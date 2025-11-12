@@ -57,7 +57,7 @@ Topic: "${outline}"
 
     // 4️⃣ Call Groq API (Llama 3)
     const response = await groq.chat.completions.create({
-      model: "llama3-70b-8192",
+      model: "llama-3.1-8b-instant",
       messages: [
         { role: "system", content: "You output valid JSON only." },
         { role: "user", content: prompt },
@@ -76,7 +76,7 @@ Topic: "${outline}"
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
     }
-    console.log("Groq raw response:", raw);
+    
 
     // 6️⃣ Save lesson back to Supabase
     await supabase
