@@ -1,17 +1,27 @@
 // lib/lessonUtils.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Langfuse } from "langfuse";
 
 // Initialize the Gemini AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// -----------------------------------------------------------------------------
-// 1. PROMPTS
-// -----------------------------------------------------------------------------
+// Initialize Langfuse
+ export function getLangfuse() {
+  // Check if env vars are set
+  if (!process.env.LANGFUSE_PUBLIC_KEY || !process.env.LANGFUSE_SECRET_KEY || !process.env.LANGFUSE_BASE_URL) {
+    console.warn("Langfuse environment variables not set. Tracing will be disabled.");
+    return null;
+  }
+  return new Langfuse({
+    publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.LANGFUSE_BASE_URL,
+  });
+}
 
-/**
- * The "Gold Standard" generation prompt.
- * Used for all *new* lesson generation.
- */
+// -----------------------------------------------------------------------------
+// 1. PROMPTS (Unchanged)
+// -----------------------------------------------------------------------------
 export const SYSTEM_PROMPT = `
 You are an expert **Master Educator**, **UI/UX Designer**, and **Senior TypeScript/React Developer**.
 Your sole task is to generate a *single, beautiful, interactive, and self-contained* React TSX component that is **educationally effective** for the target audience.
@@ -93,10 +103,6 @@ Every lesson **MUST** have these three distinct parts, in order:
 * **NO \`export default\`**.
 `;
 
-/**
- * The "Validation Repair" prompt.
- * Used when *initial generation* fails structural validation (e.g., missing component).
- */
 export const getValidationRepairPrompt = (outline: string, validationError: string) => `
 The previous code output was INVALID. It FAILED VALIDATION.
 
@@ -161,10 +167,6 @@ Generate the correct, **BEAUTIFUL**, **LEGIBLE**, **COMPLETE (Theory + Interacti
 `;
 
 
-/**
- * The "Runtime Repair" prompt. (FEATURE 1)
- * Used when the code *compiles* but *crashes in the browser*.
- */
 export const getRuntimeRepairPrompt = (
   outline: string,
   brokenCode: string,
@@ -213,16 +215,34 @@ Fix the bug that caused "${errorMessage}" and return the complete, corrected cod
 
 
 // -----------------------------------------------------------------------------
-// 2. GEMINI API CALLER
+// 2. GEMINI API CALLER (MODIFIED FOR *DECOUPLED* TRACING)
 // -----------------------------------------------------------------------------
 
 /**
- * Calls the Gemini API with a system prompt and a user content prompt.
+ * Calls the Gemini API and traces the call with Langfuse.
+ * This function is now self-contained and requires no 'trace' parameter.
  */
-export async function generateLesson(userContent: string, systemPrompt: string): Promise<string> {
+export async function generateLesson(
+  userContent: string,
+  systemPrompt: string,
+  // --- NEW PARAMETER ---
+  langfuse: Langfuse | null // Pass the instance from the API route
+): Promise<string> {
+  
+  // We no longer call getLangfuse() or langfuse.shutdown() in here.
+  
+  const generation = langfuse ? langfuse.generation({
+    name: "isolated-gemini-call",
+    model: "gemini-2.5-flash-preview-09-2025",
+    input: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userContent }
+    ],
+  }) : null;
+
   try {
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-preview-09-2025", // Use latest flash model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-preview-09-2025",
       systemInstruction: systemPrompt,
     });
 
@@ -233,7 +253,7 @@ export async function generateLesson(userContent: string, systemPrompt: string):
       }],
       generationConfig: {
         responseMimeType: "text/plain",
-        temperature: 0.5, // Lower temp for more predictable fixes
+        temperature: 0.5,
         maxOutputTokens: 8192,
       }
     });
@@ -245,23 +265,33 @@ export async function generateLesson(userContent: string, systemPrompt: string):
       throw new Error("No text returned from Gemini API.");
     }
     
+    if (generation) {
+      // Use .end() which is correct
+      await generation.end({ output: text }); 
+    }
+
     return text.trim();
 
   } catch (error: any) {
-    console.error("Error calling Gemini API:", error.message);
-    // Return a string that will fail validation, forcing a repair or error
+    console.error(`Error in isolated-gemini-call:`, error.message);
+    
+    if (generation) {
+      await generation.end({
+        output: `// Error generating lesson: ${error.message}`,
+        level: "ERROR",
+        statusMessage: error.message,
+      });
+    }
+
     return `// Error generating lesson: ${error.message}`;
   }
+  // --- The 'finally' block with shutdown() is REMOVED ---
 }
 
 
 // -----------------------------------------------------------------------------
-// 3. VALIDATOR & SANITIZER (From your generate/route.ts)
+// 3. VALIDATOR & SANITIZER (Unchanged from your original)
 // -----------------------------------------------------------------------------
-
-/**
- * Validates the structure of the generated TSX code.
- */
 export function validateTSXStructure(code: string): string | null {
   if (!code || code.length < 50) {
     return "Code is null or too short.";
@@ -334,12 +364,9 @@ export function validateTSXStructure(code: string): string | null {
         }
     }
   }
-  return null; // All checks passed
+  return null;
 }
 
-/**
- * Scrubs the raw AI output to remove markdown and other junk.
- */
 export function sanitizeTSX(raw: string): string {
     if (!raw) return "";
     let cleaned = raw.replace(/\r\n/g, "\n").trim();
@@ -348,7 +375,7 @@ export function sanitizeTSX(raw: string): string {
     cleaned = cleaned.replace(/```[a-z]*\n?/gi, "");
     cleaned = cleaned.replace(/^#+\s+.*$/gm, "");
     cleaned = cleaned.replace(/^>\s+.*$/gm, "");
-    cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1");
+    cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1st");
     cleaned = cleaned.replace(/\b_([^_]+)_\b/g, "$1");
     cleaned = cleaned.replace(/~~([^~]+)~~/g, "$1");
     cleaned = cleaned.replace('//g', "");
@@ -384,30 +411,33 @@ export function sanitizeTSX(raw: string): string {
     cleaned = cleaned.trim();
 
     // --- (Find start of code) ---
+    // --- THIS IS THE FIX ---
     const typeMatch = cleaned.match(/(type|interface)\s+\w+\s*[={]/);
     const constMatch = cleaned.match(/const\s+LessonComponent/);
     const funcMatch = cleaned.match(/function\s+LessonComponent/);
 
-    let startIndex = -1; 
-    if (typeMatch) {
-      startIndex = cleaned.indexOf(typeMatch[0]);
-    } else if (constMatch) {
-      startIndex = cleaned.indexOf(constMatch[0]);
-    } else if (funcMatch) { 
-      startIndex = cleaned.indexOf(funcMatch[0]);
+    let startIndex = -1;
+    let typeIndex = typeMatch ? cleaned.indexOf(typeMatch[0]) : -1;
+    let constIndex = constMatch ? cleaned.indexOf(constMatch[0]) : -1;
+    let funcIndex = funcMatch ? cleaned.indexOf(funcMatch[0]) : -1;
+
+    // Find the *earliest* valid starting point
+    let validIndexes = [typeIndex, constIndex, funcIndex].filter(i => i !== -1);
+    
+    if (validIndexes.length > 0) {
+      startIndex = Math.min(...validIndexes);
     }
+    // --- END OF FIX ---
 
     if (startIndex === -1) {
        const fallbackConstMatch = cleaned.match(/const\s+\w+\s*=\s*\(\)/);
-       // --- THIS IS THE FIX ---
        const fallbackFuncMatch = cleaned.match(/function\s+\w+\s*\(\)/);
-       // ---------------------
        if (fallbackConstMatch) {
            startIndex = cleaned.indexOf(fallbackConstMatch[0]);
        } else if (fallbackFuncMatch) {
            startIndex = cleaned.indexOf(fallbackFuncMatch[0]);
        } else {
-            return cleaned;
+            return cleaned; // Can't find a start, return as-is
        }
     }
     

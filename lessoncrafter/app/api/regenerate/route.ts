@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
+  getLangfuse, // Import this
   generateLesson,
   SYSTEM_PROMPT,
   getValidationRepairPrompt,
@@ -20,16 +21,19 @@ export async function POST(req: Request) {
     );
   }
 
+  // 1. Create the Langfuse instance
+  const langfuse = getLangfuse();
+
   try {
     console.log(`🔄 [Regenerate] Initiating regeneration for Lesson ${lessonId}...`);
-
-    // ---
-    // This logic is identical to your original /api/generate route
-    // ---
     
     // Attempt 1: Initial Generation
     const userContent = `Create a React lesson about: "${outline}"`;
-    let aiCode = await generateLesson(userContent, SYSTEM_PROMPT);
+    let aiCode = await generateLesson(
+      userContent, 
+      SYSTEM_PROMPT, 
+      langfuse // 2. Pass langfuse as 3rd argument
+    );
     aiCode = sanitizeTSX(aiCode);
 
     let validationError = validateTSXStructure(aiCode);
@@ -41,7 +45,11 @@ export async function POST(req: Request) {
       const repairPrompt = getValidationRepairPrompt(outline, validationError);
       const repairUserContent = `Fix the validation error for lesson: "${outline}"`;
       
-      aiCode = await generateLesson(repairUserContent, repairPrompt);
+      aiCode = await generateLesson(
+        repairUserContent, 
+        repairPrompt, 
+        langfuse // 2. Pass langfuse as 3rd argument
+      );
       aiCode = sanitizeTSX(aiCode);
 
       // Re-validate the repaired code
@@ -57,35 +65,26 @@ export async function POST(req: Request) {
       console.log("✅ [Regenerate] Initial validation successful.");
     }
     
-    // ---
-    // End of generate logic
-    // ---
-
-    // Success: Save the *new* code to Supabase
+    // ... (Supabase update logic is unchanged) ...
     const { error } = await supabase
       .from("lessons")
       .update({
         status: "generated",
         ts_code: aiCode,
         compile_status: "success",
-        compile_error: null, // Clear any previous errors
+        compile_error: null,
       })
       .eq("id", lessonId);
 
-    if (error) {
-      console.error("❌ [Regenerate] Supabase update failed:", error.message);
-      throw new Error("Supabase update failed: " + error.message);
-    }
+    if (error) throw new Error("Supabase update failed: " + error.message);
 
     console.log(`✅ [Regenerate] Lesson ${lessonId} regenerated and saved.`);
     
-    // Return the new code to the client
     return NextResponse.json({ success: true, generatedCode: aiCode });
 
   } catch (err: any) {
-    // Failure: Log error to Supabase (so user knows it failed)
+    // ... (Supabase error logic is unchanged) ...
     console.error(`❌ [Regenerate] Full regeneration failed for ${lessonId}:`, err.message);
-
     await supabase
       .from("lessons")
       .update({
@@ -99,5 +98,10 @@ export async function POST(req: Request) {
       { success: false, error: err.message },
       { status: 500 }
     );
+  } finally {
+    // 3. Add this finally block to shut down Langfuse
+    if (langfuse) {
+      await langfuse.shutdown();
+    }
   }
 }
