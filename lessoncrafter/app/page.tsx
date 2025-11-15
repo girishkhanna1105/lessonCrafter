@@ -10,6 +10,8 @@ export default function Home() {
   const supabase = createClient();
   const router = useRouter();
 
+  // --- Functions are unchanged ---
+
   // 🧠 Fetch all lessons from Supabase
   const fetchLessons = async () => {
     const { data, error } = await supabase
@@ -62,75 +64,59 @@ export default function Home() {
     fetchLessons();
   }, []);
 
+  // --- NEW RENDER BLOCK ---
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#111122] to-[#0a0a0f] text-gray-100 px-6 py-10">
-      <div className="max-w-3xl mx-auto bg-[#151523]/60 backdrop-blur-xl border border-[#2d2d4a] rounded-2xl shadow-[0_0_25px_rgba(88,88,255,0.15)] p-8 transition hover:shadow-[0_0_35px_rgba(88,88,255,0.25)]">
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 mb-4 text-center tracking-tight">
-          LessonCrafter 🚀
-        </h1>
-        <p className="text-gray-400 text-center mb-8">
-          Generate interactive AI-powered lessons from simple outlines.
-        </p>
+    <main className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#111122] to-[#0a0a0f] text-gray-100">
 
-        {/* Lesson Form */}
-        <div className="mb-6">
-          <label
-            htmlFor="outline"
-            className="block text-sm font-semibold text-gray-300 mb-2"
-          >
-            Lesson Outline
-          </label>
-          <textarea
-            id="outline"
-            value={outline}
-            onChange={(e) => setOutline(e.target.value)}
-            placeholder='e.g. "A beginner’s guide to Neural Networks"'
-            className="w-full bg-[#1b1b28] border border-[#333355] rounded-xl p-3 h-28 resize-none text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-          />
-        </div>
-
-        <button
-          onClick={addLesson}
-          disabled={loading}
-          className={`w-full py-3 font-semibold rounded-xl transition ${
-            loading
-              ? "bg-indigo-700/50 text-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
-          }`}
-        >
-          {loading ? "Generating..." : "Generate Lesson"}
-        </button>
-      </div>
-
-      {/* Lessons Table */}
-      <div className="max-w-3xl mx-auto mt-12">
-        <h2 className="text-2xl font-bold text-gray-200 mb-4">
+      {/* --- LEFT SIDEBAR (Lessons List) --- */}
+      <aside className="w-full lg:w-1/3 xl:w-1/4 lg:h-screen lg:overflow-y-auto lg:border-r border-[#2d2d4a] py-6 lg:py-8 lg:order-1 order-2">
+        
+        <h2 className="text-2xl font-bold text-gray-200 px-6 lg:px-8 mb-3">
           Generated Lessons
         </h2>
 
         {lessons.length === 0 ? (
-          <p className="text-gray-500 italic text-center">
-            No lessons yet. Start crafting one ✨
-          </p>
+          // Empty state (with padding)
+          <div className="rounded-2xl border border-[#2a2a44] bg-[#151523]/70 p-10 mx-6 lg:mx-8">
+            <p className="text-gray-500 italic text-center">
+              No lessons yet. Generate one to see it here ✨
+            </p>
+          </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-[#2a2a44] bg-[#151523]/70 backdrop-blur-lg shadow-inner">
+          // Table (flush with no horizontal padding)
+          <div className="overflow-hidden rounded-2xl border-x-0 border-y border-[#2a2a44] bg-[#151523]/70 backdrop-blur-lg shadow-inner">
             <table className="w-full border-collapse text-sm">
               <thead className="bg-[#1c1c2c] text-gray-300">
                 <tr>
+                  {/* NEW: Reduced padding (px-4) */}
                   <th className="text-left px-4 py-3 font-semibold">Title</th>
+                  {/* NEW: Reduced padding (px-4) */}
                   <th className="text-left px-4 py-3 font-semibold">Status</th>
-                  <th className="text-left px-4 py-3 font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {lessons.map((lesson) => (
                   <tr
                     key={lesson.id}
-                    className="border-t border-[#24243a] hover:bg-[#1d1d2e]/70 transition"
+                    className="border-t border-[#2424a] hover:bg-[#1d1d2e]/70 transition"
                   >
-                    <td className="px-4 py-3 font-medium text-gray-200">
-                      {lesson.title}
+                    {/* NEW: Reduced padding (px-4) */}
+                    <td className="px-4 py-3">
+                      <button
+                        className={`w-full text-left font-medium transition-colors ${
+                          lesson.status === "generated"
+                            ? "text-gray-200 hover:text-indigo-300"
+                            : "text-gray-600 cursor-not-allowed"
+                        }`}
+                        disabled={lesson.status !== "generated"}
+                        onClick={() => router.push(`/lessons/${lesson.id}`)}
+                      >
+                        {lesson.title}
+                      </button>
                     </td>
+
+                    {/* NEW: Reduced padding (px-4) */}
                     <td className="px-4 py-3">
                       <span
                         className={`px-3 py-1 text-xs font-semibold rounded-full ${
@@ -144,30 +130,69 @@ export default function Home() {
                         {lesson.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <button
-                        className={`font-medium ${
-                          lesson.status === "generated"
-                            ? "text-indigo-400 hover:text-indigo-300 hover:underline"
-                            : "text-gray-600 cursor-not-allowed"
-                        }`}
-                        disabled={lesson.status !== "generated"}
-                        onClick={() => router.push(`/lessons/${lesson.id}`)}
-                      >
-                        View Lesson →
-                      </button>
-                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-      </div>
+        
+        <footer className="text-center pt-10 text-sm text-gray-500 px-6 lg:px-8 mt-6">
+          Made with 💜 by Girish | Powered by Supabase + Groq + Next.js
+        </footer>
+      </aside>
 
-      <footer className="text-center mt-10 text-sm text-gray-500">
-        Made with 💜 by Girish | Powered by Supabase + Groq + Next.js
-      </footer>
+      {/* --- MAIN CONTENT (Generator) --- */}
+      {/* This section is unchanged */}
+      <main className="flex-1 min-h-[70vh] lg:h-screen flex flex-col justify-center items-center p-6 lg:p-10 lg:order-2 order-1">
+        
+        {/* Wrapper for intro + card */}
+        <div className="max-w-xl w-full">
+
+          {/* Intro Section */}
+          <div className="text-center mb-10">
+            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500 mb-4 tracking-tight">
+              LessonCrafter 🚀
+            </h1>
+            <p className="text-xl text-gray-400">
+              Generate interactive AI-powered lessons from simple outlines.
+            </p>
+          </div>
+          
+          {/* Generator Card */}
+          <div className="bg-[#151523]/60 backdrop-blur-xl border border-[#2d2d4a] rounded-2xl shadow-[0_0_25px_rgba(88,88,255,0.15)] p-8 transition hover:shadow-[0_0_35px_rgba(88,88,255,0.25)]">
+            
+            <div className="mb-6">
+              <label
+                htmlFor="outline"
+                className="block text-sm font-semibold text-gray-300 mb-2"
+              >
+                Lesson Outline
+              </label>
+              <textarea
+                id="outline"
+                value={outline}
+                onChange={(e) => setOutline(e.target.value)}
+                placeholder='e.g. "A beginner’s guide to Neural Networks"'
+                className="w-full bg-[#1b1b28] border border-[#333355] rounded-xl p-3 h-28 resize-none text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              />
+            </div>
+
+            <button
+              onClick={addLesson}
+              disabled={loading}
+              className={`w-full py-3 font-semibold rounded-xl transition ${
+                loading
+                  ? "bg-indigo-700/50 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
+              }`}
+            >
+              {loading ? "Generating..." : "Generate Lesson"}
+            </button>
+          </div>
+        </div>
+      </main>
+      
     </main>
   );
 }
