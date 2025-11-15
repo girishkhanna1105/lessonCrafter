@@ -1,12 +1,18 @@
-import { NextResponse } from "next/server";
+// lib/lessonUtils.ts
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createClient } from "@/lib/supabase/server";
 
 // Initialize the Gemini AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// -----------------------------------------------------------------------------
+// 1. PROMPTS
+// -----------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `
+/**
+ * The "Gold Standard" generation prompt.
+ * Used for all *new* lesson generation.
+ */
+export const SYSTEM_PROMPT = `
 You are an expert **Master Educator**, **UI/UX Designer**, and **Senior TypeScript/React Developer**.
 Your sole task is to generate a *single, beautiful, interactive, and self-contained* React TSX component that is **educationally effective** for the target audience.
 
@@ -87,10 +93,11 @@ Every lesson **MUST** have these three distinct parts, in order:
 * **NO \`export default\`**.
 `;
 
-// -----------------------------------------------------------------------------
-// 2. ✅ UPDATED REPAIR_PROMPT (Handles the "Missing component" and "Missing return" errors)
-// -----------------------------------------------------------------------------
-const getRepairPrompt = (outline: string, validationError: string) => `
+/**
+ * The "Validation Repair" prompt.
+ * Used when *initial generation* fails structural validation (e.g., missing component).
+ */
+export const getValidationRepairPrompt = (outline: string, validationError: string) => `
 The previous code output was INVALID. It FAILED VALIDATION.
 
 ---
@@ -115,7 +122,7 @@ You **MUST** fix this specific error, and then **YOU MUST** review this entire c
         const LessonComponent = () => {
             // ALL state (useState) goes HERE
             // ALL helper functions go HERE
-            // ALL data (const quizQuestions) goes HERE
+            // ALL data (const quizQuestions) go HERE
 
             // The return block with JSX goes HERE
             return (
@@ -154,99 +161,80 @@ Generate the correct, **BEAUTIFUL**, **LEGIBLE**, **COMPLETE (Theory + Interacti
 `;
 
 
-// -----------------------------------------------------------------------------
-// 3. MAIN POST HANDLER (Unchanged, the logic is solid)
-// -----------------------------------------------------------------------------
-export async function POST(req: Request) {
-  const supabase = await createClient();
-  const { lessonId, outline } = await req.json();
+/**
+ * The "Runtime Repair" prompt. (FEATURE 1)
+ * Used when the code *compiles* but *crashes in the browser*.
+ */
+export const getRuntimeRepairPrompt = (
+  outline: string,
+  brokenCode: string,
+  errorMessage: string
+) => `
+You are an expert React/TypeScript debugger in **RUNTIME REPAIR MODE**.
+Your task is to fix a **RUNTIME ERROR** in a component that *already passed validation*.
+The lesson MUST retain its full structure: (1) Theory, (2) Interactive, (3) Quiz.
 
-  if (!lessonId || !outline)
-    return NextResponse.json({ success: false, error: "Missing parameters" });
+---
+### 🚨 ORIGINAL LESSON TOPIC:
+"${outline}"
 
-  try {
-    // Attempt 1: Initial Generation
-    console.log(`🧠 Generating lesson for: "${outline}"`);
-    let aiCode = await generateLesson(outline, SYSTEM_PROMPT);
-    aiCode = sanitizeTSX(aiCode);
+---
+### ⚠️ BROKEN CODE (TSX):
+---
+${brokenCode}
 
-    let validationError = validateTSXStructure(aiCode);
+---
+### ❌ RUNTIME ERROR MESSAGE:
+---
+"${errorMessage}"
 
-    if (validationError) {
-      // Attempt 2: Self-Repair
-      console.warn(`⚠️ Initial generation failed validation: ${validationError}. Triggering self-repair...`);
-      
-      const repairPrompt = getRepairPrompt(outline, validationError);
-      aiCode = await generateLesson(outline, repairPrompt);
-      aiCode = sanitizeTSX(aiCode);
+---
+### 🛠️ YOUR TASK:
+1.  **Analyze the error:** Read the error message ("${errorMessage}") and find the exact line in the "BROKEN CODE" that is causing the crash.
+2.  **Fix the Bug:** Correct the logic. This is often an \`undefined\` variable, a \`null\` reference, a bad \`useEffect\` dependency, or incorrect state update.
+3.  **DO NOT CHANGE ANYTHING ELSE:** You **MUST NOT** remove the Theory, Interactive, or Quiz sections. You are only fixing the bug.
+4.  **Review the Rules:** Your fixed code **MUST** still follow all original rules (listed below for review).
+5.  **Respond with ONLY the full, fixed, valid TSX file.** No markdown, no "Here is the fixed code:".
 
-      // Re-validate the repaired code
-      validationError = validateTSXStructure(aiCode);
+---
+### 🚨 CRITICAL RULESET (REVIEW) 🚨
+---
+* **Rule 1 (Structure):** Must still have Theory, Interactive, and Quiz.
+* **Rule 2 (No \`alert()\`)**: All feedback (like quiz answers) **MUST** be shown in the UI using \`useState\`.
+* **Rule 3 (HTML Tags)**: **MUST** use standard HTML tags (\`<div>\`, \`<button>\`), not \`<Card>\` or \`<Button>\`.
+* **Rule 4 (Legibility):** Dark text on light backgrounds, light text on dark backgrounds.
+* **Rule 5 (TSX):** Component **MUST** be \`LessonComponent\`. All state **MUST** have types (\`useState<number>(0)\`). All logic **MUST** be inside the component.
+* **Rule 6 (Render Call):** **MUST** end with \`render(<LessonComponent />);\`.
+* **Rule 7 (No Imports):** **NO \`import\`** or \`require\`.
+---
 
-      if (validationError) {
-        console.error(`❌ Self-repair FAILED validation: ${validationError}`);
-        throw new Error(`Self-repair failed validation: ${validationError}. Raw output: ${aiCode}`);
-      }
-      
-      console.log("✅ Self-repair validation successful.");
-    } else {
-      console.log("✅ Initial validation successful.");
-    }
+Fix the bug that caused "${errorMessage}" and return the complete, corrected code.
+`;
 
-    // Success: Save to Supabase
-    const { error } = await supabase
-      .from("lessons")
-      .update({
-        status: "generated",
-        ts_code: aiCode,
-        compile_status: "success",
-        compile_error: null,
-      })
-      .eq("id", lessonId);
-
-    if (error) throw new Error("Supabase update failed: " + error.message);
-
-    console.log("✅ Lesson generated and saved successfully.");
-    return NextResponse.json({ success: true });
-
-  } catch (err: any) {
-    // Failure: Log error to Supabase
-    console.error("❌ Generation failed:", err.message);
-
-    await supabase
-      .from("lessons")
-      .update({
-        status: "error",
-        compile_status: "failed",
-        compile_error: err.message,
-      })
-      .eq("id", lessonId);
-
-    return NextResponse.json({ success: false, error: err.message });
-}
-}
 
 // -----------------------------------------------------------------------------
-// 4. HELPER FUNCTIONS
+// 2. GEMINI API CALLER
 // -----------------------------------------------------------------------------
 
 /**
- * ✅ This function calls the Gemini API with the correct SDK syntax.
+ * Calls the Gemini API with a system prompt and a user content prompt.
  */
-async function generateLesson(outline: string, systemPrompt: string): Promise<string> {
+export async function generateLesson(userContent: string, systemPrompt: string): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-preview-09-2025",
+      model: "gemini-2.5-flash-preview-09-2025", // Use latest flash model
       systemInstruction: systemPrompt,
     });
 
     const result = await model.generateContent({
       contents: [{
         role: "user",
-        parts: [{ text: `Create a React lesson about: "${outline}"` }]
+        parts: [{ text: userContent }]
       }],
       generationConfig: {
         responseMimeType: "text/plain",
+        temperature: 0.5, // Lower temp for more predictable fixes
+        maxOutputTokens: 8192,
       }
     });
 
@@ -266,8 +254,15 @@ async function generateLesson(outline: string, systemPrompt: string): Promise<st
   }
 }
 
-// ✅ VALIDATOR (This is our battle-tested validator, unchanged)
-function validateTSXStructure(code: string): string | null {
+
+// -----------------------------------------------------------------------------
+// 3. VALIDATOR & SANITIZER (From your generate/route.ts)
+// -----------------------------------------------------------------------------
+
+/**
+ * Validates the structure of the generated TSX code.
+ */
+export function validateTSXStructure(code: string): string | null {
   if (!code || code.length < 50) {
     return "Code is null or too short.";
   }
@@ -325,12 +320,6 @@ function validateTSXStructure(code: string): string | null {
   if (/<(Button|Heading|Text|Card|Box|Stack|Grid)(?![a-z])/.test(code)) {
     return "Code contains component library tags (e.g., <Button>, <Heading>). Only standard HTML tags (e.g., <button>, <h1>) are allowed.";
   }
-
-  // We are relaxing these rules, as you requested.
-  // if (/<(button|input)(?![^>]*className=)/i.test(code)) {
-  // ...
-  // if (/<(h1|h2|h3)(?![^>]*className=)/i.test(code)) {
-  // ...
   
   if (!/quiz/i.test(code)) {
     return "Code is missing the mandatory 'Quiz' section.";
@@ -348,8 +337,10 @@ function validateTSXStructure(code: string): string | null {
   return null; // All checks passed
 }
 
-// ✅ SANITIZER (This is our battle-tested brutal sanitizer, typo is fixed)
-function sanitizeTSX(raw: string): string {
+/**
+ * Scrubs the raw AI output to remove markdown and other junk.
+ */
+export function sanitizeTSX(raw: string): string {
     if (!raw) return "";
     let cleaned = raw.replace(/\r\n/g, "\n").trim();
 
@@ -360,7 +351,7 @@ function sanitizeTSX(raw: string): string {
     cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1");
     cleaned = cleaned.replace(/\b_([^_]+)_\b/g, "$1");
     cleaned = cleaned.replace(/~~([^~]+)~~/g, "$1");
-    cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, "");
+    cleaned = cleaned.replace('//g', "");
     
     // Remove forbidden code (with aggressive regex)
     cleaned = cleaned.replace(/(const|let|var)\s+.*?=\s*require\s*\([^)]+\);?/gi, "");
@@ -408,7 +399,9 @@ function sanitizeTSX(raw: string): string {
 
     if (startIndex === -1) {
        const fallbackConstMatch = cleaned.match(/const\s+\w+\s*=\s*\(\)/);
+       // --- THIS IS THE FIX ---
        const fallbackFuncMatch = cleaned.match(/function\s+\w+\s*\(\)/);
+       // ---------------------
        if (fallbackConstMatch) {
            startIndex = cleaned.indexOf(fallbackConstMatch[0]);
        } else if (fallbackFuncMatch) {
