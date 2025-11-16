@@ -138,7 +138,7 @@ export default function Home() {
         )}
         
         <footer className="text-center pt-10 text-sm text-gray-500 px-6 lg:px-8 mt-6">
-          Made with 💜 by Girish | Powered by Supabase + Groq + Next.js
+          Made with 💜 by Girish | Powered by Supabase + Gemini + Next.js
         </footer>
       </aside>
 
