@@ -1,14 +1,10 @@
-// app/api/regenerate/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getLangfuse, // Import this
-  generateLesson,
-  SYSTEM_PROMPT,
-  getValidationRepairPrompt,
-  sanitizeTSX,
-  validateTSXStructure
-} from "@/lib/lessonUtils";
+import { runContentAgent } from "@/lib/agents/contentAgent";
+import { runCompilerAgent } from "@/lib/agents/compilerAgent";
+import { runUIPolishAgent } from "@/lib/agents/uiPolishAgent";
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -21,56 +17,44 @@ export async function POST(req: Request) {
     );
   }
 
-  // 1. Create the Langfuse instance
-  const langfuse = getLangfuse();
-
   try {
-    console.log(`🔄 [Regenerate] Initiating regeneration for Lesson ${lessonId}...`);
-    
-    // Attempt 1: Initial Generation
-    const userContent = `Create a React lesson about: "${outline}"`;
-    let aiCode = await generateLesson(
-      userContent, 
-      SYSTEM_PROMPT, 
-      langfuse // 2. Pass langfuse as 3rd argument
+    console.log(`🔄 [Regenerate] Smart 3-agent pipeline for lesson ${lessonId}...`);
+
+    await supabase
+      .from("lessons")
+      .update({ status: "generating", compile_error: null })
+      .eq("id", lessonId);
+
+    // ─── Agent 1: Re-generate content ─────────────────────────────────────
+    console.log("🧠 [Regenerate] Agent 1: Content Architect running...");
+    const content = await runContentAgent(outline, null);
+    await sleep(4000); // Free tier rate limit buffer
+
+    // ─── Agent 4: Compile directly (skip Interactive + Quiz for speed) ────
+    console.log("⚙️ [Regenerate] Agent 4: Compiler running...");
+    const compiledCode = await runCompilerAgent(
+      content,
+      { elements: [] },   // No interactive elements — faster
+      { questions: [] }   // No quiz — faster
     );
-    aiCode = sanitizeTSX(aiCode);
+    await sleep(4000);
 
-    let validationError = validateTSXStructure(aiCode);
-
-    if (validationError) {
-      // Attempt 2: Self-Repair (for validation errors)
-      console.warn(`⚠️ [Regenerate] Initial generation failed validation: ${validationError}. Triggering self-repair...`);
-      
-      const repairPrompt = getValidationRepairPrompt(outline, validationError);
-      const repairUserContent = `Fix the validation error for lesson: "${outline}"`;
-      
-      aiCode = await generateLesson(
-        repairUserContent, 
-        repairPrompt, 
-        langfuse // 2. Pass langfuse as 3rd argument
-      );
-      aiCode = sanitizeTSX(aiCode);
-
-      // Re-validate the repaired code
-      validationError = validateTSXStructure(aiCode);
-
-      if (validationError) {
-        console.error(`❌ [Regenerate] Self-repair FAILED validation: ${validationError}`);
-        throw new Error(`Self-repair failed validation: ${validationError}.`);
-      }
-      
-      console.log("✅ [Regenerate] Self-repair validation successful.");
-    } else {
-      console.log("✅ [Regenerate] Initial validation successful.");
+    // ─── Agent 5: UI Polish ────────────────────────────────────────────────
+    console.log("🎨 [Regenerate] Agent 5: UI Polish running...");
+    let finalCode: string;
+    try {
+      finalCode = await runUIPolishAgent(compiledCode);
+    } catch {
+      finalCode = compiledCode; // Graceful fallback
     }
-    
-    // ... (Supabase update logic is unchanged) ...
+
+    // Save to DB
     const { error } = await supabase
       .from("lessons")
       .update({
+        title: content.title,
+        ts_code: finalCode,
         status: "generated",
-        ts_code: aiCode,
         compile_status: "success",
         compile_error: null,
       })
@@ -78,13 +62,12 @@ export async function POST(req: Request) {
 
     if (error) throw new Error("Supabase update failed: " + error.message);
 
-    console.log(`✅ [Regenerate] Lesson ${lessonId} regenerated and saved.`);
-    
-    return NextResponse.json({ success: true, generatedCode: aiCode });
+    console.log(`✅ [Regenerate] Lesson ${lessonId} regenerated (3-agent fast path).`);
+    return NextResponse.json({ success: true, generatedCode: finalCode });
 
   } catch (err: any) {
-    // ... (Supabase error logic is unchanged) ...
-    console.error(`❌ [Regenerate] Full regeneration failed for ${lessonId}:`, err.message);
+    console.error(`❌ [Regenerate] Failed for ${lessonId}:`, err.message);
+
     await supabase
       .from("lessons")
       .update({
@@ -98,10 +81,5 @@ export async function POST(req: Request) {
       { success: false, error: err.message },
       { status: 500 }
     );
-  } finally {
-    // 3. Add this finally block to shut down Langfuse
-    if (langfuse) {
-      await langfuse.shutdown();
-    }
   }
 }

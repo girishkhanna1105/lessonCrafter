@@ -233,7 +233,7 @@ export async function generateLesson(
   
   const generation = langfuse ? langfuse.generation({
     name: "isolated-gemini-call",
-    model: "gemini-2.5-flash-preview-09-2025",
+    model: "gemini-1.5-flash",
     input: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userContent }
@@ -242,7 +242,7 @@ export async function generateLesson(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-09-2025",
+      model: "gemini-1.5-flash",
       systemInstruction: systemPrompt,
     });
 
@@ -283,7 +283,7 @@ export async function generateLesson(
       });
     }
 
-    return `// Error generating lesson: ${error.message}`;
+    throw error;
   }
   // --- The 'finally' block with shutdown() is REMOVED ---
 }
@@ -378,7 +378,6 @@ export function sanitizeTSX(raw: string): string {
     cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1st");
     cleaned = cleaned.replace(/\b_([^_]+)_\b/g, "$1");
     cleaned = cleaned.replace(/~~([^~]+)~~/g, "$1");
-    cleaned = cleaned.replace('//g', "");
     
     // Remove forbidden code (with aggressive regex)
     cleaned = cleaned.replace(/(const|let|var)\s+.*?=\s*require\s*\([^)]+\);?/gi, "");

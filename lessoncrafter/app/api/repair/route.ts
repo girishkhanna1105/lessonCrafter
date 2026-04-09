@@ -1,17 +1,12 @@
-// app/api/repair/route.ts
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getLangfuse, // Import this
-  generateLesson,
-  getRuntimeRepairPrompt,
-  sanitizeTSX,
-  validateTSXStructure
-} from "@/lib/lessonUtils";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const { lessonId, outline, originalCode, errorMessage } =     await req.json();
+  const { lessonId, outline, originalCode, errorMessage } = await req.json();
 
   if (!lessonId || !outline || !originalCode || !errorMessage) {
     return NextResponse.json(
@@ -20,31 +15,42 @@ export async function POST(req: Request) {
     );
   }
 
-  // 1. Create the Langfuse instance
-  const langfuse = getLangfuse();
-
   try {
-    console.log(`🔧 [Repair] Initiating runtime repair for Lesson ${lessonId}...`);
+    console.log(`🔧 [Repair] Fixing runtime error for Lesson ${lessonId}: ${errorMessage}`);
 
-    const repairPrompt = getRuntimeRepairPrompt(outline, originalCode, errorMessage);
-    const userContent = `Fix the lesson about "${outline}" that failed with: ${errorMessage}`;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    let repairedCode = await generateLesson(
-      userContent,
-      repairPrompt,
-      langfuse // 2. Pass langfuse as 3rd argument
-    );
-    repairedCode = sanitizeTSX(repairedCode);
+    const prompt = `You are a React code repair agent. Fix the following react-live component that has a runtime error.
 
-    const validationError = validateTSXStructure(repairedCode);
-    if (validationError) {
-      console.error(`❌ [Repair] Repair FAILED validation: ${validationError}`);
-      throw new Error(`Repaired code failed validation: ${validationError}.`);
+CRITICAL FORMAT RULES (react-live noInline mode):
+1. NO import statements
+2. NO export statements
+3. Component MUST be named "LessonComponent" as: function LessonComponent() { ... }
+4. LAST LINE must be: render(<LessonComponent />)
+5. Only inline styles — no Tailwind/CSS classes
+
+LESSON TOPIC: "${outline}"
+
+ERROR TO FIX: ${errorMessage}
+
+BROKEN CODE:
+${originalCode}
+
+Return ONLY the fixed code. No markdown. No backticks. Start with the first code line and end with render(<LessonComponent />)`;
+
+    const result = await model.generateContent(prompt);
+    let repairedCode = result.response.text().trim();
+
+    // Strip code fences
+    repairedCode = repairedCode.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
+    // Strip imports/exports
+    repairedCode = repairedCode.replace(/^import\s+.*$/gm, "").replace(/^export\s+default\s+/gm, "").replace(/^export\s+/gm, "").trim();
+    // Ensure render() exists
+    if (!repairedCode.includes("render(")) {
+      repairedCode = repairedCode + "\nrender(<LessonComponent />);";
     }
 
-    console.log(`✅ [Repair] Repair validation successful for Lesson ${lessonId}.`);
-
-    // ... (Supabase update logic is unchanged) ...
+    // Save to DB
     const { error: updateError } = await supabase
       .from("lessons")
       .update({
@@ -55,26 +61,16 @@ export async function POST(req: Request) {
       })
       .eq("id", lessonId);
 
-    if (updateError) {
-      console.error("❌ [Repair] Supabase update failed:", updateError.message);
-      throw new Error("Supabase update failed: " + updateError.message);
-    }
+    if (updateError) throw new Error("Supabase update failed: " + updateError.message);
 
     console.log(`✅ [Repair] Lesson ${lessonId} repaired and saved.`);
-    
     return NextResponse.json({ success: true, repairedCode });
 
   } catch (err: any) {
-    console.error(`❌ [Repair] Full repair process failed for ${lessonId}:`, err.message);
-    
+    console.error(`❌ [Repair] Failed for ${lessonId}:`, err.message);
     return NextResponse.json(
       { success: false, error: err.message },
       { status: 500 }
     );
-  } finally {
-    // 3. Add this finally block to shut down Langfuse
-    if (langfuse) {
-      await langfuse.shutdown();
-    }
   }
 }
