@@ -36,7 +36,7 @@ export default function HeroSection() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pt-20">
+    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pt-36 sm:pt-40">
       {/* Background Decorative Elements */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />

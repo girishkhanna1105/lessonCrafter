@@ -31,12 +31,9 @@ export default function Home() {
         <LowerSection />
       </div>
       
-      <footer className="py-20 px-6 border-t border-white/5 text-center">
-        <p className="text-gray-600 text-xs font-bold uppercase tracking-[0.2em] mb-4">
-          LessonCrafter // The Future of AI-Native Education
-        </p>
-        <p className="text-gray-400 text-sm">
-          Made with 💜 by Girish | Powered by Gemini + Supabase + Next.js
+      <footer className="py-12 px-6 border-t border-white/5 text-center">
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em]">
+          LessonCrafter © {new Date().getFullYear()} — AI-Powered Educational Platform
         </p>
       </footer>
     </div>

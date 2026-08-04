@@ -11,7 +11,7 @@ export default function AuthenticatedHero({ user }: AuthenticatedHeroProps) {
   const router = useRouter();
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[80vh] overflow-hidden pt-32 px-6">
+    <div className="relative flex flex-col items-center justify-center min-h-[80vh] overflow-hidden pt-36 sm:pt-40 px-6">
       {/* Dynamic Background */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" />
       

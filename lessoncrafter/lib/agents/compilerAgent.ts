@@ -14,6 +14,7 @@ export async function runCompilerAgent(
 
   const interactiveMap = interactive.elements.reduce((acc, el) => {
     acc[el.section_title] = el;
+    console.log(acc);
     return acc;
   }, {} as Record<string, any>);
 

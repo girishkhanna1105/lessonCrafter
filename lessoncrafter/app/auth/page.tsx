@@ -70,11 +70,11 @@ export default function AuthPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       
-      <main className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+      <main className="flex-1 flex items-center justify-center p-6 pt-28 sm:pt-32 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
         
-        <Card className="w-full max-w-md glass border-white/10 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-500">
-          <CardHeader className="space-y-1 pb-8">
+        <Card className="w-full max-w-md glass border-white/10 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-500 my-auto">
+          <CardHeader className="space-y-1 pb-6">
             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 mb-4">
               <Lock className="w-6 h-6 text-indigo-400" />
             </div>
@@ -172,22 +172,9 @@ export default function AuthPage() {
                 )}
               </Button>
             </form>
-            
-            <div className="mt-8 flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/5" />
-              <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">Or Continue With</span>
-              <div className="h-px flex-1 bg-white/5" />
-            </div>
-            
-            <div className="mt-6">
-              <Button type="button" variant="outline" className="w-full h-12 glass border-white/5 hover:bg-white/5 font-bold flex items-center gap-3">
-                <Github className="w-5 h-5" />
-                GitHub
-              </Button>
-            </div>
           </CardContent>
           
-          <CardFooter className="flex flex-col space-y-4 pb-8 pt-4">
+          <CardFooter className="flex flex-col space-y-4 pb-8 pt-2">
             <p className="text-sm text-gray-500 text-center">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button 
