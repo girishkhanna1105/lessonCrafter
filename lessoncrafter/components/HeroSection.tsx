@@ -19,7 +19,7 @@ export default function HeroSection() {
     if (!user) {
       router.push("/auth");
     } else {
-      router.push("/page2");
+      router.push("/studio");
     }
   };
 
@@ -27,76 +27,75 @@ export default function HeroSection() {
     if (!user) {
       router.push("/auth");
     } else {
-      // We could pass the prompt to page2 via localStorage or query
       if (prompt.trim()) {
         localStorage.setItem("pending_prompt", prompt);
       }
-      router.push("/page2");
+      router.push("/studio");
     }
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pt-36 sm:pt-40">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
+    <div className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden pt-36 sm:pt-40 px-4">
+      {/* Background Architectural Ambient Accents - NO PURPLE */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-cobalt-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-marine-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Badge */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-8 animate-float">
-        <Sparkles className="w-4 h-4 text-indigo-400" />
-        <span className="text-xs font-semibold text-indigo-200 tracking-wide uppercase">
-          AI-Powered Learning Platform
+        <Sparkles className="w-4 h-4 text-cobalt-600 dark:text-cobalt-400" />
+        <span className="text-xs font-bold text-slate-800 dark:text-cobalt-200 tracking-wide uppercase font-mono">
+          AI-Native Educational Studio
         </span>
       </div>
 
       {/* HEADLINE SECTION */}
-      <div className="text-center max-w-5xl mx-auto px-6 relative z-10">
-        <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[1.1] mb-6">
-          <span className="text-white">Master Any Topic with</span>
+      <div className="text-center max-w-5xl mx-auto px-4 relative z-10">
+        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-[1.1] mb-6">
+          <span className="text-slate-900 dark:text-white">Master Any Topic with</span>
           <br />
           <span className="text-gradient">
             Intelligent Lessons
           </span>
         </h1>
         
-        <p className="mt-8 max-w-2xl mx-auto text-xl text-gray-400 font-medium leading-relaxed">
-          The AI-native engine for generating interactive, executable lessons, 
-          quizzes, and study guides in seconds. Elevate your learning journey today.
+        <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+          The next-generation engine for synthesizing interactive, executable lessons, 
+          simulators, and formative quizzes in seconds.
         </p>
       </div>
 
       {/* CTA SECTION */}
-      <div className="mt-12 flex flex-col sm:flex-row gap-4 relative z-10">
+      <div className="mt-10 flex flex-col sm:flex-row gap-4 relative z-10">
         <button 
           onClick={handleStartCreating}
-          className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 group active:scale-95"
+          className="px-8 py-4 bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-cobalt-600/25 flex items-center justify-center gap-2 group active:scale-95 cursor-pointer"
         >
           Start Creating Now
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
         </button>
         <button 
           onClick={() => router.push("/lessons")}
-          className="px-8 py-4 glass text-white font-bold rounded-2xl hover:bg-white/10 transition-all active:scale-95"
+          className="px-8 py-4 glass text-slate-800 dark:text-white font-bold rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all active:scale-95 cursor-pointer"
         >
-          View Public Lessons
+          Explore Library
         </button>
       </div>
 
-      {/* INPUT PREVIEW / MOCKUP */}
-      <div className="mt-20 w-full max-w-3xl px-6 relative z-10 group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+      {/* INPUT PREVIEW / QUICK PROMPT LAUNCHER */}
+      <div className="mt-16 w-full max-w-3xl px-4 relative z-10 group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-cobalt-600 to-marine-500 rounded-[2rem] blur opacity-20 group-hover:opacity-35 transition duration-500"></div>
         <div className="relative glass-card p-2 rounded-[1.5rem]">
-          <div className="bg-black/40 rounded-2xl flex items-center p-3 gap-2 border border-white/5">
+          <div className="bg-white/60 dark:bg-slate-950/80 rounded-2xl flex items-center p-2.5 gap-2 border border-slate-200/80 dark:border-white/5">
             <input 
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Create a comprehensive lesson on Quantum Computing fundamentals..."
-              className="flex-1 bg-transparent px-4 py-2 text-white placeholder-gray-600 focus:outline-none"
+              placeholder="e.g. Quantum Computing: Superposition & Bloch sphere simulation..."
+              className="flex-1 bg-transparent px-4 py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none text-sm sm:text-base font-sans"
             />
             <button 
               onClick={handleGenerate}
-              className="bg-indigo-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-indigo-500/20 active:scale-95 transition-transform whitespace-nowrap"
+              className="bg-cobalt-600 hover:bg-cobalt-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-cobalt-600/20 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
             >
               Generate
             </button>
@@ -105,4 +104,4 @@ export default function HeroSection() {
       </div>
     </div>
   );
-}
+}

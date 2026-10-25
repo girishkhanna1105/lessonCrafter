@@ -12,15 +12,6 @@ export async function runCompilerAgent(
 ): Promise<string> {
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
-  const interactiveMap = interactive.elements.reduce((acc, el) => {
-    acc[el.section_title] = el;
-    console.log(acc);
-    return acc;
-  }, {} as Record<string, any>);
-
-  const sectionsJson = JSON.stringify(content.sections, null, 2);
-  const quizJson = JSON.stringify(quiz.questions, null, 2);
-
   const prompt = `You are the Compiler Agent. Write a single, self-contained code block that renders a beautiful lesson using react-live.
 
 CRITICAL FORMAT RULES — MUST FOLLOW EXACTLY:
@@ -54,15 +45,17 @@ Options: ${q.options.join(" | ")}
 Correct: ${q.options[q.correct_index]}
 `).join("\n")}
 
-DESIGN REQUIREMENTS:
-- Background: pure black #0a0a0a — NOT purple, NOT navy, NOT #1a1a3e
-- Cards/sections: #111111 or #141414 with a subtle white border (rgba(255,255,255,0.06))
-- Primary accent: #6366f1 (indigo) for buttons and highlights ONLY — not for backgrounds
-- Text: #ffffff for headings, #a1a1aa for body, #6b7280 for captions
-- Quiz: green #22c55e for correct, red #ef4444 for wrong
-- Section dividers: 1px solid rgba(255,255,255,0.06)
-- Font: system-ui or Inter via fontFamily style
-- Smooth layout with generous padding (40–60px sections)
+DESIGN REQUIREMENTS (Pantone Cobalt Architect Theme):
+- Background: Deep architectural slate #0a0f18 — strictly NO purple, NO violet, NO navy
+- Cards/sections: #111827 or #161f30 with clean hairline border (rgba(255,255,255,0.08))
+- Primary accent: #2563eb (Classic Cobalt) and #3b82f6 (Electric Cobalt) for buttons and active states
+- Secondary accent: #06b6d4 (Marine Cyan) for telemetry, data readouts, and tags
+- Formative indicator: #f59e0b (Solar Amber) for status chips
+- Quiz: Emerald #10b981 for correct answers, Red #ef4444 for incorrect
+- Text: #ffffff for headings, #cbd5e1 for body, #94a3b8 for secondary text
+- Section dividers: 1px solid rgba(255,255,255,0.08)
+- Font: Inter or system-ui via fontFamily style; JetBrains Mono for code blocks
+- Layout: Generous padding, crisp micro-radii (8px-12px), high-contrast readability
 
 OUTPUT: Return ONLY the raw code. No markdown. No code blocks. No \`\`\`. Start directly with the first line of code.
 

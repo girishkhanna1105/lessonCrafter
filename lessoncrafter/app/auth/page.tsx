@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Mail, Lock, User, ArrowRight, Github } from "lucide-react";
+import { Loader2, Mail, Lock, User, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,12 +45,12 @@ export default function AuthPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         
-        // ✨ Check if user has a profile
+        // Check if user has a profile
         const profileRes = await fetch(`/api/profile?userId=${data.user.id}&role=${data.user.role}`);
         const profileData = await profileRes.json();
 
         if (profileData.hasProfile) {
-          router.push("/page2");
+          router.push("/studio");
         } else {
           router.push("/onboarding");
         }
@@ -67,24 +67,25 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors duration-200">
       <Navbar />
       
       <main className="flex-1 flex items-center justify-center p-6 pt-28 sm:pt-32 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+        {/* Cobalt architectural glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cobalt-600/10 rounded-full blur-[140px] pointer-events-none" />
         
-        <Card className="w-full max-w-md glass border-white/10 shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-500 my-auto">
+        <Card className="w-full max-w-md glass border-slate-200 dark:border-slate-800 shadow-2xl relative z-10 my-auto">
           <CardHeader className="space-y-1 pb-6">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 mb-4">
-              <Lock className="w-6 h-6 text-indigo-400" />
+            <div className="w-12 h-12 rounded-2xl bg-cobalt-500/10 flex items-center justify-center border border-cobalt-500/20 mb-4">
+              <Lock className="w-6 h-6 text-cobalt-600 dark:text-cobalt-400" />
             </div>
-            <CardTitle className="text-3xl font-black text-white">
-              {isLogin ? "Welcome Back" : "Join the Future"}
+            <CardTitle className="text-3xl font-black text-slate-900 dark:text-white">
+              {isLogin ? "Welcome Back" : "Join LessonCrafter"}
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-slate-500 dark:text-slate-400">
               {isLogin 
-                ? "Sign in to access your private lessons." 
-                : "Create an account to start your learning journey."}
+                ? "Sign in to access your creation studio and lessons." 
+                : "Create an account to start synthesizing interactive lessons."}
             </CardDescription>
           </CardHeader>
           
@@ -93,8 +94,8 @@ export default function AuthPage() {
               {error && (
                 <div className={`p-3 rounded-xl border text-sm font-medium ${
                   error.includes("successful") 
-                    ? "bg-green-500/10 border-green-500/20 text-green-400" 
-                    : "bg-red-500/10 border-red-500/20 text-red-400"
+                    ? "bg-jade-500/10 border-jade-500/20 text-jade-500" 
+                    : "bg-red-500/10 border-red-500/20 text-red-500"
                 }`}>
                   {error}
                 </div>
@@ -102,40 +103,40 @@ export default function AuthPage() {
               
               {!isLogin && (
                 <>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <Input
-                      placeholder="Full Name"
-                      className="pl-10 h-12 glass border-white/5 focus:border-indigo-500/50"
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      required
-                    />
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        placeholder="Full Name"
+                        className="pl-10 h-12 bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 focus:border-cobalt-500"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">PH</span>
-                    <Input
-                      placeholder="Phone Number"
-                      className="pl-10 h-12 glass border-white/5 focus:border-indigo-500/50"
-                      value={formData.phone_no}
-                      onChange={(e) => setFormData({...formData, phone_no: e.target.value})}
-                      required
-                    />
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs font-mono">TEL</span>
+                      <Input
+                        placeholder="Phone Number"
+                        className="pl-10 h-12 bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 focus:border-cobalt-500"
+                        value={formData.phone_no}
+                        onChange={(e) => setFormData({...formData, phone_no: e.target.value})}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
                 </>
               )}
               
               <div className="space-y-2">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
                     type="email"
                     placeholder="Email Address"
-                    className="pl-10 h-12 glass border-white/5 focus:border-indigo-500/50"
+                    className="pl-10 h-12 bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 focus:border-cobalt-500"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required
@@ -145,11 +146,11 @@ export default function AuthPage() {
               
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
                     type="password"
                     placeholder="Password"
-                    className="pl-10 h-12 glass border-white/5 focus:border-indigo-500/50"
+                    className="pl-10 h-12 bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 focus:border-cobalt-500"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     required
@@ -159,7 +160,7 @@ export default function AuthPage() {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95 text-lg"
+                className="w-full h-12 bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-cobalt-600/20 active:scale-95 text-base cursor-pointer"
                 disabled={loading}
               >
                 {loading ? (
@@ -167,7 +168,7 @@ export default function AuthPage() {
                 ) : (
                   <>
                     {isLogin ? "Sign In" : "Create Account"}
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}
               </Button>
@@ -175,11 +176,11 @@ export default function AuthPage() {
           </CardContent>
           
           <CardFooter className="flex flex-col space-y-4 pb-8 pt-2">
-            <p className="text-sm text-gray-500 text-center">
+            <p className="text-sm text-slate-500 text-center">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button 
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+                className="text-cobalt-600 dark:text-cobalt-400 font-bold hover:underline transition-all cursor-pointer"
                 type="button"
               >
                 {isLogin ? "Create one now" : "Sign in here"}
@@ -189,8 +190,8 @@ export default function AuthPage() {
         </Card>
       </main>
       
-      <footer className="py-12 px-6 text-center text-[10px] text-gray-600 font-bold uppercase tracking-[0.2em] relative z-10">
-        Securely powered by Supabase & JWT
+      <footer className="py-8 px-6 text-center text-xs text-slate-400 font-mono font-bold uppercase tracking-widest relative z-10">
+        Authenticated securely via Supabase & JWT
       </footer>
     </div>
   );

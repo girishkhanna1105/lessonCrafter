@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import AuthenticatedHero from "@/components/AuthenticatedHero";
 import HeroSection from "@/components/HeroSection";
@@ -19,7 +18,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-transparent selection:bg-indigo-500/30 selection:text-white">
+    <div className="min-h-screen bg-transparent selection:bg-cobalt-500/20 selection:text-cobalt-800 dark:selection:text-cobalt-200 transition-colors duration-200">
       <Navbar />
       
       {!loading && (
@@ -27,13 +26,13 @@ export default function Home() {
       )}
 
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none" />
         <LowerSection />
       </div>
       
-      <footer className="py-12 px-6 border-t border-white/5 text-center">
-        <p className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em]">
-          LessonCrafter © {new Date().getFullYear()} — AI-Powered Educational Platform
+      <footer className="py-12 px-6 border-t border-slate-200 dark:border-white/5 text-center">
+        <p className="text-slate-400 dark:text-slate-500 text-xs font-mono font-bold uppercase tracking-[0.2em]">
+          LessonCrafter © {new Date().getFullYear()} — Precision AI Educational Platform
         </p>
       </footer>
     </div>

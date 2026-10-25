@@ -23,7 +23,7 @@ export interface PipelineResult {
 }
 
 /**
- * Runs the full 5-agent pipeline.
+ * Runs the optimized 5-agent pipeline with parallelized generation.
  * @param topic The lesson topic
  * @param userProfile The logged-in user's profile from DB
  * @param onProgress Callback for streaming status updates to the UI
@@ -48,7 +48,7 @@ export async function runPipeline(
     onProgress({ ...progress });
   };
 
-  // ─── AGENT 1: Content Architect ───────────────────────────────────────────
+  // ─── AGENT 1: Content Architect (Gemini) ──────────────────────────────────
   emit({ content: "running" });
   let contentOutput: LessonContent;
   try {
@@ -59,34 +59,39 @@ export async function runPipeline(
     throw new Error(`Content Agent failed: ${e}`);
   }
 
-  // Rate limit buffer — stay within 15 RPM free tier
-  await sleep(4000);
+  // ─── AGENT 2 & AGENT 3: Concurrent Execution (Promise.all) ───────────────
+  // Agent 2 runs on Gemini, Agent 3 runs on Groq (independent rate limit pools)
+  emit({ interactive: "running", quiz: "running" });
 
-  // ─── AGENT 2: Interactive Builder ─────────────────────────────────────────
-  emit({ interactive: "running" });
+  const [interactiveResult, quizResult] = await Promise.allSettled([
+    runInteractiveAgent(contentOutput),
+    runQuizAgent(contentOutput),
+  ]);
+
   let interactiveOutput: InteractiveOutput;
-  try {
-    interactiveOutput = await runInteractiveAgent(contentOutput);
+  if (interactiveResult.status === "fulfilled") {
+    interactiveOutput = interactiveResult.value;
     emit({ interactive: "done" });
-  } catch (e) {
-    emit({ interactive: "error" });
+  } else {
+    console.warn("[Orchestrator] Interactive Agent failed:", interactiveResult.reason);
     interactiveOutput = { elements: [] };
+    emit({ interactive: "error" });
   }
 
-  // ─── AGENT 3: Quiz Designer (Groq — no rate limit concern) ────────────────
-  emit({ quiz: "running" });
   let quizOutput: QuizOutput;
-  try {
-    quizOutput = await runQuizAgent(contentOutput);
+  if (quizResult.status === "fulfilled") {
+    quizOutput = quizResult.value;
     emit({ quiz: "done" });
-  } catch (e) {
-    emit({ quiz: "error" });
+  } else {
+    console.warn("[Orchestrator] Quiz Agent failed:", quizResult.reason);
     quizOutput = { questions: [] };
+    emit({ quiz: "error" });
   }
 
-  await sleep(4000);
+  // Micro-buffer for Gemini concurrency safety
+  await sleep(1000);
 
-  // ─── AGENT 4: Compiler ─────────────────────────────────────────────────────
+  // ─── AGENT 4: Compiler (Gemini) ───────────────────────────────────────────
   emit({ compiler: "running" });
   let compiledCode: string;
   try {
@@ -97,16 +102,14 @@ export async function runPipeline(
     throw new Error(`Compiler Agent failed: ${e}`);
   }
 
-  await sleep(4000);
-
-  // ─── AGENT 5: UI Polish ────────────────────────────────────────────────────
+  // ─── AGENT 5: UI Polish (Gemini) ──────────────────────────────────────────
   emit({ polish: "running" });
   let finalCode: string;
   try {
     finalCode = await runUIPolishAgent(compiledCode);
     emit({ polish: "done" });
   } catch (e) {
-    console.warn("UI Polish agent failed, using compiled code:", e);
+    console.warn("[Orchestrator] UI Polish agent failed, falling back to compiled code:", e);
     finalCode = compiledCode;
     emit({ polish: "done" });
   }

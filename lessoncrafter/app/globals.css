@@ -3,27 +3,55 @@
 @tailwind utilities;
 
 @layer base {
+  /* =========================================================================
+     LIGHT MODE (Pantone Crisp Alabaster & Classic Cobalt)
+     ========================================================================= */
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 263.4 70% 50.4%;
+    --background: 210 40% 98%;          /* #f8fafc Crisp Alabaster */
+    --foreground: 222 47% 11%;          /* #0f172a Deep Ink Charcoal */
+    --card: 0 0% 100%;                  /* #ffffff Pure Sheet */
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221.2 83.2% 53.3%;       /* #2563eb Pantone Classic Cobalt */
     --primary-foreground: 210 40% 98%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --secondary: 210 40% 96.1%;         /* #f1f5f9 Warm Chalk */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%; /* #64748b Cool Slate */
+    --accent: 198 93% 45%;              /* #0891b2 Hyper Marine Cyan */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;        /* #e2e8f0 Hairline Border */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+  }
+
+  /* =========================================================================
+     DARK MODE (Pantone Void Slate & Electric Lapis)
+     ========================================================================= */
+  .dark {
+    --background: 222 47% 7%;           /* #0a0f18 Void Slate Floor */
+    --foreground: 210 40% 98%;          /* #dee2f0 High Contrast Crisp White */
+    --card: 222 47% 11%;                /* #111827 Structural Charcoal */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;       /* #3b82f6 Electric Cobalt Highlight */
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217.2 32.6% 17.5%;     /* #1e293b Technical Slate Plane */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%; /* #94a3b8 */
+    --accent: 188 86% 53%;              /* #06b6d4 Luminous Cyan */
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 263.4 70% 50.4%;
-    --radius: 1rem;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;        /* #1e293b / rgba(255,255,255,0.08) */
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -32,32 +60,47 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-200;
     font-feature-settings: "rlig" 1, "calt" 1;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(263, 70%, 50%, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(280, 70%, 50%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(230, 70%, 50%, 0.1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(320, 70%, 50%, 0.05) 0px, transparent 50%);
+      radial-gradient(at 50% 0%, hsla(221, 83%, 53%, 0.08) 0px, transparent 65%),
+      radial-gradient(at 100% 100%, hsla(188, 86%, 53%, 0.04) 0px, transparent 50%);
     background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image: 
+      radial-gradient(at 50% 0%, hsla(221, 83%, 53%, 0.14) 0px, transparent 65%),
+      radial-gradient(at 100% 100%, hsla(188, 86%, 53%, 0.06) 0px, transparent 50%);
   }
 }
 
+/* =========================================================================
+   COBALT ARCHITECT UTILITIES
+   ========================================================================= */
+
 .glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  @apply bg-white/70 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 shadow-sm dark:shadow-none;
 }
 
 .glass-card {
-  @apply glass rounded-2xl shadow-2xl transition-all duration-300 hover:border-white/20;
+  @apply bg-white/90 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xl dark:shadow-2xl transition-all duration-300 hover:border-cobalt-500/40 dark:hover:border-cobalt-400/40;
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-indigo-200 to-purple-400;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-cobalt-700 via-cobalt-600 to-marine-600 dark:from-white dark:via-cobalt-200 dark:to-marine-400;
+}
+
+.blueprint-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
 }
 
 @keyframes float {
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
   100% { transform: translateY(0px); }
 }
 

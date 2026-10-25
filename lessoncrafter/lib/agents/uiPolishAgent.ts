@@ -18,11 +18,11 @@ CURRENT COMPONENT:
 ${rawCode}
 
 YOUR TASKS (improve visually only, keep all functionality):
-1. Ensure dark theme background (#0a0a1a or #0f0f1a)
-2. Add proper visual hierarchy: title bold and large, sections clearly separated with cards
-3. Improve quiz section: clear correct/wrong feedback colors (green=#22c55e, red=#ef4444)
-4. Add progress indicator and score display for quiz
-5. Ensure code snippets use monospace font in dark blocks
+1. Ensure architectural slate background (#0a0f18) with Cobalt (#2563eb / #3b82f6) and Cyan (#06b6d4) accents — strictly NO purple or violet
+2. Add proper visual hierarchy: title bold and large in Plus Jakarta Sans / Inter, sections clearly separated in cards (#111827)
+3. Improve quiz section: clear correct/wrong feedback colors (Emerald=#10b981, Red=#ef4444)
+4. Add progress indicator and score display for quiz with Solar Amber (#f59e0b) badges
+5. Ensure code snippets use monospace font (JetBrains Mono) in dark technical blocks (#080c14)
 6. Add hover states for interactive elements using onMouseEnter/onMouseLeave
 7. Add a header with the lesson title, level badge, and objectives list
 

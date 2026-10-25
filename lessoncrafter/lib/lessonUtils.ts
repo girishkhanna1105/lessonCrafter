@@ -416,12 +416,12 @@ export function sanitizeTSX(raw: string): string {
     const funcMatch = cleaned.match(/function\s+LessonComponent/);
 
     let startIndex = -1;
-    let typeIndex = typeMatch ? cleaned.indexOf(typeMatch[0]) : -1;
-    let constIndex = constMatch ? cleaned.indexOf(constMatch[0]) : -1;
-    let funcIndex = funcMatch ? cleaned.indexOf(funcMatch[0]) : -1;
+    const typeIndex = typeMatch ? cleaned.indexOf(typeMatch[0]) : -1;
+    const constIndex = constMatch ? cleaned.indexOf(constMatch[0]) : -1;
+    const funcIndex = funcMatch ? cleaned.indexOf(funcMatch[0]) : -1;
 
     // Find the *earliest* valid starting point
-    let validIndexes = [typeIndex, constIndex, funcIndex].filter(i => i !== -1);
+    const validIndexes = [typeIndex, constIndex, funcIndex].filter(i => i !== -1);
     
     if (validIndexes.length > 0) {
       startIndex = Math.min(...validIndexes);

@@ -44,18 +44,58 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
+
+        // --- Pantone "Cobalt Architect" Precision Tokens ---
+        cobalt: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6", // Electric Cobalt Highlight
+          600: "#2563eb", // Pantone Classic Cobalt Base
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#172554",
+        },
+        marine: {
+          50: "#ecfeff",
+          100: "#cffafe",
+          200: "#a5f3fc",
+          300: "#67e8f9",
+          400: "#22d3ee",
+          500: "#06b6d4", // Hyper Marine Cyan
+          600: "#0891b2", // Technical Cyan
+          700: "#0e7490",
+          800: "#155e75",
+          900: "#164e63",
+        },
+        solar: {
+          400: "#fbbf24",
+          500: "#f59e0b", // Pantone Solar Amber
+          600: "#d97706",
+        },
+        jade: {
+          400: "#34d399",
+          500: "#10b981", // Pantone Architectural Emerald
+          600: "#059669",
+        },
+        slate: {
+          850: "#111827",
+          925: "#0c111c",
+          950: "#0a0f18", // Void Slate Floor
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "Inter", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "var(--font-geist-sans)", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
     },
   },

@@ -1,32 +1,3 @@
-import { NextRequest,NextResponse } from "next/server";
-import { verifyToken } from "@/lib/jwt";
-
-export  function middleware(req:NextRequest) {
-    const token=req.headers.get("authorization")?.split(" ")[1];
-    if(!token){
-        return NextResponse.json(
-            {message:"unauthorized access (no authorization token in header"},
-            {status:401}
-        )
-
-    }
-    try {
-    const decoded = verifyToken(token)
-
-    const requestHeaders = new Headers(req.headers)
-    requestHeaders.set("x-user-id", decoded.userId)
-
-    return NextResponse.next({
-      request: { headers: requestHeaders },
-    })
-  } catch {
-    return NextResponse.json(
-      { message: "Invalid token" },
-      { status: 401 }
-    )
-  }
-}
-
-export const config = {
-  matcher: ["/api/auth/me"],
-}
+// Note: Next.js App Router executes /middleware.ts located at the root of the project.
+// This file is kept as an empty export for backward safety.
+export {};
