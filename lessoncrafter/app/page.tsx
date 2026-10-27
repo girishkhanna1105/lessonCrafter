@@ -5,6 +5,10 @@ import AuthenticatedHero from "@/components/AuthenticatedHero";
 import HeroSection from "@/components/HeroSection";
 import LowerSection from "@/components/LowerSection";
 
+import InteractivePreviewSandbox from "@/components/InteractivePreviewSandbox";
+import CurriculumExplorer from "@/components/CurriculumExplorer";
+import InteractiveSocraticDemo from "@/components/InteractiveSocraticDemo";
+
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,6 +28,15 @@ export default function Home() {
       {!loading && (
         user ? <AuthenticatedHero user={user} /> : <HeroSection />
       )}
+
+      {/* Interactive Simulation Sandbox */}
+      <InteractivePreviewSandbox />
+
+      {/* Interactive Curriculum Tracks */}
+      <CurriculumExplorer />
+
+      {/* Live Socratic Dialogue Playground */}
+      <InteractiveSocraticDemo />
 
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none" />

@@ -18,13 +18,14 @@ CURRENT COMPONENT:
 ${rawCode}
 
 YOUR TASKS (improve visually only, keep all functionality):
-1. Ensure architectural slate background (#0a0f18) with Cobalt (#2563eb / #3b82f6) and Cyan (#06b6d4) accents — strictly NO purple or violet
-2. Add proper visual hierarchy: title bold and large in Plus Jakarta Sans / Inter, sections clearly separated in cards (#111827)
-3. Improve quiz section: clear correct/wrong feedback colors (Emerald=#10b981, Red=#ef4444)
-4. Add progress indicator and score display for quiz with Solar Amber (#f59e0b) badges
-5. Ensure code snippets use monospace font (JetBrains Mono) in dark technical blocks (#080c14)
-6. Add hover states for interactive elements using onMouseEnter/onMouseLeave
-7. Add a header with the lesson title, level badge, and objectives list
+1. Preserve and refine the dual-mode C palette (dark ? ... : ...). Ensure all text, card backgrounds, and borders use dynamic colors from C, not hardcoded black or white.
+2. STRICTLY NO TABS: Do NOT add activeTab or hide/show views. Keep the full 2-column workstation visible (Left: Curriculum, Right: Simulation Lab & Formative Quiz).
+3. STRICT REACT RULES OF HOOKS: Keep all useState and useEffect calls at the very top of LessonComponent. Never move hooks into conditionals or arrays.
+4. Header Alignment: Ensure lesson title has its own full-width row with line-height 1.3 so it never collides with or squeezes metadata badges.
+5. Quiz Polish: Ensure exactly ONE single instance of the Quiz renders. Add question progress bar, circular option letter badges (A, B, C, D), and Emerald/Red feedback badges.
+6. Polish cards with subtle hairline borders, smooth border radius (14px to 18px), and generous internal padding (24px to 32px).
+7. Ensure technical code blocks use monospace font with dark background blocks (#080c14).
+8. Strictly NO purple or violet colors.
 
 OUTPUT: Return ONLY the raw code. No markdown. No \`\`\`. Start with the first code line.`;
 

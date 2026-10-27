@@ -1,7 +1,9 @@
 import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { LessonContent } from "./contentAgent";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
 export interface QuizQuestion {
   question: string;
@@ -48,51 +50,76 @@ Return ONLY valid JSON:
   ]
 }`;
 
-  // Preferred model: openai/gpt-oss-120b on Groq for deep reasoning and distractor accuracy
-  const candidateModels = [
-    "openai/gpt-oss-120b",
-    "qwen/qwen3.8-27b",
-    "openai/gpt-oss-20b",
-  ];
+  let parsed: QuizOutput | null = null;
 
-  let rawText = "{}";
+  // 1. Try Groq fast inference first if available
+  if (groq) {
+    const candidateModels = [
+      "llama-3.3-70b-versatile",
+      "llama-3.1-8b-instant",
+      "mixtral-8x7b-32768",
+    ];
 
-  for (const modelId of candidateModels) {
-    try {
-      const completion = await groq.chat.completions.create({
-        model: modelId,
-        messages: [
-          {
-            role: "system",
-            content: "You are a strict, pedagogical quiz designer. Return ONLY valid JSON matching the requested schema with no markdown code fences, no extra preamble.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.2,
-        max_tokens: 2000,
-        response_format: { type: "json_object" },
-      });
+    for (const modelId of candidateModels) {
+      try {
+        const completion = await groq.chat.completions.create({
+          model: modelId,
+          messages: [
+            {
+              role: "system",
+              content: "You are a strict, pedagogical quiz designer. Return ONLY valid JSON matching the requested schema with no markdown code fences, no extra preamble.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.2,
+          max_tokens: 2000,
+          response_format: { type: "json_object" },
+        });
 
-      rawText = completion.choices[0]?.message?.content?.trim() || "{}";
-      break; // Successfully got completion
-    } catch (err: any) {
-      console.warn(`[QuizAgent] Model ${modelId} failed: ${err.message}. Trying next candidate...`);
+        const rawText = completion.choices[0]?.message?.content?.trim() || "{}";
+        const cleaned = rawText
+          .replace(/^```json\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/```\s*$/i, "")
+          .trim();
+        const candidate = JSON.parse(cleaned);
+        if (candidate.questions && Array.isArray(candidate.questions) && candidate.questions.length > 0) {
+          parsed = candidate;
+          break;
+        }
+      } catch (err: any) {
+        console.warn(`[QuizAgent] Groq model ${modelId} failed: ${err.message}.`);
+      }
     }
   }
 
-  try {
-    const cleaned = rawText
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/```\s*$/i, "")
-      .trim();
-    const parsed = JSON.parse(cleaned);
-    return parsed as QuizOutput;
-  } catch (e) {
-    console.error("[QuizAgent] Parse error:", e);
-    return { questions: [] };
+  // 2. Resilient Gemini Fallback if Groq failed or wasn't configured
+  if (!parsed || !parsed.questions || parsed.questions.length === 0) {
+    if (genAI) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash",
+          generationConfig: {
+            temperature: 0.2,
+            responseMimeType: "application/json",
+          },
+        });
+        const res = await model.generateContent(prompt);
+        const text = res.response.text();
+        const cleaned = text
+          .replace(/^```json\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/```\s*$/i, "")
+          .trim();
+        parsed = JSON.parse(cleaned);
+      } catch (geminiErr: any) {
+        console.error("[QuizAgent] Gemini fallback failed:", geminiErr);
+      }
+    }
   }
+
+  return parsed && Array.isArray(parsed.questions) ? parsed : { questions: [] };
 }

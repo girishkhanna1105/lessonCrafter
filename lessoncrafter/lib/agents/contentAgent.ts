@@ -58,7 +58,7 @@ The JSON must follow this exact schema:
   "sections": [
     {
       "title": "Section title",
-      "explanation": "Detailed explanation (4-6 paragraphs)",
+      "explanation": "Clear, rigorous, intuitive 2-3 paragraph explanation focusing on foundational mechanics and intuition",
       "key_points": ["point 1", "point 2", "point 3"],
       "real_world_example": "A concrete real-world application",
       "code_snippet": "Optional: relevant code example if applicable"
@@ -67,7 +67,7 @@ The JSON must follow this exact schema:
   "summary": "A concise summary of what was learned"
 }
 
-Generate 3-5 sections. Make the content rich, accurate, and engaging.`;
+Generate 3-4 structured sections. Make the content rich, accurate, and engaging.`;
 
   const result = await model.generateContent(prompt);
   const rawText = result.response.text().trim();

@@ -32,8 +32,9 @@ ${sectionsOverview}
 For each section, create ONE interactive element. Each element MUST be:
 - A valid, self-contained React functional component snippet (just JSX, no imports, no export)
 - Using only React hooks (useState, useEffect) — NO external libraries
-- Styled inline with Tailwind-like utility classes using className
-- Visually engaging (use color, animation, interactivity)
+- Styled inline with React style={{ ... }} objects (use modern clean inline styles, avoid unsupported className)
+- Visually engaging with clean palette: use cobalt (#2563eb), marine cyan (#06b6d4), emerald (#10b981), amber (#f59e0b). NEVER use purple, violet, or indigo.
+- Supports dark and light backgrounds cleanly.
 
 Return ONLY valid JSON, no markdown, no code blocks:
 {

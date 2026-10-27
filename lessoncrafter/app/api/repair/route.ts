@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   try {
     console.log(`🔧 [Repair] Fixing runtime error for Lesson ${lessonId}: ${errorMessage}`);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `You are a React code repair agent. Fix the following react-live component that has a runtime error.
 
@@ -32,6 +32,15 @@ CRITICAL FORMAT RULES (react-live noInline mode):
 LESSON TOPIC: "${outline}"
 
 ERROR TO FIX: ${errorMessage}
+
+REPAIR DIRECTIVES:
+- IF THE ERROR IS A HOOK VIOLATION ("Rendered more hooks than during previous render" or hook count mismatch):
+  1. Remove any activeTab state and conditional rendering of hooks!
+  2. Put ALL useState and useEffect calls unconditionally at the very top of LessonComponent.
+  3. Never put hooks in array functions or object methods (e.g. "code: () => { useState() }").
+  4. Display the layout as a unified 2-column workstation (Left: Theory/Curriculum, Right: Simulation Lab + Quiz).
+- IF THE QUIZ IS DUPLICATED: Ensure exactly ONE single Quiz card renders in the right column.
+- FIX HEADER MISALIGNMENT: Give the lesson title its own full-width row with proper line-height so it never collides with buttons or badges.
 
 BROKEN CODE:
 ${originalCode}

@@ -164,7 +164,7 @@ export default function SocraticTutorDrawer({
                 <div className="flex items-center gap-2">
                   <h3 className="font-black text-sm text-slate-900 dark:text-white">Socratic Tutor</h3>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cobalt-100 dark:bg-cobalt-950/80 text-cobalt-700 dark:text-cobalt-300 border border-cobalt-300/40 dark:border-cobalt-800">
-                    Groq 120B
+                    Llama 3.3 / Gemini
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-gray-400 truncate max-w-[200px]">

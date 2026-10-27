@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import LessonRunner from "@/components/LessonRunner";
 import SocraticTutorDrawer from "@/components/SocraticTutorDrawer";
+import GeneratingTelemetryVisualizer from "@/components/GeneratingTelemetryVisualizer";
 import { ChevronLeft, RotateCcw, ShieldAlert, Code2, Loader2, Wrench, BookOpen, Download, Printer } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -285,21 +286,8 @@ export default function LessonViewer() {
       {/* Lesson Surface */}
       <div className="w-full">
         {status === "generating" ? (
-          <div className="mx-6 glass-card p-20 text-center flex flex-col items-center justify-center border-cobalt-500/20 bg-cobalt-500/5">
-            <div className="relative mb-8">
-              <div className="absolute inset-0 bg-cobalt-500/20 blur-2xl rounded-full" />
-              <Loader2 className="w-16 h-16 text-cobalt-600 animate-spin relative z-10" />
-            </div>
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Crafting Your Lesson</h2>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed text-sm">
-              Our AI is currently weaving together educational theory, interactive components, and quizzes for:
-              <span className="block mt-2 text-cobalt-600 dark:text-cobalt-300 font-bold italic">&ldquo;{outline}&rdquo;</span>
-            </p>
-            <div className="mt-8 flex gap-2">
-              <div className="w-2 h-2 bg-cobalt-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 bg-cobalt-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 bg-cobalt-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
+          <div className="max-w-4xl mx-auto px-6 py-12">
+            <GeneratingTelemetryVisualizer pipeline={null} topicTitle={outline || title} />
           </div>
         ) : (compile_error || !ts_code) ? (
           <div className="mx-6 glass-card p-12 border-red-500/20 bg-red-500/5">

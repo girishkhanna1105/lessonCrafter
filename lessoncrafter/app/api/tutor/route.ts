@@ -43,11 +43,11 @@ SOCRATIC PEDAGOGY PRINCIPLES:
       { role: "user" as const, content: userQuery.trim() },
     ];
 
-    // Priority 1: High-reasoning Groq models
+    // Priority 1: High-reasoning Groq models (official production model IDs)
     const candidateModels = [
-      "openai/gpt-oss-120b",
-      "qwen/qwen3.8-27b",
-      "openai/gpt-oss-20b",
+      "llama-3.3-70b-versatile",
+      "llama-3.1-8b-instant",
+      "mixtral-8x7b-32768",
     ];
 
     for (const modelId of candidateModels) {
@@ -72,10 +72,10 @@ SOCRATIC PEDAGOGY PRINCIPLES:
       }
     }
 
-    // Fallback: Gemini
+    // Fallback: Gemini 2.5 Flash
     if (genAI) {
       try {
-        const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const chatHistoryPrompt = history
           .slice(-4)
           .map((m: Message) => `${m.role === "user" ? "Student" : "Tutor"}: ${m.content}`)

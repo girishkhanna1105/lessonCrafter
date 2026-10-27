@@ -4,29 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { 
-  Clock, CheckCircle2, AlertCircle, Loader2, BookOpen, 
-  ChevronRight, Sparkles, Zap, Brain, Code2, Paintbrush, 
+  Clock, Loader2, BookOpen, 
+  ChevronRight, Sparkles, Zap, 
   Sliders, ArrowRight, Lightbulb
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
-
-type AgentStatus = "waiting" | "running" | "done" | "error";
-
-interface PipelineProgress {
-  content: AgentStatus;
-  interactive: AgentStatus;
-  quiz: AgentStatus;
-  compiler: AgentStatus;
-  polish: AgentStatus;
-}
-
-const AGENTS = [
-  { key: "content", label: "Content Architect", provider: "Gemini 2.5", icon: Brain, desc: "Syllabus mapping & conceptual foundation" },
-  { key: "interactive", label: "Interactive Builder", provider: "Gemini 2.5", icon: Zap, desc: "Dynamic sandbox simulators & widgets" },
-  { key: "quiz", label: "Quiz Designer", provider: "Groq OSS-120B", icon: Sparkles, desc: "Calibrated formative checks & distractors" },
-  { key: "compiler", label: "Compiler Engine", provider: "Gemini 2.5", icon: Code2, desc: "Self-contained component assembly" },
-  { key: "polish", label: "UI Polish Specialist", provider: "Gemini 2.5", icon: Paintbrush, desc: "Design tokens & WCAG AAA styling" },
-] as const;
+import GeneratingTelemetryVisualizer, { PipelineProgress } from "@/components/GeneratingTelemetryVisualizer";
 
 const LEARNER_LEVELS = [
   { id: "elementary", label: "Elementary", tag: "Grades 1–5", desc: "Visual, tangible, story-based" },
@@ -78,6 +61,7 @@ export default function StudioPage() {
       localStorage.removeItem("pending_prompt");
     }
     fetchLessons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchLessons = async () => {
@@ -163,35 +147,6 @@ export default function StudioPage() {
       setLoading(false);
       setPipeline(null);
       alert("Error: " + msg);
-    }
-  };
-
-  const getAgentStatusBadge = (status: AgentStatus) => {
-    switch (status) {
-      case "done":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-jade-500/10 text-jade-500 border border-jade-500/20">
-            <CheckCircle2 className="w-3 h-3" /> Complete
-          </span>
-        );
-      case "running":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-cobalt-500/15 text-cobalt-600 dark:text-cobalt-400 border border-cobalt-500/30 animate-pulse">
-            <Loader2 className="w-3 h-3 animate-spin" /> Active
-          </span>
-        );
-      case "error":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-red-500/10 text-red-500 border border-red-500/20">
-            <AlertCircle className="w-3 h-3" /> Failed
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800">
-            Queued
-          </span>
-        );
     }
   };
 
@@ -344,49 +299,8 @@ export default function StudioPage() {
 
             {/* Live Multi-Agent Telemetry Rail (when generating) */}
             {pipeline && (
-              <div className="glass-card p-6 border-cobalt-500/30 bg-cobalt-500/5 animate-in fade-in zoom-in-95 duration-300">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/50 dark:border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cobalt-500 animate-ping" />
-                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                      Neural Multi-Agent Orchestrator
-                    </h3>
-                  </div>
-                  <span className="text-xs font-mono text-cobalt-600 dark:text-cobalt-400 font-bold">
-                    Streaming Live Telemetry
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {AGENTS.map((agent) => {
-                    const status = pipeline[agent.key as keyof PipelineProgress] || "waiting";
-                    const Icon = agent.icon;
-                    return (
-                      <div
-                        key={agent.key}
-                        className="flex items-center justify-between p-3 rounded-xl bg-white/60 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-cobalt-500/10 flex items-center justify-center border border-cobalt-500/20">
-                            <Icon className="w-4 h-4 text-cobalt-600 dark:text-cobalt-400" />
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                              {agent.label}
-                              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">
-                                ({agent.provider})
-                              </span>
-                            </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                              {agent.desc}
-                            </div>
-                          </div>
-                        </div>
-                        <div>{getAgentStatusBadge(status)}</div>
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="my-8">
+                <GeneratingTelemetryVisualizer pipeline={pipeline} topicTitle={outline} />
               </div>
             )}
 
