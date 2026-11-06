@@ -3,7 +3,7 @@ import { runPipeline, PipelineProgress } from "@/lib/agents/orchestrator";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
-  const { topic, userId, userProfile, isPublic } = await req.json();
+  const { topic, userId, userProfile, isPublic, intakeAnswers } = await req.json();
 
   if (!topic) {
     return NextResponse.json({ message: "Topic is required" }, { status: 400 });
@@ -18,49 +18,79 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        // 1. Insert a stub row first to get a lesson ID
-        const supabase = await createClient();
-        const { data: stub, error: insertError } = await supabase
-          .from("lessons")
-          .insert({
-            title: topic,
-            outline: topic,
-            status: "generating",
-            user_id: userId || null,
-            is_public: isPublic ?? true,
-          })
-          .select("id")
-          .single();
+        let lessonId = `local-${Date.now()}`;
+        let dbAvailable = false;
+        let supabaseClient: any = null;
 
-        if (insertError || !stub) {
-          send({ type: "error", message: "Failed to create lesson record: " + insertError?.message });
-          return;
+        // 1. Attempt Supabase reservation with fail-safe fallback
+        try {
+          supabaseClient = await createClient();
+          const { data: stub, error: insertError } = await supabaseClient
+            .from("lessons")
+            .insert({
+              title: topic,
+              outline: topic,
+              status: "generating",
+              user_id: userId || null,
+              is_public: isPublic ?? true,
+            })
+            .select("id")
+            .single();
+
+          if (!insertError && stub?.id) {
+            lessonId = stub.id;
+            dbAvailable = true;
+          } else {
+            console.warn("[generate-v2] Supabase reservation notice:", insertError?.message);
+          }
+        } catch (dbErr: any) {
+          console.warn("[generate-v2] Supabase unavailable (paused or offline), switching to resilient local session:", dbErr.message);
         }
 
-        // 2. Run the full pipeline with progress callbacks
-        const result = await runPipeline(topic, userProfile, (progress: PipelineProgress) => {
-          send({ type: "progress", progress });
+        // 2. Run the full multi-agent pipeline
+        const result = await runPipeline(
+          topic,
+          userProfile,
+          intakeAnswers,
+          (progress: PipelineProgress) => {
+            send({ type: "progress", progress });
+          }
+        );
+
+        // 3. Format structured outline
+        const structuredSummary = `[Subject: ${result.lessonSubject} | Level: ${result.lessonLevel}]\n` +
+          `Objectives: ${result.objectives.join("; ")}\n\n` +
+          (result.pedagogyBrief?.intuitiveAnchor ? `Intuitive Anchor: ${result.pedagogyBrief.intuitiveAnchor}\n` : "");
+        const fullOutline = `${topic}\n\n${structuredSummary}`;
+
+        // 4. Update remote DB if available
+        if (dbAvailable && supabaseClient) {
+          try {
+            await supabaseClient
+              .from("lessons")
+              .update({
+                title: result.lessonTitle,
+                outline: fullOutline,
+                ts_code: result.finalCode,
+                status: "generated",
+                compile_status: "success",
+                compile_error: null,
+              })
+              .eq("id", lessonId);
+          } catch (updateErr: any) {
+            console.warn("[generate-v2] Supabase update warning, returning payload directly:", updateErr.message);
+          }
+        }
+
+        // 5. Always deliver the complete lesson payload directly to the client
+        send({
+          type: "done",
+          lessonId,
+          title: result.lessonTitle,
+          outline: fullOutline,
+          ts_code: result.finalCode,
         });
 
-        // 3. Update the stub row with generated content
-        const { error: updateError } = await supabase
-          .from("lessons")
-          .update({
-            title: result.lessonTitle,
-            outline: `${topic}\n\n[Subject: ${result.lessonSubject} | Level: ${result.lessonLevel}]`,
-            ts_code: result.finalCode,
-            status: "generated",
-            compile_status: "success",
-            compile_error: null,
-          })
-          .eq("id", stub.id);
-
-        if (updateError) {
-          console.error("DB update error:", updateError);
-          send({ type: "error", message: "Lesson generated but failed to save: " + updateError.message });
-        } else {
-          send({ type: "done", lessonId: stub.id, title: result.lessonTitle });
-        }
       } catch (err: any) {
         console.error("Pipeline error:", err);
         send({ type: "error", message: err.message || "Pipeline failed" });

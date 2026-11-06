@@ -40,26 +40,32 @@ export default function InteractivePreviewSandbox() {
   const [w2, setW2] = useState(0.9);
   const [bias, setBias] = useState(0.2);
   const [actFunc, setActFunc] = useState<"relu" | "sigmoid" | "tanh">("sigmoid");
+  const [mounted, setMounted] = useState(false);
 
-  // Animation clock
   useEffect(() => {
-    if (!isPlaying) return;
+    setMounted(true);
+  }, []);
+
+  // Animation clock (starts only after hydration to eliminate SSR mismatches)
+  useEffect(() => {
+    if (!isPlaying || !mounted) return;
     const interval = setInterval(() => {
       setTick((prev) => (prev + 1) % 3600);
       setSatAngle((prev) => (prev + 0.04 * (centralMass / 100)) % (Math.PI * 2));
     }, 30);
     return () => clearInterval(interval);
-  }, [isPlaying, centralMass]);
+  }, [isPlaying, mounted, centralMass]);
 
-  // Compute wave points
+  // Compute wave points with deterministic precision
   const pointsCount = 60;
+  const currentTick = mounted ? tick : 0;
   const wavePoints = Array.from({ length: pointsCount }).map((_, i) => {
-    const x = (i / (pointsCount - 1)) * 320;
-    const t = (tick * 0.05);
-    const y1 = Math.sin((i * 0.15 * freq1) + t) * (amplitude * 0.5);
-    const y2 = Math.sin((i * 0.15 * freq2) + t + (phase * Math.PI / 180)) * (amplitude * 0.5);
-    const yTotal = y1 + y2;
-    return { x, y1: 45 + y1, y2: 45 + y2, yTotal: 105 + yTotal };
+    const x = Number(((i / (pointsCount - 1)) * 320).toFixed(2));
+    const t = (currentTick * 0.05);
+    const y1 = Number((45 + Math.sin((i * 0.15 * freq1) + t) * (amplitude * 0.5)).toFixed(2));
+    const y2 = Number((45 + Math.sin((i * 0.15 * freq2) + t + (phase * Math.PI / 180)) * (amplitude * 0.5)).toFixed(2));
+    const yTotal = Number((105 + (y1 - 45) + (y2 - 45)).toFixed(2));
+    return { x, y1, y2, yTotal };
   });
 
   const wave1Path = `M ${wavePoints.map(p => `${p.x},${p.y1}`).join(" L ")}`;
@@ -460,19 +466,19 @@ export default function InteractivePreviewSandbox() {
               
               {activeSim === "waves" && (
                 <div className="w-full space-y-4">
-                  <svg viewBox="0 0 320 180" className="w-full h-auto overflow-visible">
+                  <svg viewBox="0 0 320 180" className="w-full h-auto overflow-visible" suppressHydrationWarning>
                     {/* Gridlines */}
                     <line x1="0" y1="45" x2="320" y2="45" stroke="#334155" strokeDasharray="3 3" strokeWidth="0.8" />
                     <line x1="0" y1="105" x2="320" y2="105" stroke="#334155" strokeDasharray="3 3" strokeWidth="0.8" />
 
                     {/* Wave 1: Cobalt */}
-                    <path d={wave1Path} fill="none" stroke="#2563eb" strokeWidth="2" strokeOpacity="0.85" />
+                    <path d={mounted ? wave1Path : ""} fill="none" stroke="#2563eb" strokeWidth="2" strokeOpacity="0.85" />
                     
                     {/* Wave 2: Cyan */}
-                    <path d={wave2Path} fill="none" stroke="#06b6d4" strokeWidth="2" strokeOpacity="0.85" />
+                    <path d={mounted ? wave2Path : ""} fill="none" stroke="#06b6d4" strokeWidth="2" strokeOpacity="0.85" />
 
                     {/* Combined Superposition Wave: Thick Gradient-like */}
-                    <path d={totalWavePath} fill="none" stroke="#38bdf8" strokeWidth="3.5" filter="drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))" />
+                    <path d={mounted ? totalWavePath : ""} fill="none" stroke="#38bdf8" strokeWidth="3.5" filter="drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))" />
                   </svg>
 
                   <div className="flex justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800">
@@ -485,7 +491,7 @@ export default function InteractivePreviewSandbox() {
 
               {activeSim === "orbit" && (
                 <div className="w-full flex items-center justify-center">
-                  <svg viewBox="0 0 340 240" className="w-full max-w-sm h-auto overflow-visible">
+                  <svg viewBox="0 0 340 240" className="w-full max-w-sm h-auto overflow-visible" suppressHydrationWarning>
                     {/* Orbital Track */}
                     <ellipse 
                       cx="170" 
@@ -510,14 +516,15 @@ export default function InteractivePreviewSandbox() {
 
                     {/* Orbiting Satellite */}
                     {(() => {
-                      const satX = 170 + Math.cos(satAngle) * (orbitRadius * 1.1);
-                      const satY = 120 + Math.sin(satAngle) * (orbitRadius * 0.75);
-                      return (
+                      const angle = mounted ? satAngle : 0;
+                      const satX = (170 + Math.cos(angle) * (orbitRadius * 1.1)).toFixed(2);
+                      const satY = (120 + Math.sin(angle) * (orbitRadius * 0.75)).toFixed(2);
+                      return mounted ? (
                         <g>
                           <circle cx={satX} cy={satY} r="7" fill="#38bdf8" filter="drop-shadow(0 0 6px #38bdf8)" />
                           <circle cx={satX} cy={satY} r="12" fill="none" stroke="#38bdf8" strokeOpacity="0.4" strokeWidth="1" />
                         </g>
-                      );
+                      ) : null;
                     })()}
                   </svg>
                 </div>

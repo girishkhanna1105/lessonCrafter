@@ -3,10 +3,12 @@ import { runInteractiveAgent, InteractiveOutput } from "./interactiveAgent";
 import { runQuizAgent, QuizOutput } from "./quizAgent";
 import { runCompilerAgent } from "./compilerAgent";
 import { runUIPolishAgent } from "./uiPolishAgent";
+import { runPedagogyAgent, PedagogyBrief } from "./pedagogyAgent";
 
 export type AgentStatus = "waiting" | "running" | "done" | "error";
 
 export interface PipelineProgress {
+  pedagogy?: AgentStatus;
   content: AgentStatus;
   interactive: AgentStatus;
   quiz: AgentStatus;
@@ -20,22 +22,28 @@ export interface PipelineResult {
   lessonSubject: string;
   lessonLevel: string;
   objectives: string[];
+  contentData: LessonContent;
+  quizData: QuizOutput;
+  pedagogyBrief?: PedagogyBrief;
 }
 
-/**
- * Runs the optimized 5-agent pipeline with parallelized generation.
- * @param topic The lesson topic
- * @param userProfile The logged-in user's profile from DB
- * @param onProgress Callback for streaming status updates to the UI
- */
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Runs the upgraded multi-agent pipeline with Adaptive Cognitive Profiling and parallelized generation.
+ * @param topic The lesson topic
+ * @param userProfile The logged-in user's profile from DB
+ * @param intakeAnswers Diagnostic context collected from the student/teacher
+ * @param onProgress Callback for streaming status updates to the UI
+ */
 export async function runPipeline(
   topic: string,
   userProfile: any,
-  onProgress: (progress: PipelineProgress) => void
+  intakeAnswers?: Record<string, string>,
+  onProgress?: (progress: PipelineProgress) => void
 ): Promise<PipelineResult> {
   const progress: PipelineProgress = {
+    pedagogy: "waiting",
     content: "waiting",
     interactive: "waiting",
     quiz: "waiting",
@@ -45,14 +53,25 @@ export async function runPipeline(
 
   const emit = (update: Partial<PipelineProgress>) => {
     Object.assign(progress, update);
-    onProgress({ ...progress });
+    onProgress?.({ ...progress });
   };
+
+  // ─── AGENT 0: Cognitive Scaffolding & Misconception Specialist ──────────────
+  emit({ pedagogy: "running" });
+  let pedagogyBrief: PedagogyBrief | undefined;
+  try {
+    pedagogyBrief = await runPedagogyAgent(topic, userProfile, intakeAnswers);
+    emit({ pedagogy: "done" });
+  } catch (err) {
+    console.warn("[Orchestrator] Pedagogy Agent failed, continuing with default heuristics:", err);
+    emit({ pedagogy: "error" });
+  }
 
   // ─── AGENT 1: Content Architect (Gemini) ──────────────────────────────────
   emit({ content: "running" });
   let contentOutput: LessonContent;
   try {
-    contentOutput = await runContentAgent(topic, userProfile);
+    contentOutput = await runContentAgent(topic, userProfile, pedagogyBrief, intakeAnswers);
     emit({ content: "done" });
   } catch (e) {
     emit({ content: "error" });
@@ -60,12 +79,11 @@ export async function runPipeline(
   }
 
   // ─── AGENT 2 & AGENT 3: Concurrent Execution (Promise.all) ───────────────
-  // Agent 2 runs on Gemini, Agent 3 runs on Groq (independent rate limit pools)
   emit({ interactive: "running", quiz: "running" });
 
   const [interactiveResult, quizResult] = await Promise.allSettled([
-    runInteractiveAgent(contentOutput),
-    runQuizAgent(contentOutput),
+    runInteractiveAgent(contentOutput, pedagogyBrief),
+    runQuizAgent(contentOutput, pedagogyBrief),
   ]);
 
   let interactiveOutput: InteractiveOutput;
@@ -88,8 +106,8 @@ export async function runPipeline(
     emit({ quiz: "error" });
   }
 
-  // Micro-buffer for Gemini concurrency safety
-  await sleep(1000);
+  // Micro-buffer for concurrency safety
+  await sleep(600);
 
   // ─── AGENT 4: Compiler (Gemini) ───────────────────────────────────────────
   emit({ compiler: "running" });
@@ -120,5 +138,8 @@ export async function runPipeline(
     lessonSubject: contentOutput.subject,
     lessonLevel: contentOutput.level,
     objectives: contentOutput.learning_objectives,
+    contentData: contentOutput,
+    quizData: quizOutput,
+    pedagogyBrief,
   };
 }

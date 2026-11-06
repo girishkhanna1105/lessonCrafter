@@ -6,10 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import { 
   Clock, Loader2, BookOpen, 
   ChevronRight, Sparkles, Zap, 
-  Sliders, ArrowRight, Lightbulb
+  Sliders, ArrowRight, Lightbulb,
+  CheckCircle2, Target, HelpCircle, Compass, RefreshCw
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import GeneratingTelemetryVisualizer, { PipelineProgress } from "@/components/GeneratingTelemetryVisualizer";
+import { DiagnosticQuestion } from "@/lib/agents/intakeAgent";
 
 const LEARNER_LEVELS = [
   { id: "elementary", label: "Elementary", tag: "Grades 1–5", desc: "Visual, tangible, story-based" },
@@ -25,6 +27,29 @@ const PEDAGOGICAL_TEMPLATES = [
   { title: "Diagnostic Mastery", desc: "Misconception testing with targeted remedy loops", prompt: "Calculus Optimization Problems: Maxima, Minima, and Constraint Derivatives with geometric visualizer" },
 ];
 
+const DEFAULT_STUDIO_INTAKE: DiagnosticQuestion[] = [
+  {
+    id: "baseline",
+    category: "baseline",
+    question: "1. What is your current knowledge baseline on this topic?",
+    options: [
+      { id: "beginner", label: "Complete Beginner", sublabel: "Zero prior exposure, build from first-principles intuition" },
+      { id: "intermediate", label: "Know the Basics", sublabel: "Familiar with terminology, need deep mechanics & intuition" },
+      { id: "advanced", label: "Advanced / Rigorous", sublabel: "Focus on formal math, edge constraints, and deep derivations" },
+    ],
+  },
+  {
+    id: "goal",
+    category: "goal",
+    question: "2. What is your primary learning breakthrough goal?",
+    options: [
+      { id: "intuition", label: "Deep Physical Intuition", sublabel: "Why and how it happens using concrete mental models" },
+      { id: "simulation", label: "Interactive Simulation", sublabel: "Manipulate live simulation sliders and observe behavior" },
+      { id: "problem_solving", label: "Worked Problems & Mastery", sublabel: "Step-by-step problem deconstruction & exam traps" },
+    ],
+  },
+];
+
 export default function StudioPage() {
   const [outline, setOutline] = useState("");
   const [lessons, setLessons] = useState<any[]>([]);
@@ -36,8 +61,58 @@ export default function StudioPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [pipeline, setPipeline] = useState<PipelineProgress | null>(null);
 
+  // Adaptive Diagnostic Intake States (Active by default for immediate context intake)
+  const [intakeQuestions, setIntakeQuestions] = useState<DiagnosticQuestion[]>(DEFAULT_STUDIO_INTAKE);
+  const [intakeLoading, setIntakeLoading] = useState(false);
+  const [intakeAnswers, setIntakeAnswers] = useState<Record<string, string>>({
+    baseline: "intermediate",
+    goal: "intuition",
+  });
+  const [customStickingPoint, setCustomStickingPoint] = useState("");
+  const [showIntake, setShowIntake] = useState(true);
+
   const supabase = createClient();
   const router = useRouter();
+
+  const triggerIntakeDiagnosis = async (topicToUse?: string) => {
+    const t = topicToUse || outline;
+    if (!t || t.trim().length < 4) return;
+    setIntakeLoading(true);
+    setShowIntake(true);
+    try {
+      const res = await fetch("/api/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: t.trim(), level: selectedLevel }),
+      });
+      const data = await res.json();
+      if (data.success && data.questions && data.questions.length > 0) {
+        setIntakeQuestions(data.questions);
+      }
+    } catch (err) {
+      console.warn("Intake failed:", err);
+    } finally {
+      setIntakeLoading(false);
+    }
+  };
+
+  // Automatically refresh tailored diagnostic questions when topic is entered (750ms debounce)
+  useEffect(() => {
+    if (outline.trim().length >= 5) {
+      const timer = setTimeout(() => {
+        triggerIntakeDiagnosis(outline);
+      }, 750);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [outline, selectedLevel]);
+
+  const handleSelectOption = (questionId: string, optionId: string) => {
+    setIntakeAnswers((prev) => ({
+      ...prev,
+      [questionId]: optionId,
+    }));
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -103,6 +178,10 @@ export default function StudioPage() {
             role: deliveryMode,
           },
           isPublic,
+          intakeAnswers: {
+            ...intakeAnswers,
+            stickingPoint: customStickingPoint.trim(),
+          },
         }),
       });
 
@@ -125,6 +204,16 @@ export default function StudioPage() {
             if (json.type === "progress") {
               setPipeline({ ...json.progress });
             } else if (json.type === "done") {
+              if (typeof window !== "undefined") {
+                localStorage.setItem(`lesson_${json.lessonId}`, JSON.stringify({
+                  id: json.lessonId,
+                  title: json.title,
+                  outline: json.outline,
+                  ts_code: json.ts_code,
+                  status: "generated",
+                  compile_error: null,
+                }));
+              }
               setLoading(false);
               setPipeline(null);
               router.push(`/lessons/${json.lessonId}`);
@@ -201,6 +290,83 @@ export default function StudioPage() {
                   rows={4}
                   className="w-full bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cobalt-500/40 focus:border-cobalt-500 font-sans text-sm sm:text-base resize-none transition-all"
                 />
+              </div>
+
+              {/* Step 2: Adaptive Context Intake (Prominent & Always Visible) */}
+              <div className="mt-5 p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-cobalt-500/30 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-cobalt-500" />
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                      Step 2: Pedagogical Context Intake (Follow-Up Profiler)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {intakeLoading ? (
+                      <span className="text-[11px] font-mono text-cobalt-500 flex items-center gap-1.5 font-bold">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Tailoring questions...</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-mono text-emerald-500 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>{Object.keys(intakeAnswers).length} preferences calibrated</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {intakeQuestions.map((q) => (
+                    <div key={q.id} className="space-y-2">
+                      <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                        {q.question}
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        {q.options.map((opt) => {
+                          const isSelected = intakeAnswers[q.id] === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => handleSelectOption(q.id, opt.id)}
+                              className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-cobalt-600 text-white border-cobalt-600 shadow-md ring-2 ring-cobalt-400/30"
+                                  : "bg-white dark:bg-slate-950/70 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-cobalt-500/40"
+                              }`}
+                            >
+                              <div className="font-bold flex items-center justify-between">
+                                <span>{opt.label}</span>
+                                {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                              </div>
+                              {opt.sublabel && (
+                                <div className={`text-[10px] mt-0.5 leading-snug ${isSelected ? "text-cobalt-100" : "text-slate-400"}`}>
+                                  {opt.sublabel}
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Specific Sticking Point */}
+                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800">
+                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1">
+                      <HelpCircle className="w-3.5 h-3.5 text-solar-500" />
+                      <span>Specific sticking point or question you want deeply deconstructed? (Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={customStickingPoint}
+                      onChange={(e) => setCustomStickingPoint(e.target.value)}
+                      placeholder="e.g., Why doesn't measuring Qubit A violate relativistic causality? Or: Show first-principles derivation"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-cobalt-500"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Target Learner Level Selector */}
@@ -315,7 +481,10 @@ export default function StudioPage() {
                 {PEDAGOGICAL_TEMPLATES.map((tpl, i) => (
                   <div
                     key={i}
-                    onClick={() => setOutline(tpl.prompt)}
+                    onClick={() => {
+                      setOutline(tpl.prompt);
+                      triggerIntakeDiagnosis(tpl.prompt);
+                    }}
                     className="p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/40 hover:border-cobalt-500/40 hover:bg-slate-50 dark:hover:bg-slate-900/80 transition-all cursor-pointer group"
                   >
                     <div className="font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:text-cobalt-600 dark:group-hover:text-cobalt-400 transition-colors flex items-center justify-between">

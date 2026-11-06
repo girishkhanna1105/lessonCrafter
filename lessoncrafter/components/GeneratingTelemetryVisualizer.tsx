@@ -17,6 +17,7 @@ import {
 export type AgentStatus = "waiting" | "running" | "done" | "error";
 
 export interface PipelineProgress {
+  pedagogy?: AgentStatus;
   content: AgentStatus;
   interactive: AgentStatus;
   quiz: AgentStatus;
@@ -30,6 +31,13 @@ interface GeneratingTelemetryVisualizerProps {
 }
 
 const AGENTS = [
+  {
+    key: "pedagogy",
+    name: "Cognitive Profiler",
+    model: "Groq 70B",
+    role: "Misconception & Anchor",
+    icon: Lightbulb,
+  },
   {
     key: "content",
     name: "Content Architect",
@@ -47,8 +55,8 @@ const AGENTS = [
   {
     key: "quiz",
     name: "Formative Evaluator",
-    model: "Groq OSS-120B",
-    role: "Misconception Calibration",
+    model: "Groq 70B",
+    role: "Diagnostic Assessment",
     icon: Zap,
   },
   {
@@ -111,6 +119,12 @@ export default function GeneratingTelemetryVisualizer({
       "INITIALIZING: Neural multi-agent cluster online.",
     ];
 
+    if (pipeline.pedagogy === "running") {
+      newLogs.push("AGENT 0 [Cognitive Profiler]: Diagnosing user baseline, intuitive anchor & misconceptions...");
+    } else if (pipeline.pedagogy === "done") {
+      newLogs.push("AGENT 0 [Cognitive Profiler]: Cognitive scaffolding & distractor strategy calibrated.");
+    }
+
     if (pipeline.content === "running") {
       newLogs.push("AGENT 1 [Content Architect]: Formulating conceptual breakdown and objectives...");
     } else if (pipeline.content === "done") {
@@ -152,19 +166,22 @@ export default function GeneratingTelemetryVisualizer({
   const calculateProgressPercent = () => {
     if (!pipeline) return 10;
     let score = 0;
-    if (pipeline.content === "done") score += 25;
-    else if (pipeline.content === "running") score += 12;
+    if (pipeline.pedagogy === "done") score += 15;
+    else if (pipeline.pedagogy === "running") score += 8;
 
-    if (pipeline.interactive === "done") score += 20;
-    else if (pipeline.interactive === "running") score += 10;
+    if (pipeline.content === "done") score += 20;
+    else if (pipeline.content === "running") score += 10;
 
-    if (pipeline.quiz === "done") score += 20;
-    else if (pipeline.quiz === "running") score += 10;
+    if (pipeline.interactive === "done") score += 18;
+    else if (pipeline.interactive === "running") score += 9;
 
-    if (pipeline.compiler === "done") score += 20;
-    else if (pipeline.compiler === "running") score += 10;
+    if (pipeline.quiz === "done") score += 18;
+    else if (pipeline.quiz === "running") score += 9;
 
-    if (pipeline.polish === "done") score += 15;
+    if (pipeline.compiler === "done") score += 15;
+    else if (pipeline.compiler === "running") score += 8;
+
+    if (pipeline.polish === "done") score += 14;
     else if (pipeline.polish === "running") score += 7;
 
     return Math.min(Math.max(score, 12), 98);
@@ -215,7 +232,7 @@ export default function GeneratingTelemetryVisualizer({
               {progressPercent}% Complete
             </div>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              5 Neural Agents
+              6 Neural Agents
             </div>
           </div>
         </div>
@@ -232,7 +249,7 @@ export default function GeneratingTelemetryVisualizer({
       </div>
 
       {/* Multi-Agent Node Visualizer Rail */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-3.5 mb-8 relative z-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 mb-8 relative z-10">
         {AGENTS.map((agent, i) => {
           const status = pipeline ? (pipeline[agent.key as keyof PipelineProgress] || "waiting") : "waiting";
           const Icon = agent.icon;
