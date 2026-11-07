@@ -84,8 +84,8 @@ export default function AuthPage() {
             </CardTitle>
             <CardDescription className="text-slate-500 dark:text-slate-400">
               {isLogin 
-                ? "Sign in to access your creation studio and lessons." 
-                : "Create an account to start synthesizing interactive lessons."}
+                ? "Sign in to access your saved lessons and builder." 
+                : "Create an account to explore and build interactive lessons."}
             </CardDescription>
           </CardHeader>
           
@@ -191,7 +191,7 @@ export default function AuthPage() {
       </main>
       
       <footer className="py-8 px-6 text-center text-xs text-slate-400 font-mono font-bold uppercase tracking-widest relative z-10">
-        Authenticated securely via Supabase & JWT
+        LessonCrafter · Secure Account Access
       </footer>
     </div>
   );

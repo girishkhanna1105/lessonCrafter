@@ -105,7 +105,7 @@ export default function OnboardingPage() {
                 {step === 1 ? "Choose Your Path" : "Personalize Your Experience"}
               </CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-                {step === 1 ? "Tell us how you intend to use LessonCrafter to tailor our AI engines for you." : "Help us understand your background to generate perfectly tailored lessons."}
+                {step === 1 ? "Tell us how you plan to use LessonCrafter so we can tailor lessons to your goals." : "Help us understand your background to generate tailored lessons."}
               </CardDescription>
             </CardHeader>
 

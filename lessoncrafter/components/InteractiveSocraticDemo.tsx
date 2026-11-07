@@ -3,12 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
-  Bot, 
   ArrowRight, 
   CheckCircle2, 
-  Lightbulb, 
-  BrainCircuit, 
-  HelpCircle 
+  HelpCircle,
+  MessageSquare
 } from "lucide-react";
 
 interface QAPair {
@@ -20,22 +18,22 @@ interface QAPair {
 
 const DEMO_QUESTIONS: QAPair[] = [
   {
-    q: "Why doesn't the moon crash into Earth if gravity is always pulling it inward?",
+    q: "Why doesn't the moon fall into the Earth if gravity is always pulling it inward?",
     topic: "Orbital Mechanics",
-    tutorReply: "Imagine firing a cannon horizontally from a high mountaintop. If you fire with low velocity, it arcs and hits the ground. What happens as you increase the muzzle velocity higher and higher?",
-    guidingQuestion: "At what point does the curvature of the projectile's trajectory match the curvature of the Earth's surface falling away beneath it?",
+    tutorReply: "Imagine firing a cannon horizontally from a high mountain. With low velocity, it falls to the ground. What happens as you fire it faster and faster?",
+    guidingQuestion: "At what speed does the curve of the cannonball's fall match the curvature of the Earth dropping away beneath it?",
   },
   {
     q: "In wave interference, where does the energy go during destructive interference?",
     topic: "Wave Physics",
-    tutorReply: "Energy cannot be destroyed by the law of conservation. When two opposite wave crests meet and momentarily cancel out to zero displacement, notice where the neighboring constructive crests have doubled.",
-    guidingQuestion: "Is the energy destroyed, or is it redistributed elsewhere in the interference spatial pattern?",
+    tutorReply: "Energy can never be destroyed. When two opposite wave crests meet and cancel out to zero in one spot, look at the neighboring areas where crests double.",
+    guidingQuestion: "Is the energy gone, or has it moved to the brighter constructive regions?",
   },
   {
-    q: "Why do neural networks need non-linear activations like ReLU or Sigmoid?",
-    topic: "Deep Learning",
-    tutorReply: "Consider multiplying two linear equations: y = W₁(W₂x). Notice that W₁ × W₂ simply collapses into a single matrix W₃. If every layer in a 100-layer network is purely linear, what is the effective depth of the model?",
-    guidingQuestion: "Can a purely linear system learn to draw a curved decision boundary around data?",
+    q: "Why do neural networks need non-linear functions like ReLU?",
+    topic: "Machine Learning",
+    tutorReply: "Consider multiplying two linear equations: y = W₁(W₂x). Notice that W₁ × W₂ is still just one single linear matrix. If you stack 100 linear layers, what can the model actually learn?",
+    guidingQuestion: "Can a purely linear line ever separate data that forms a circle or curve?",
   },
 ];
 
@@ -45,117 +43,96 @@ export default function InteractiveSocraticDemo() {
   const activeQA = DEMO_QUESTIONS[selectedIdx];
 
   return (
-    <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
+    <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto">
       
-      {/* Container */}
-      <div className="glass-card rounded-3xl p-6 sm:p-12 border-slate-200 dark:border-white/10 shadow-2xl bg-gradient-to-br from-card via-card to-cobalt-500/5 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div className="bg-white dark:bg-slate-900/70 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
-        {/* Left Column: Pedagogical Value Prop (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass">
-            <BrainCircuit className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400 animate-pulse" />
-            <span className="text-xs font-mono font-bold text-cobalt-700 dark:text-cobalt-300 uppercase tracking-widest">
-              Socratic Pedagogical Sidecar
-            </span>
+        {/* Left Column: Clear Value Prop (5 cols) */}
+        <div className="lg:col-span-5 space-y-5">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <MessageSquare className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400" />
+            <span>Interactive Study Assistant</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-            An AI Mentor That Teaches You <span className="text-gradient">How to Think</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+            An assistant that helps you <span className="text-gradient">actually understand</span>
           </h2>
 
-          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-            Unlike generic chatbots that leak immediate answers and short-circuit the learning process, LessonCrafter&apos;s embedded Socratic Tutor guides students through cognitive scaffolding, intuitive physical analogies, and targeted counter-questions.
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+            Instead of simply giving away final answers, the built-in assistant guides your thinking with helpful hints, physical analogies, and step-by-step logic.
           </p>
 
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300 font-medium">
-              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </span>
-              <span>Identifies and corrects underlying mental misconceptions</span>
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Explains concepts from first principles</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300 font-medium">
-              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </span>
-              <span>Context-aware of the active lesson simulation and quiz state</span>
+            <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Gives hints without spoiling test questions</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-300 font-medium">
-              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </span>
-              <span>Powered by Groq OSS-120B reasoning engine</span>
+            <div className="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Helps you explore and test hypotheses</span>
             </div>
           </div>
 
-          <div className="pt-4">
+          <div className="pt-2">
             <button
               onClick={() => router.push("/studio")}
-              className="px-6 py-3.5 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cobalt-600/25 flex items-center gap-2 transition-all active:scale-95 group cursor-pointer"
+              className="px-5 py-3 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-cobalt-600/20 flex items-center gap-2 transition-all cursor-pointer"
             >
-              <span>Try Socratic Tutor in Creation Studio</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>Build a Custom Lesson</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Right Column: Live Interactive Chat Simulator (7 cols) */}
-        <div className="lg:col-span-7 bg-slate-950 rounded-2xl p-6 sm:p-7 border border-slate-800 shadow-2xl space-y-6">
+        {/* Right Column: Interactive Chat Preview (7 cols) */}
+        <div className="lg:col-span-7 space-y-4">
           
-          {/* Top Question Chips */}
-          <div>
-            <div className="flex justify-between items-center text-xs font-mono text-slate-400 mb-3">
-              <span className="flex items-center gap-1.5">
-                <HelpCircle className="w-3.5 h-3.5 text-cobalt-400" />
-                <span>SELECT A SAMPLE LEARNER INQUIRY:</span>
-              </span>
-              <span className="text-[10px] text-emerald-400 font-bold">● Active Sandbox</span>
-            </div>
-
-            <div className="space-y-2">
-              {DEMO_QUESTIONS.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedIdx(idx)}
-                  className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${
-                    selectedIdx === idx
-                      ? "bg-cobalt-950/80 border-cobalt-500 text-white shadow-md ring-1 ring-cobalt-400/30"
-                      : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                  }`}
-                >
-                  <span className="font-semibold truncate pr-2">&ldquo;{item.q}&rdquo;</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cobalt-300 flex-shrink-0">
-                    {item.topic}
-                  </span>
-                </button>
-              ))}
-            </div>
+          {/* Question Switcher Tabs */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs overflow-x-auto">
+            {DEMO_QUESTIONS.map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSelectedIdx(idx)}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  selectedIdx === idx
+                    ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
+                }`}
+              >
+                {item.topic}
+              </button>
+            ))}
           </div>
 
-          {/* Interactive Chat Dialogue Thread */}
-          <div className="space-y-4 pt-4 border-t border-slate-800/80">
+          {/* Chat Window Frame */}
+          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-4">
             
-            {/* Student Message */}
-            <div className="flex gap-3 justify-end items-start text-xs">
-              <div className="bg-cobalt-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-[85%] shadow-md leading-relaxed">
+            {/* User Question Bubble */}
+            <div className="flex items-start gap-3 justify-end">
+              <div className="max-w-[85%] p-3.5 rounded-2xl rounded-tr-sm bg-cobalt-600 text-white text-xs leading-relaxed font-medium shadow-sm">
                 {activeQA.q}
               </div>
             </div>
 
-            {/* Socratic Tutor Response */}
-            <div className="flex gap-3 justify-start items-start text-xs animate-in fade-in duration-300">
-              <div className="w-8 h-8 rounded-xl bg-cobalt-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-cobalt-600/30">
-                <Bot className="w-4 h-4" />
+            {/* Assistant Guiding Response */}
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-cobalt-500/10 text-cobalt-600 dark:text-cobalt-400 flex items-center justify-center shrink-0 border border-cobalt-500/20">
+                <HelpCircle className="w-4 h-4" />
               </div>
-              <div className="bg-slate-900 border border-slate-800 text-slate-200 p-4 rounded-2xl rounded-tl-none max-w-[90%] space-y-3 leading-relaxed shadow-sm">
-                <p>{activeQA.tutorReply}</p>
-                <div className="p-3 rounded-xl bg-cobalt-950/70 border border-cobalt-500/30 text-cobalt-200 flex items-start gap-2">
-                  <Lightbulb className="w-4 h-4 text-solar-400 flex-shrink-0 mt-0.5" />
-                  <span className="font-semibold text-[11px]">{activeQA.guidingQuestion}</span>
+              <div className="space-y-2.5 max-w-[90%]">
+                <div className="p-3.5 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-normal shadow-sm">
+                  {activeQA.tutorReply}
                 </div>
-                <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 pt-1">
-                  <span>Socratic Scaffolding Mode</span>
-                  <span className="text-emerald-400">Response generated in 180ms</span>
+                
+                {/* Guiding Question Prompt */}
+                <div className="p-3 rounded-xl bg-cobalt-500/5 dark:bg-cobalt-500/10 border-l-3 border-cobalt-500 text-[11px] text-cobalt-800 dark:text-cobalt-300 font-medium">
+                  <span className="font-bold">Next thought: </span>
+                  {activeQA.guidingQuestion}
                 </div>
               </div>
             </div>
@@ -165,7 +142,6 @@ export default function InteractiveSocraticDemo() {
         </div>
 
       </div>
-
     </section>
   );
 }

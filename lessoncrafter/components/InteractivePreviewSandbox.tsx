@@ -40,26 +40,32 @@ export default function InteractivePreviewSandbox() {
   const [w2, setW2] = useState(0.9);
   const [bias, setBias] = useState(0.2);
   const [actFunc, setActFunc] = useState<"relu" | "sigmoid" | "tanh">("sigmoid");
+  const [mounted, setMounted] = useState(false);
 
-  // Animation clock
   useEffect(() => {
-    if (!isPlaying) return;
+    setMounted(true);
+  }, []);
+
+  // Animation clock (starts only after hydration to eliminate SSR mismatches)
+  useEffect(() => {
+    if (!isPlaying || !mounted) return;
     const interval = setInterval(() => {
       setTick((prev) => (prev + 1) % 3600);
       setSatAngle((prev) => (prev + 0.04 * (centralMass / 100)) % (Math.PI * 2));
     }, 30);
     return () => clearInterval(interval);
-  }, [isPlaying, centralMass]);
+  }, [isPlaying, mounted, centralMass]);
 
-  // Compute wave points
+  // Compute wave points with deterministic precision
   const pointsCount = 60;
+  const currentTick = mounted ? tick : 0;
   const wavePoints = Array.from({ length: pointsCount }).map((_, i) => {
-    const x = (i / (pointsCount - 1)) * 320;
-    const t = (tick * 0.05);
-    const y1 = Math.sin((i * 0.15 * freq1) + t) * (amplitude * 0.5);
-    const y2 = Math.sin((i * 0.15 * freq2) + t + (phase * Math.PI / 180)) * (amplitude * 0.5);
-    const yTotal = y1 + y2;
-    return { x, y1: 45 + y1, y2: 45 + y2, yTotal: 105 + yTotal };
+    const x = Number(((i / (pointsCount - 1)) * 320).toFixed(2));
+    const t = (currentTick * 0.05);
+    const y1 = Number((45 + Math.sin((i * 0.15 * freq1) + t) * (amplitude * 0.5)).toFixed(2));
+    const y2 = Number((45 + Math.sin((i * 0.15 * freq2) + t + (phase * Math.PI / 180)) * (amplitude * 0.5)).toFixed(2));
+    const yTotal = Number((105 + (y1 - 45) + (y2 - 45)).toFixed(2));
+    return { x, y1, y2, yTotal };
   });
 
   const wave1Path = `M ${wavePoints.map(p => `${p.x},${p.y1}`).join(" L ")}`;
@@ -86,26 +92,28 @@ export default function InteractivePreviewSandbox() {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto relative">
+    <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto relative">
       
       {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-4">
-          <Activity className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400 animate-pulse" />
-          <span className="text-xs font-mono font-bold text-cobalt-700 dark:text-cobalt-300 uppercase tracking-widest">
-            Zero-Latency Interactive Sandboxes
-          </span>
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
+          <Activity className="w-3.5 h-3.5 text-cobalt-500" />
+          <span>Interactive Simulators</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
-          Experience Live Synthesized Simulations
+        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+          Learn by{" "}
+          <span className="text-gradient">manipulating the variables</span>
         </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-          LessonCrafter doesn&apos;t just generate text. Every lesson compiles a live stateful visualizer that learners can manipulate in real-time. Test drive three sample modules below:
+        <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+          Every lesson comes with a live parameter simulator. Try adjusting the sliders below to see wave interference, orbital mechanics, and neural activations respond in real time.
         </p>
       </div>
 
       {/* Simulator Card Container */}
-      <div className="glass-card rounded-3xl border-slate-200 dark:border-white/10 p-5 sm:p-8 shadow-2xl bg-card text-card-foreground relative overflow-hidden">
+      <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-5 sm:p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white relative overflow-hidden">
+        {/* Top accent stripe */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/50 to-transparent" />
         
         {/* Module Switcher Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-white/10">
@@ -436,7 +444,7 @@ export default function InteractivePreviewSandbox() {
                 }}
                 className="w-full py-3.5 px-4 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cobalt-600/25 flex items-center justify-center gap-2 transition-all active:scale-95 group cursor-pointer"
               >
-                <span>Synthesize Full Lesson with this Module</span>
+                <span>Build a Full Lesson on This Topic</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -460,19 +468,19 @@ export default function InteractivePreviewSandbox() {
               
               {activeSim === "waves" && (
                 <div className="w-full space-y-4">
-                  <svg viewBox="0 0 320 180" className="w-full h-auto overflow-visible">
+                  <svg viewBox="0 0 320 180" className="w-full h-auto overflow-visible" suppressHydrationWarning>
                     {/* Gridlines */}
                     <line x1="0" y1="45" x2="320" y2="45" stroke="#334155" strokeDasharray="3 3" strokeWidth="0.8" />
                     <line x1="0" y1="105" x2="320" y2="105" stroke="#334155" strokeDasharray="3 3" strokeWidth="0.8" />
 
                     {/* Wave 1: Cobalt */}
-                    <path d={wave1Path} fill="none" stroke="#2563eb" strokeWidth="2" strokeOpacity="0.85" />
+                    <path d={mounted ? wave1Path : ""} fill="none" stroke="#2563eb" strokeWidth="2" strokeOpacity="0.85" />
                     
                     {/* Wave 2: Cyan */}
-                    <path d={wave2Path} fill="none" stroke="#06b6d4" strokeWidth="2" strokeOpacity="0.85" />
+                    <path d={mounted ? wave2Path : ""} fill="none" stroke="#06b6d4" strokeWidth="2" strokeOpacity="0.85" />
 
                     {/* Combined Superposition Wave: Thick Gradient-like */}
-                    <path d={totalWavePath} fill="none" stroke="#38bdf8" strokeWidth="3.5" filter="drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))" />
+                    <path d={mounted ? totalWavePath : ""} fill="none" stroke="#38bdf8" strokeWidth="3.5" filter="drop-shadow(0 0 8px rgba(56, 189, 248, 0.4))" />
                   </svg>
 
                   <div className="flex justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-slate-800">
@@ -485,7 +493,7 @@ export default function InteractivePreviewSandbox() {
 
               {activeSim === "orbit" && (
                 <div className="w-full flex items-center justify-center">
-                  <svg viewBox="0 0 340 240" className="w-full max-w-sm h-auto overflow-visible">
+                  <svg viewBox="0 0 340 240" className="w-full max-w-sm h-auto overflow-visible" suppressHydrationWarning>
                     {/* Orbital Track */}
                     <ellipse 
                       cx="170" 
@@ -510,14 +518,15 @@ export default function InteractivePreviewSandbox() {
 
                     {/* Orbiting Satellite */}
                     {(() => {
-                      const satX = 170 + Math.cos(satAngle) * (orbitRadius * 1.1);
-                      const satY = 120 + Math.sin(satAngle) * (orbitRadius * 0.75);
-                      return (
+                      const angle = mounted ? satAngle : 0;
+                      const satX = (170 + Math.cos(angle) * (orbitRadius * 1.1)).toFixed(2);
+                      const satY = (120 + Math.sin(angle) * (orbitRadius * 0.75)).toFixed(2);
+                      return mounted ? (
                         <g>
                           <circle cx={satX} cy={satY} r="7" fill="#38bdf8" filter="drop-shadow(0 0 6px #38bdf8)" />
                           <circle cx={satX} cy={satY} r="12" fill="none" stroke="#38bdf8" strokeOpacity="0.4" strokeWidth="1" />
                         </g>
-                      );
+                      ) : null;
                     })()}
                   </svg>
                 </div>
@@ -573,9 +582,9 @@ export default function InteractivePreviewSandbox() {
             <div className="pt-3 border-t border-slate-800/80 flex justify-between items-center text-[11px] font-mono text-slate-400">
               <span className="flex items-center gap-1.5 text-cobalt-400">
                 <Zap className="w-3.5 h-3.5" />
-                <span>100% Client-Side React Runtime</span>
+                <span>Live React Simulation</span>
               </span>
-              <span className="text-slate-500">React Hooks + SVG</span>
+              <span className="text-slate-500">React + SVG</span>
             </div>
 
           </div>
