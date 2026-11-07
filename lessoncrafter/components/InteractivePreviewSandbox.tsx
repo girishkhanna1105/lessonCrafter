@@ -92,26 +92,24 @@ export default function InteractivePreviewSandbox() {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 max-w-7xl mx-auto relative">
+    <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto relative">
       
       {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-4">
-          <Activity className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400 animate-pulse" />
-          <span className="text-xs font-mono font-bold text-cobalt-700 dark:text-cobalt-300 uppercase tracking-widest">
-            Zero-Latency Interactive Sandboxes
-          </span>
+      <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          <Activity className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400" />
+          <span>Interactive Simulators</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
-          Experience Live Synthesized Simulations
+        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+          Learn by manipulating the variables
         </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-          LessonCrafter doesn&apos;t just generate text. Every lesson compiles a live stateful visualizer that learners can manipulate in real-time. Test drive three sample modules below:
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal leading-relaxed">
+          Every lesson comes with a live parameter simulator. Try adjusting the sliders below to see wave interference, orbital mechanics, and neural activations respond in real time.
         </p>
       </div>
 
       {/* Simulator Card Container */}
-      <div className="glass-card rounded-3xl border-slate-200 dark:border-white/10 p-5 sm:p-8 shadow-2xl bg-card text-card-foreground relative overflow-hidden">
+      <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-8 shadow-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white relative overflow-hidden">
         
         {/* Module Switcher Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-white/10">

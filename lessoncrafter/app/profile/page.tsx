@@ -280,7 +280,7 @@ export default function ProfilePage() {
               className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 transition-all group">
               <div className="flex items-center gap-3">
                 <Sparkles className="w-4 h-4 text-cobalt-600 dark:text-cobalt-400" />
-                <span className="text-sm font-bold text-slate-800 dark:text-gray-300 group-hover:text-slate-950 dark:group-hover:text-white">Open Creation Studio</span>
+                <span className="text-sm font-bold text-slate-800 dark:text-gray-300 group-hover:text-slate-950 dark:group-hover:text-white">Create a Lesson</span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 dark:text-gray-600 group-hover:text-slate-600 dark:group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
             </button>
@@ -288,7 +288,7 @@ export default function ProfilePage() {
               className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 transition-all group">
               <div className="flex items-center gap-3">
                 <BookOpen className="w-4 h-4 text-cobalt-600 dark:text-cobalt-400" />
-                <span className="text-sm font-bold text-slate-800 dark:text-gray-300 group-hover:text-slate-950 dark:group-hover:text-white">View Lesson Archive</span>
+                <span className="text-sm font-bold text-slate-800 dark:text-gray-300 group-hover:text-slate-950 dark:group-hover:text-white">Explore Lessons</span>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400 dark:text-gray-600 group-hover:text-slate-600 dark:group-hover:text-gray-400 group-hover:translate-x-0.5 transition-all" />
             </button>

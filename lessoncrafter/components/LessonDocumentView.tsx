@@ -77,7 +77,7 @@ SUMMARY
 ${document.summary}
 
 ================================================================================
-Generated with LessonCrafter Precision Educational Studio
+Generated with LessonCrafter
 ================================================================================
 `.trim();
 
@@ -91,15 +91,15 @@ Generated with LessonCrafter Precision Educational Studio
   };
 
   return (
-    <article className="max-w-4xl mx-auto px-4 sm:px-8 py-10 space-y-10 font-sans print:p-0 print:m-0 print:max-w-full">
+    <article className="max-w-[940px] mx-auto px-4 sm:px-6 py-10 space-y-10 font-sans print:p-0 print:m-0 print:max-w-full">
       
       {/* Top Utility Bar (Hidden in Print) */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800 print:hidden">
         <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
           <FileText className="w-4 h-4 text-cobalt-500" />
-          <span>EXECUTIVE DOCUMENT FORMAT</span>
+          <span>READING VIEW</span>
           <span className="text-slate-300 dark:text-slate-700">|</span>
-          <span className="text-emerald-500 font-semibold">Publication Ready</span>
+          <span className="text-emerald-500 font-semibold">Ready to Study</span>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -202,6 +202,25 @@ Generated with LessonCrafter Precision Educational Studio
               {section.explanation}
             </p>
 
+            {/* Hierarchical Subsections */}
+            {section.subsections && section.subsections.length > 0 && (
+              <div className="space-y-4 pt-2">
+                {section.subsections.map((sub, sIdx) => (
+                  <div 
+                    key={sIdx} 
+                    className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 space-y-2 shadow-sm print:border-black print:bg-none"
+                  >
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white print:text-black">
+                      {sub.title}
+                    </h4>
+                    <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line print:text-black font-normal">
+                      {sub.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Key Takeaways */}
             {section.keyPoints && section.keyPoints.length > 0 && (
               <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 print:border-black print:bg-none space-y-2">
@@ -264,7 +283,7 @@ Generated with LessonCrafter Precision Educational Studio
         <section className="p-6 sm:p-8 rounded-3xl bg-slate-100/90 dark:bg-slate-900/60 border border-cobalt-500/30 print:border-black print:bg-none print:p-0 space-y-6 print:break-inside-avoid">
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cobalt-600 text-white print:border-black print:text-black">
-              Step-by-Step Mastery Case Study
+              Worked Example
             </span>
           </div>
 
@@ -295,7 +314,7 @@ Generated with LessonCrafter Precision Educational Studio
           </div>
 
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-slate-800 dark:text-slate-200 leading-relaxed print:border-black print:text-black">
-            <strong className="text-emerald-600 dark:text-emerald-400 mr-1.5">CORE INSIGHT:</strong>
+            <strong className="text-emerald-600 dark:text-emerald-400 mr-1.5">KEY TAKEAWAY:</strong>
             {document.workedExample.insight}
           </div>
         </section>
@@ -307,11 +326,11 @@ Generated with LessonCrafter Precision Educational Studio
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-solar-500 print:hidden" />
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white print:text-black">
-              Diagnostic Assessment & Mastery Review
+              Practice Questions & Solutions
             </h2>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 print:text-black">
-            Test and reinforce your conceptual understanding with targeted reasoning.
+            Test and reinforce your conceptual understanding with targeted questions.
           </p>
 
           <div className="space-y-6">
@@ -329,7 +348,7 @@ Generated with LessonCrafter Precision Educational Studio
                     onClick={() => toggleReveal(qIdx)}
                     className="text-[11px] font-mono text-slate-500 hover:text-cobalt-500 transition-colors print:hidden cursor-pointer"
                   >
-                    {revealedAnswers[qIdx] ? "Hide Solution" : "Show Solution & Rationale"}
+                    {revealedAnswers[qIdx] ? "Hide Solution" : "Show Solution & Explanation"}
                   </button>
                 </div>
 
@@ -359,7 +378,7 @@ Generated with LessonCrafter Precision Educational Studio
 
                 {(revealedAnswers[qIdx] || false) && (
                   <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-medium print:block">
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 mr-1">RATIONALE:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 mr-1">EXPLANATION:</span>
                     {q.explanation}
                   </div>
                 )}
@@ -372,13 +391,13 @@ Generated with LessonCrafter Precision Educational Studio
       {/* Summary Footer */}
       <footer className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 print:border-black print:bg-none space-y-2">
         <div className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 print:text-black">
-          Synthesis & Follow-Up
+          Summary & Key Insights
         </div>
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed print:text-black">
           {document.summary}
         </p>
         <div className="pt-2 text-[10px] font-mono text-slate-400 print:text-black">
-          Published with LessonCrafter Studio • Multi-Agent Cognitive Scaffolding Engine
+          Published with LessonCrafter · Interactive Learning Platform
         </div>
       </footer>
 

@@ -46,7 +46,8 @@ ${content.intuitive_anchor ? `Intuitive Anchor: "${content.intuitive_anchor}"` :
 SECTIONS:
 ${content.sections.map((s, i) => `
 [Section ${i + 1}]: "${s.title}"
-Explanation: ${s.explanation}
+Overview: ${s.explanation}
+${s.subsections && s.subsections.length > 0 ? s.subsections.map((sub, subIdx) => `  [Subsection ${i + 1}.${subIdx + 1}]: "${sub.title}"\n  ${sub.content}`).join("\n\n") : ""}
 Key Points: ${s.key_points.join(" | ")}
 ${s.misconception_callout ? `Misconception Alert: "${s.misconception_callout}"` : ""}
 Real-World Example: ${s.real_world_example}
@@ -89,40 +90,66 @@ DESIGN & ARCHITECTURE DIRECTIVES:
      danger: '#ef4444'
    };
 
-2. UNIFIED WORKSTATION LAYOUT (STRICTLY NO TABS!):
-   Split-screen workstation with gap 28px:
+2. STRICT UNIFIED WIDTH & CARD ARCHITECTURE:
+   CRITICAL CONSISTENT WIDTH RULE:
+   - The master outer container and EVERY SINGLE card in the lesson MUST share the EXACT SAME WIDTH: maxWidth 920px!
+   - NO card is allowed to be wider or narrower than any other card. Every card (Hero Banner, Interactive Lab, Section Cards 1..6, Worked Example, Quiz) must align perfectly to the exact same left and right edges.
+   
+   Define a unified card style at the top of LessonComponent:
+   const cardStyle = {
+     width: '100%',
+     maxWidth: '920px',
+     margin: '0 auto',
+     background: C.card,
+     border: '1px solid ' + C.border,
+     borderRadius: '20px',
+     padding: '28px 24px',
+     boxSizing: 'border-box',
+     boxShadow: '0 4px 20px -2px rgba(0,0,0,0.1)'
+   };
 
-   A. TOP HEADER HERO BANNER:
-      - Subject badge ("${content.subject}") & Level pill ("${content.level}").
-      - Full-width lesson title with generous font size (1.8rem-2.2rem), font-weight 800, line-height 1.3, color C.text.
-      - Collapsible Learning Objectives drawer card.
+   Master Container:
+   style={{ width: '100%', maxWidth: '920px', margin: '0 auto', padding: '16px 0', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '28px' }}
 
-   B. LEFT COLUMN (Theory & Curriculum, ~58% width, minWidth: '340px'):
-      - Introduction card: 2-3 deep paragraphs with comfortable line-height (1.7) and high-contrast text.
-      - Section Cards:
-        - DO NOT abbreviate! Render the comprehensive explanation paragraphs in full.
-        - Numbered badge ("01", "02", "03").
-        - Key Takeaways bulleted list with CheckCircle2 icons.
-        - Misconception Alert card with 1px amber border, light amber background, and AlertTriangle icon.
-        - Real-World Analogy card with 4px cobalt left-border and Lightbulb icon.
-        - Monospace code/formula blocks if provided (#080c14 background).
-      ${content.worked_example ? `
-      - Worked Example Card:
-        - Title, problem scenario, and 4 step-by-step breakdown boxes with numbered badges.
-        - Core insight callout.
-      ` : ""}
+   A. HERO HEADER BANNER:
+      - Container: style={cardStyle}
+      - Subject badge ("${content.subject}") & Level pill ("${content.level}") with font-mono text.
+      - Lesson title with font-size 2.2rem, font-weight 900, line-height 1.25, color C.text.
+      - Collapsible or prominent Learning Objectives drawer with CheckCircle2 icons.
 
-   C. RIGHT COLUMN (Sticky Interactive Lab & Formative Quiz, ~40% width, position: 'sticky', top: '24px'):
-      - CARD 1: THE INTERACTIVE SIMULATION LAB:
-        - Self-contained, stateful interactive parameter laboratory with dynamic SVG or canvas and live sliders.
-        - ALL HOOKS for this simulation MUST be declared at the top of LessonComponent!
-      - CARD 2: THE FORMATIVE ASSESSMENT QUIZ (RENDERED ONCE):
-        - Header with Question counter badge, progress bar, 4 option cards with "A", "B", "C", "D" circular badges.
-        - Green on correct, red on incorrect, with full explanation reveal box.
+   B. CENTERPIECE INTERACTIVE SIMULATION LAB:
+      - Container: style={cardStyle} (Single card container — DO NOT double-wrap or nest inside an extra card!).
+      - Header with "Interactive Simulation Lab", live status pill ("Active Model", "Interactive Simulation"), and preset buttons.
+      - Dynamic SVG visualizer with viewBox="0 0 860 340", width: '100%', height: 'auto', glowing paths, and coordinate axes.
+      - Parameter control dock with responsive grid (minmax 220px, 1fr) for sliders and live value displays.
+      - Telemetry readout pills displaying dynamic metrics derived from slider states.
+
+   C. COMPREHENSIVE CURRICULUM MODULES (SECTIONS 1 THROUGH 6):
+      - EVERY SECTION MUST BE A DEDICATED CARD USING style={cardStyle}!
+      - Numbered badge ("01", "02", "03", etc.).
+      - Section title and overview paragraphs.
+      - Structured subsections (e.g. 1.1, 1.2) with distinct subheadings and deep multi-paragraph explanations.
+      - Key Takeaways bulleted list with CheckCircle2 icons.
+      - Misconception Alert card with 1px amber border, light amber background, and AlertTriangle icon.
+      - Real-World Case Study / Analogy card with 4px cobalt left-border and Lightbulb icon.
+      - Monospace mathematical formulations or code snippet blocks with dark slate background.
+
+   ${content.worked_example ? `
+   D. WORKED EXAMPLE:
+      - Container: style={cardStyle}
+      - Title, challenge problem scenario, and step-by-step breakdown boxes with numbered badges.
+      - Core insight callout with Target icon.
+   ` : ""}
+
+   E. PRACTICE QUESTIONS & SOLUTIONS:
+      - Container: style={cardStyle}
+      - Question counter badge, progress bar, 4 tactile option cards with circular "A", "B", "C", "D" badges.
+      - Instant feedback (Emerald for correct, Amber for incorrect distractor).
+      - Full explanatory feedback reveal box explaining WHY the answer is correct and untangling the distractor.
 
 3. STRICT REACT RULES OF HOOKS:
-   - ALL hooks unconditionally at the very top of LessonComponent!
-   - NEVER call hooks in conditionals, loops, or nested functions.
+   - ALL useState, useEffect, useMemo hooks MUST be declared unconditionally at the very top of LessonComponent!
+   - NEVER call hooks inside conditions, loops, or child helper renders.
 
 OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } and ending with render(<LessonComponent />);. No markdown fences.`;
 

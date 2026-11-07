@@ -4,9 +4,15 @@
  * that every lesson can be viewed and printed as an executive masterclass document.
  */
 
+export interface DocumentSubsection {
+  title: string;
+  content: string;
+}
+
 export interface DocumentSection {
   title: string;
   explanation: string;
+  subsections?: DocumentSubsection[];
   keyPoints: string[];
   example?: string;
   misconception?: string;

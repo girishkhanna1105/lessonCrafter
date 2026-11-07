@@ -19,18 +19,23 @@ export async function runPedagogyAgent(
   intakeAnswers?: Record<string, string>
 ): Promise<PedagogyBrief> {
   const level = userProfile?.learner_level || "college";
-  const baseline = intakeAnswers?.baseline || "intermediate";
-  const goal = intakeAnswers?.goal || "deep_intuition";
   const stickingPoint = intakeAnswers?.stickingPoint || "";
 
+  // Compile all diagnostic MCQ selections from user
+  const diagnosticSummary = intakeAnswers
+    ? Object.entries(intakeAnswers)
+        .filter(([k, v]) => k !== "stickingPoint" && Boolean(v))
+        .map(([k, v]) => `• ${k}: ${v}`)
+        .join("\n")
+    : "";
+
   const prompt = `You are the Cognitive Scaffolding & Misconception Specialist.
-Your mission is to analyze the learner's background and map out the exact pedagogical strategy for this lesson.
+Your mission is to analyze the learner's diagnostic choices and map out the exact pedagogical strategy for this lesson.
 
 TOPIC: "${topic}"
 LEARNER LEVEL: ${level}
-USER BASELINE: ${baseline}
-USER GOAL: ${goal}
-${stickingPoint ? `USER'S SPECIFIC STICKING POINT: "${stickingPoint}"` : ""}
+${diagnosticSummary ? `DIAGNOSTIC INTAKE SELECTIONS:\n${diagnosticSummary}` : ""}
+${stickingPoint ? `USER'S SPECIFIC STICKING POINT / QUESTION: "${stickingPoint}"` : ""}
 
 Analyze how learners think about this topic. Output strictly valid JSON with this schema:
 {

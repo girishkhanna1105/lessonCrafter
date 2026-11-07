@@ -1,100 +1,195 @@
 "use client";
-import React from "react";
+
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, History, Sparkles, BookOpen, ChevronRight } from "lucide-react";
+import { 
+  Plus, ArrowRight, Sparkles, 
+  Atom, BrainCircuit, Sigma, Dna, 
+  Zap, ChevronRight, Search
+} from "lucide-react";
 
 interface AuthenticatedHeroProps {
   user: any;
 }
 
+const TOPIC_SUGGESTIONS = [
+  {
+    icon: <BrainCircuit className="w-5 h-5" />,
+    color: "cobalt",
+    label: "Transformers & Attention",
+    desc: "Q/K/V projections, multi-head attention, positional encoding",
+    prompt: "Transformers: Self-Attention Mechanics & Q/K/V Matrices",
+  },
+  {
+    icon: <Atom className="w-5 h-5" />,
+    color: "marine",
+    label: "Quantum Entanglement",
+    desc: "Bell states, superposition, wave function collapse",
+    prompt: "Quantum Computing: Superposition, Entanglement & Bell States",
+  },
+  {
+    icon: <Sigma className="w-5 h-5" />,
+    color: "solar",
+    label: "Calculus Optimization",
+    desc: "Critical points, Hessian matrices, Lagrange multipliers",
+    prompt: "Calculus: Multivariable Optimization & Lagrange Multipliers",
+  },
+  {
+    icon: <Dna className="w-5 h-5" />,
+    color: "jade",
+    label: "CRISPR Gene Editing",
+    desc: "Cas9 mechanism, guide RNA, gene targeting sequences",
+    prompt: "CRISPR-Cas9: Gene Editing Mechanism & Applications",
+  },
+];
+
+const colorMap: Record<string, { bg: string; border: string; text: string; iconBg: string; glow: string }> = {
+  cobalt: {
+    bg: "hover:bg-cobalt-50/60 dark:hover:bg-cobalt-950/30",
+    border: "border-cobalt-200/60 dark:border-cobalt-800/40 hover:border-cobalt-400/60 dark:hover:border-cobalt-500/40",
+    text: "text-cobalt-700 dark:text-cobalt-300",
+    iconBg: "bg-cobalt-100 dark:bg-cobalt-900/60 text-cobalt-600 dark:text-cobalt-400",
+    glow: "group-hover:shadow-cobalt-500/20",
+  },
+  marine: {
+    bg: "hover:bg-cyan-50/60 dark:hover:bg-cyan-950/30",
+    border: "border-cyan-200/60 dark:border-cyan-800/40 hover:border-cyan-400/60 dark:hover:border-cyan-500/40",
+    text: "text-cyan-700 dark:text-cyan-300",
+    iconBg: "bg-cyan-100 dark:bg-cyan-900/60 text-cyan-600 dark:text-cyan-400",
+    glow: "group-hover:shadow-cyan-500/20",
+  },
+  solar: {
+    bg: "hover:bg-amber-50/60 dark:hover:bg-amber-950/30",
+    border: "border-amber-200/60 dark:border-amber-800/40 hover:border-amber-400/60 dark:hover:border-amber-500/40",
+    text: "text-amber-700 dark:text-amber-300",
+    iconBg: "bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400",
+    glow: "group-hover:shadow-amber-500/20",
+  },
+  jade: {
+    bg: "hover:bg-emerald-50/60 dark:hover:bg-emerald-950/30",
+    border: "border-emerald-200/60 dark:border-emerald-800/40 hover:border-emerald-400/60 dark:hover:border-emerald-500/40",
+    text: "text-emerald-700 dark:text-emerald-300",
+    iconBg: "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400",
+    glow: "group-hover:shadow-emerald-500/20",
+  },
+};
+
 export default function AuthenticatedHero({ user }: AuthenticatedHeroProps) {
   const router = useRouter();
+  const firstName = user?.name ? user.name.split(" ")[0] : "there";
+  const [inputVal, setInputVal] = useState("");
+
+  const handleLaunch = (prompt?: string) => {
+    const text = prompt || inputVal;
+    if (text.trim()) localStorage.setItem("pending_prompt", text.trim());
+    router.push("/studio");
+  };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[80vh] overflow-hidden pt-36 sm:pt-40 px-6">
-      {/* Dynamic Background - Cobalt Architectural Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cobalt-600/10 dark:bg-cobalt-500/15 rounded-full blur-[140px] pointer-events-none" />
-      
-      <div className="max-w-5xl w-full relative z-10">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-          
-          {/* Welcome Text */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass mb-6">
-              <Sparkles className="w-4 h-4 text-cobalt-600 dark:text-cobalt-400" />
-              <span className="text-xs font-bold font-mono text-slate-800 dark:text-cobalt-200 uppercase tracking-widest">
-                Welcome Back, {user.name?.split(' ')[0] || 'Explorer'}
-              </span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">
-              Ready to <span className="text-gradient">Craft</span><br />Something New?
-            </h1>
-            
-            <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-xl mb-10 leading-relaxed font-medium">
-              Your AI-native creation studio is primed. Synthesize rigorous curricula, interactive simulations, and formative checks in seconds.
-            </p>
+    <section className="relative min-h-[85vh] flex flex-col items-center justify-center pt-28 pb-16 px-4 overflow-hidden">
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <button 
-                onClick={() => router.push('/studio')}
-                className="px-8 py-4 bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold rounded-2xl transition-all shadow-xl shadow-cobalt-600/25 flex items-center justify-center gap-2 group active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-5 h-5" />
-                Launch Studio
-              </button>
-              <button 
-                onClick={() => router.push('/lessons')}
-                className="px-8 py-4 glass text-slate-800 dark:text-white font-bold rounded-2xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <History className="w-5 h-5 text-cobalt-600 dark:text-cobalt-400" />
-                View Library
-              </button>
+      {/* ── Background depth layers ── */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Primary cobalt radial glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-cobalt-600/[0.09] dark:bg-cobalt-500/[0.13] rounded-full blur-[130px]" />
+        {/* Cyan accent glow bottom-right */}
+        <div className="absolute bottom-0 right-0 w-[500px] h-[400px] bg-marine-500/[0.07] dark:bg-marine-500/[0.09] rounded-full blur-[120px]" />
+        {/* Fine dot-grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
+          style={{
+            backgroundImage: "radial-gradient(circle, #2563eb 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+      </div>
+
+      <div className="max-w-4xl w-full mx-auto relative z-10">
+
+        {/* Greeting pill */}
+        <div className="mb-5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-cobalt-500" />
+          <span className="text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 tracking-wide">
+            Welcome back, {firstName}
+          </span>
+        </div>
+
+        {/* Hero headline */}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.08] mb-5">
+          What would you like to
+          <br />
+          <span className="relative inline-block">
+            <span className="text-gradient">learn today?</span>
+            {/* Underline accent */}
+            <span className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-cobalt-500 to-marine-500 rounded-full opacity-60" />
+          </span>
+        </h1>
+
+        <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed mb-10 font-normal">
+          Type any topic and get a fully interactive lesson with live simulations, 
+          first-principles explanations, and tailored practice problems.
+        </p>
+
+        {/* ── Big search / input bar ── */}
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleLaunch(); }}
+          className="relative group mb-10"
+        >
+          <div className="flex items-stretch bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-xl shadow-slate-200/60 dark:shadow-none transition-all duration-200 focus-within:border-cobalt-400 dark:focus-within:border-cobalt-500 focus-within:shadow-[0_0_0_4px_rgba(37,99,235,0.1)] dark:focus-within:shadow-[0_0_0_4px_rgba(37,99,235,0.15)] overflow-hidden">
+            <div className="flex items-center pl-5 text-slate-400">
+              <Search className="w-5 h-5 flex-shrink-0" />
             </div>
+            <input
+              type="text"
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+              placeholder="e.g. How does gradient descent work in neural networks?"
+              className="flex-1 bg-transparent px-4 py-4 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-base focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="m-2 px-6 py-3 bg-cobalt-600 hover:bg-cobalt-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-cobalt-600/25 flex items-center gap-2 cursor-pointer flex-shrink-0"
+            >
+              <Zap className="w-4 h-4" />
+              <span className="hidden sm:inline">Build Lesson</span>
+              <span className="sm:hidden">Build</span>
+            </button>
           </div>
+        </form>
 
-          {/* Quick Stats/Actions Card */}
-          <div className="w-full max-w-md">
-            <div className="glass-card p-8 border-slate-200/80 dark:border-slate-800 relative group">
-              <div className="space-y-6">
-                <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-cobalt-500/10 flex items-center justify-center border border-cobalt-500/20">
-                    <BookOpen className="w-6 h-6 text-cobalt-600 dark:text-cobalt-400" />
+        {/* ── Topic suggestion cards ── */}
+        <div>
+          <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">
+            Or start with a popular topic
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {TOPIC_SUGGESTIONS.map((topic, i) => {
+              const c = colorMap[topic.color];
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleLaunch(topic.prompt)}
+                  className={`group flex items-center gap-4 p-4 rounded-2xl border bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm text-left transition-all duration-200 cursor-pointer shadow-sm hover:shadow-lg ${c.border} ${c.bg} ${c.glow}`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${c.iconBg}`}>
+                    {topic.icon}
                   </div>
-                  <div>
-                    <h3 className="text-slate-900 dark:text-white font-bold">Workspace Ready</h3>
-                    <p className="text-xs text-slate-400 uppercase tracking-widest font-mono font-bold">Active Session</p>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-bold ${c.text} mb-0.5 truncate`}>
+                      {topic.label}
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-1">
+                      {topic.desc}
+                    </div>
                   </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div 
-                    onClick={() => router.push('/studio')}
-                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 flex items-center justify-between group/item cursor-pointer hover:border-cobalt-500/40 transition-colors"
-                  >
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Open new creation draft</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover/item:text-cobalt-500 group-hover/item:translate-x-1 transition-all" />
-                  </div>
-                  <div 
-                    onClick={() => router.push('/lessons')}
-                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 flex items-center justify-between group/item cursor-pointer hover:border-cobalt-500/40 transition-colors"
-                  >
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Explore community archive</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover/item:text-cobalt-500 group-hover/item:translate-x-1 transition-all" />
-                  </div>
-                </div>
-
-                <div className="pt-4 flex items-center justify-between">
-                  <span className="text-xs text-slate-500 font-mono">Role: {user.role || 'Student'}</span>
-                  <span className="text-[10px] text-cobalt-600 dark:text-cobalt-400 font-mono font-bold uppercase tracking-wider">
-                    Cobalt Engine Online
-                  </span>
-                </div>
-              </div>
-            </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                </button>
+              );
+            })}
           </div>
         </div>
+
       </div>
-    </div>
+    </section>
   );
 }

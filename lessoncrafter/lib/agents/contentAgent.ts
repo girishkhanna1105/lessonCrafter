@@ -4,9 +4,15 @@ import { PedagogyBrief } from "./pedagogyAgent";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+export interface ContentSubsection {
+  title: string;
+  content: string;
+}
+
 export interface ContentSection {
   title: string;
   explanation: string;
+  subsections?: ContentSubsection[];
   key_points: string[];
   real_world_example: string;
   misconception_callout?: string;
@@ -43,7 +49,13 @@ export async function runContentAgent(
   pedagogyBrief?: PedagogyBrief,
   intakeAnswers?: Record<string, string>
 ): Promise<LessonContent> {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      maxOutputTokens: 8192,
+      temperature: 0.35,
+    }
+  });
 
   const roleContext = userProfile?.role === "teacher"
     ? `Target Audience: TEACHER classroom delivery. Provide rigorous curriculum alignment, in-depth theoretical explanations, and instructional clarity.
@@ -64,65 +76,178 @@ ${pedagogyBrief.cognitiveMilestones.map((m, i) => `  ${i + 1}. ${m}`).join("\n")
 `
     : "";
 
+  const diagnosticSummary = intakeAnswers
+    ? Object.entries(intakeAnswers)
+        .filter(([k, v]) => k !== "stickingPoint" && Boolean(v))
+        .map(([k, v]) => `• ${k}: ${v}`)
+        .join("\n")
+    : "";
+
   const prompt = `You are the Lead Pedagogical Content Architect.
-Your task is to write a comprehensive, authoritative, graduate-quality educational masterclass on: "${topic}".
-DO NOT write superficial bullet lists or short generic summaries. Learners need rigorous, deep, intuition-building explanations that explain the mechanical "why" and "how".
+Your task is to write an exhaustive, textbook-grade academic masterclass on: "${topic}".
+
+CRITICAL LENGTH & DEPTH MANDATE:
+- Target Volume: Comprehensive 6 to 8 full printed pages (approximately 3,200 to 4,800 words total).
+- DO NOT summarize or write brief outlines. Every concept must be explored deeply from first principles.
+- Use the hierarchical "subsections" structure to unpack specific mathematical proofs, mechanical foundations, and real-world architectures with academic precision.
 
 USER CONTEXT:
 ${roleContext}
-${intakeAnswers?.baseline ? `User Baseline: ${intakeAnswers.baseline}` : ""}
-${intakeAnswers?.goal ? `User Goal: ${intakeAnswers.goal}` : ""}
-${intakeAnswers?.stickingPoint ? `User's Sticking Point: "${intakeAnswers.stickingPoint}"` : ""}
+${diagnosticSummary ? `LEARNER DIAGNOSTIC CHOICES:\n${diagnosticSummary}` : ""}
+${intakeAnswers?.stickingPoint ? `USER'S SPECIFIC STICKING POINT / CHALLENGE: "${intakeAnswers.stickingPoint}"` : ""}
 
 ${pedagogyContext}
 
-Generate a rich, thorough curriculum document. Return ONLY valid JSON, no markdown fences, matching this schema:
+Generate an exhaustive masterclass document matching this schema (Return ONLY valid JSON):
 {
   "title": "Authoritative and compelling lesson title",
   "subject": "Domain (e.g. Quantum Physics, Computer Science, Biochemistry)",
   "level": "Beginner | Intermediate | Advanced",
   "learning_objectives": [
-    "Specific demonstrable competency 1",
-    "Specific demonstrable competency 2",
-    "Specific demonstrable competency 3",
-    "Specific demonstrable competency 4"
+    "Demonstrable competency 1 with analytical rigor",
+    "Demonstrable competency 2 with analytical rigor",
+    "Demonstrable competency 3 with analytical rigor",
+    "Demonstrable competency 4 with analytical rigor",
+    "Demonstrable competency 5 with analytical rigor"
   ],
   "prerequisites": [
-    "Prerequisite concept 1 with brief reason",
-    "Prerequisite concept 2 with brief reason"
+    "Prerequisite concept 1 with theoretical rationale",
+    "Prerequisite concept 2 with theoretical rationale",
+    "Prerequisite concept 3 with theoretical rationale"
   ],
-  "introduction": "A rich, compelling 3-paragraph introduction detailing the historical motivation, why classical intuition fails, and what makes this topic fundamental.",
+  "introduction": "An exhaustive 4-paragraph introductory thesis detailing historical context, classical limits, the necessity of the current model, and an architectural roadmap.",
   "intuitive_anchor": "A vivid, physically grounded mental model or analogy that unifies the entire concept.",
   "sections": [
     {
-      "title": "01. Section Title (e.g., First-Principles Mechanics & Governing Dynamics)",
-      "explanation": "A comprehensive, 3-4 paragraph explanation. Explain the exact mechanisms, what each variable represents, why the system behaves this way, and how intuition guides the mathematics.",
-      "key_points": [
-        "In-depth key takeaway 1",
-        "In-depth key takeaway 2",
-        "In-depth key takeaway 3",
-        "In-depth key takeaway 4"
+      "title": "01. Core Principles & Historical Context",
+      "explanation": "Clear overview of this module (2 paragraphs framing the fundamental concepts and background).",
+      "subsections": [
+        {
+          "title": "1.1 The Breakdown of Previous Models & Key Discoveries",
+          "content": "Dense, multi-paragraph analysis (2-3 paragraphs, 250+ words) detailing the exact challenges and anomalies of predecessor approaches."
+        },
+        {
+          "title": "1.2 Core Formulations & Reference Framework",
+          "content": "Dense, multi-paragraph breakdown (2-3 paragraphs, 250+ words) establishing the primary variables, degrees of freedom, and foundational rules."
+        }
       ],
-      "real_world_example": "A concrete real-world engineering, scientific, or computational application.",
-      "misconception_callout": "Identify a widespread misconception, why intuitive thinking fails here, and what the correct reality is.",
-      "code_snippet": "Relevant formula, mathematical notation, or code snippet"
+      "key_points": [
+        "In-depth takeaway 1 with clear explanation",
+        "In-depth takeaway 2 with clear explanation",
+        "In-depth takeaway 3 with clear explanation",
+        "In-depth takeaway 4 with clear explanation"
+      ],
+      "real_world_example": "Comprehensive real-world case study with concrete metrics and outcomes.",
+      "misconception_callout": "Detailed misconception analysis: common trap, why it tempts learners, and the correct way to think about it.",
+      "code_snippet": "Formal mathematical equation or code block with parameter annotations"
+    },
+    {
+      "title": "02. Core Mechanisms & Dynamic Behaviors",
+      "explanation": "Clear overview of the governing mechanisms and equilibrium conditions.",
+      "subsections": [
+        {
+          "title": "2.1 Step-by-Step State Transitions & Interactions",
+          "content": "Deep conceptual derivation (2-3 paragraphs, 250+ words) exploring how system inputs influence intermediate states."
+        },
+        {
+          "title": "2.2 Conservation Laws & System Bounds",
+          "content": "Deep conceptual derivation (2-3 paragraphs, 250+ words) exploring key conservation rules and theoretical bounds."
+        }
+      ],
+      "key_points": [ ... ],
+      "real_world_example": "...",
+      "misconception_callout": "...",
+      "code_snippet": "..."
+    },
+    {
+      "title": "03. Mathematical Formulation & Derivations",
+      "explanation": "Overview of quantitative formulations and equations.",
+      "subsections": [
+        {
+          "title": "3.1 Step-by-Step Analytical Derivation",
+          "content": "Full mathematical progression (2-3 paragraphs, 250+ words) from fundamental principles to closed-form solutions."
+        },
+        {
+          "title": "3.2 Key Quantities & Stability Bounds",
+          "content": "In-depth quantitative treatment (2-3 paragraphs, 250+ words) analyzing stability bounds and key performance metrics."
+        }
+      ],
+      "key_points": [ ... ],
+      "real_world_example": "...",
+      "misconception_callout": "...",
+      "code_snippet": "..."
+    },
+    {
+      "title": "04. Real-World Architecture & Engineering Implementation",
+      "explanation": "Overview of practical real-world implementations.",
+      "subsections": [
+        {
+          "title": "4.1 System Topology & Practical Pipeline",
+          "content": "Detailed real-world deployment (2-3 paragraphs, 250+ words) covering implementation details and best practices."
+        },
+        {
+          "title": "4.2 Critical Trade-Off Analysis: Performance vs Complexity",
+          "content": "Detailed real-world deployment (2-3 paragraphs, 250+ words) exploring architectural choices and tradeoffs."
+        }
+      ],
+      "key_points": [ ... ],
+      "real_world_example": "...",
+      "misconception_callout": "...",
+      "code_snippet": "..."
+    },
+    {
+      "title": "05. Edge Cases, Failure Modes & Boundary Conditions",
+      "explanation": "Overview of unusual edge cases, failure modes, and boundary states.",
+      "subsections": [
+        {
+          "title": "5.1 Threshold Behavior & Asymptotic Limits",
+          "content": "Rigorous investigation (2-3 paragraphs, 250+ words) of behavior as variables approach boundary conditions."
+        },
+        {
+          "title": "5.2 Error Handling & Recovery Strategies",
+          "content": "Rigorous investigation (2-3 paragraphs, 250+ words) on fail-safe mechanisms and mitigation strategies."
+        }
+      ],
+      "key_points": [ ... ],
+      "real_world_example": "...",
+      "misconception_callout": "...",
+      "code_snippet": "..."
+    },
+    {
+      "title": "06. Practical Applications & Modern Frontiers",
+      "explanation": "Overview of modern industry applications and cutting-edge directions.",
+      "subsections": [
+        {
+          "title": "6.1 Comparative Paradigm Analysis",
+          "content": "In-depth comparison (2-3 paragraphs, 250+ words) contrasting competing schools of thought and alternative representations."
+        },
+        {
+          "title": "6.2 Open Problems & Next-Generation Horizons",
+          "content": "In-depth exploration (2-3 paragraphs, 250+ words) of unresolved questions and emergent methodologies."
+        }
+      ],
+      "key_points": [ ... ],
+      "real_world_example": "...",
+      "misconception_callout": "...",
+      "code_snippet": "..."
     }
   ],
   "worked_example": {
-    "title": "Practical Problem Deconstruction & Step-by-Step Analysis",
-    "scenario": "A concrete problem or challenge scenario testing the concepts learned.",
+    "title": "Comprehensive Challenge Problem: Step-by-Step Analytical Deconstruction",
+    "scenario": "A rich, complex challenge problem scenario testing the concepts learned.",
     "steps": [
-      { "step_number": 1, "title": "Identify Known Parameters & Boundary Conditions", "description": "Extracting the critical inputs and initial state." },
-      { "step_number": 2, "title": "Apply Governing Principles & Formulations", "description": "Selecting and executing the analytical strategy." },
-      { "step_number": 3, "title": "Calculate & Evaluate State Transitions", "description": "Working through the quantitative or logical progression." },
-      { "step_number": 4, "title": "Verify Against Conservation & Sanity Checks", "description": "Confirming the result matches physical reality and boundaries." }
+      { "step_number": 1, "title": "Boundary Analysis & Parameter Extraction", "description": "Extracting all known variables, boundary constraints, and target unknowns." },
+      { "step_number": 2, "title": "Governing Law Formulation", "description": "Selecting the applicable analytical strategy and setting up governing equations." },
+      { "step_number": 3, "title": "Quantitative Evaluation & Derivation", "description": "Step-by-step execution of mathematical operations, showing transitions clearly." },
+      { "step_number": 4, "title": "Conservation Laws & Asymptotic Sanity Checks", "description": "Validating the calculated values against conservation laws and physical reality." },
+      { "step_number": 5, "title": "Engineering Trade-Off & Practical Optimization", "description": "Analyzing how real-world tolerances affect the idealized result." }
     ],
-    "insight": "The critical takeaway that differentiates superficial memorization from true mastery."
+    "insight": "The critical insight differentiating superficial memorization from true masterclass competency."
   },
-  "summary": "An executive synthesis consolidating the core laws, trade-offs, and mental checklist."
+  "summary": "An executive synthesis consolidating the core laws, trade-offs, and mental models into a definitive mental checklist."
 }
 
-Generate 4 to 5 comprehensive sections. Ensure every section has substantive explanations with rich paragraphs, concrete formulas or code, and clear misconception callouts.`;
+Generate exactly 6 comprehensive modules with detailed subsections. Every subsection must have rich, substantive paragraphs with technical depth.`;
 
   const fallbackContent: LessonContent = {
     title: topic,
