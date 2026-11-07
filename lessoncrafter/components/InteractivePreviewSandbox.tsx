@@ -96,20 +96,24 @@ export default function InteractivePreviewSandbox() {
       
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-3">
-          <Activity className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
+          <Activity className="w-3.5 h-3.5 text-cobalt-500" />
           <span>Interactive Simulators</span>
         </div>
-        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-          Learn by manipulating the variables
+        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+          Learn by{" "}
+          <span className="text-gradient">manipulating the variables</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal leading-relaxed">
+        <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
           Every lesson comes with a live parameter simulator. Try adjusting the sliders below to see wave interference, orbital mechanics, and neural activations respond in real time.
         </p>
       </div>
 
       {/* Simulator Card Container */}
-      <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-8 shadow-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white relative overflow-hidden">
+      <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-5 sm:p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white relative overflow-hidden">
+        {/* Top accent stripe */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/50 to-transparent" />
         
         {/* Module Switcher Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-white/10">
@@ -440,7 +444,7 @@ export default function InteractivePreviewSandbox() {
                 }}
                 className="w-full py-3.5 px-4 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cobalt-600/25 flex items-center justify-center gap-2 transition-all active:scale-95 group cursor-pointer"
               >
-                <span>Synthesize Full Lesson with this Module</span>
+                <span>Build a Full Lesson on This Topic</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -578,9 +582,9 @@ export default function InteractivePreviewSandbox() {
             <div className="pt-3 border-t border-slate-800/80 flex justify-between items-center text-[11px] font-mono text-slate-400">
               <span className="flex items-center gap-1.5 text-cobalt-400">
                 <Zap className="w-3.5 h-3.5" />
-                <span>100% Client-Side React Runtime</span>
+                <span>Live React Simulation</span>
               </span>
-              <span className="text-slate-500">React Hooks + SVG</span>
+              <span className="text-slate-500">React + SVG</span>
             </div>
 
           </div>
