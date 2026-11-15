@@ -8,6 +8,7 @@ import {
   HelpCircle,
   MessageSquare
 } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 
 interface QAPair {
   q: string;
@@ -44,8 +45,9 @@ export default function InteractiveSocraticDemo() {
 
   return (
     <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto">
-      
-      <div className="bg-white dark:bg-slate-900/70 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <ScrollReveal direction="up" threshold={0.1}>
+        <div className="bg-white dark:bg-slate-900/80 rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative overflow-hidden transition-all duration-300 hover:border-cobalt-400/40">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/40 to-transparent" />
         
         {/* Left Column: Clear Value Prop (5 cols) */}
         <div className="lg:col-span-5 space-y-5">
@@ -80,7 +82,7 @@ export default function InteractiveSocraticDemo() {
           <div className="pt-2">
             <button
               onClick={() => router.push("/studio")}
-              className="px-5 py-3 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-cobalt-600/20 flex items-center gap-2 transition-all cursor-pointer"
+              className="px-5 py-3 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-cobalt-600/20 flex items-center gap-2 transition-all cursor-pointer btn-lift"
             >
               <span>Build a Custom Lesson</span>
               <ArrowRight className="w-4 h-4" />
@@ -130,7 +132,7 @@ export default function InteractiveSocraticDemo() {
                 </div>
                 
                 {/* Guiding Question Prompt */}
-                <div className="p-3 rounded-xl bg-cobalt-500/5 dark:bg-cobalt-500/10 border-l-3 border-cobalt-500 text-[11px] text-cobalt-800 dark:text-cobalt-300 font-medium">
+                <div className="p-3 rounded-xl bg-cobalt-500/5 dark:bg-cobalt-500/10 border-l-2 border-cobalt-500 text-[11px] text-cobalt-800 dark:text-cobalt-300 font-medium">
                   <span className="font-bold">Next thought: </span>
                   {activeQA.guidingQuestion}
                 </div>
@@ -142,6 +144,7 @@ export default function InteractiveSocraticDemo() {
         </div>
 
       </div>
+      </ScrollReveal>
     </section>
   );
 }

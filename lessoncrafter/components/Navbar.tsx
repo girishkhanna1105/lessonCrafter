@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => { 
     const checkUser = () => {
@@ -25,6 +26,7 @@ export default function Navbar() {
       setLoading(false);
     };
     checkUser();
+    setMounted(true);
     window.addEventListener("storage", checkUser);
     return () => window.removeEventListener("storage", checkUser);
   }, []);
@@ -37,7 +39,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4">
+    <nav className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4 animate-slide-down">
       <div className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/70 shadow-lg shadow-slate-200/40 dark:shadow-none flex items-center justify-between w-full max-w-5xl px-5 sm:px-6 py-3 rounded-2xl transition-all">
         
         {/* Brand Logo */}

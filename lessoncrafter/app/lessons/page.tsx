@@ -170,7 +170,7 @@ export default function LessonsPage() {
               <div 
                 key={lesson.id} 
                 onClick={() => router.push(`/lessons/${lesson.id}`)}
-                className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 hover:border-cobalt-500/50 hover:shadow-md transition-all group cursor-pointer flex flex-col justify-between"
+                className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 hover:border-cobalt-500/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">

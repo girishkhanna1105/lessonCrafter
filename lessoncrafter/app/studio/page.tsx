@@ -376,7 +376,7 @@ export default function StudioPage() {
 
             {/* STEP 1: TOPIC & LEVEL */}
             {step === 1 && (
-              <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 animate-scale-in">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
                     Topic or Question
@@ -467,7 +467,7 @@ export default function StudioPage() {
                     type="button"
                     onClick={handleProceedToDiagnosis}
                     disabled={!outline.trim() || outline.trim().length < 3}
-                    className="w-full sm:flex-1 py-3.5 rounded-xl font-bold text-white text-xs uppercase tracking-wider bg-cobalt-600 hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/20 flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer"
+                    className="w-full sm:flex-1 py-3.5 rounded-xl font-bold text-white text-xs uppercase tracking-wider bg-cobalt-600 hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/20 flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer btn-lift"
                   >
                     <span>Next: Customize Focus Areas</span>
                     <ArrowRight className="w-4 h-4" />
@@ -477,7 +477,7 @@ export default function StudioPage() {
                     type="button"
                     onClick={handleSynthesize}
                     disabled={loading || !outline.trim()}
-                    className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all disabled:opacity-40 cursor-pointer"
+                    className="w-full sm:w-auto px-5 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-all disabled:opacity-40 cursor-pointer btn-lift"
                   >
                     <span>Skip & Build Now</span>
                   </button>
@@ -487,7 +487,7 @@ export default function StudioPage() {
 
             {/* STEP 2: CUSTOMIZE FOCUS AREAS */}
             {step === 2 && (
-              <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 animate-scale-in">
                 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
