@@ -29,9 +29,9 @@ export default function HeroSection() {
       {/* ── Background depth ── */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Primary cobalt top glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-cobalt-600/[0.09] dark:bg-cobalt-500/[0.14] rounded-full blur-[150px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-cobalt-600/[0.09] dark:bg-cobalt-500/[0.14] rounded-full blur-[150px] animate-glow" />
         {/* Cyan bottom-right accent */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[400px] bg-marine-500/[0.07] dark:bg-marine-500/[0.1] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[400px] bg-marine-500/[0.07] dark:bg-marine-500/[0.1] rounded-full blur-[120px]" style={{ animation: "glow-pulse 5s ease-in-out 1.5s infinite" }} />
         {/* Dot grid */}
         <div
           className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
@@ -46,7 +46,7 @@ export default function HeroSection() {
       <div className="text-center max-w-4xl mx-auto relative z-10">
 
         {/* Badge pill */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 shadow-sm mb-7">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 shadow-sm mb-7 animate-slide-up delay-0">
           <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
           <Sparkles className="w-3.5 h-3.5 text-cobalt-500" />
           <span className="text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 tracking-wide">
@@ -55,7 +55,7 @@ export default function HeroSection() {
         </div>
 
         {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.07] mb-6">
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.07] mb-6 animate-slide-up delay-100">
           Learn any concept through{" "}
           <br className="hidden sm:block" />
           <span className="relative inline-block">
@@ -64,14 +64,14 @@ export default function HeroSection() {
           </span>
         </h1>
 
-        <p className="mb-10 max-w-2xl mx-auto text-base sm:text-lg text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+        <p className="mb-10 max-w-2xl mx-auto text-base sm:text-lg text-slate-500 dark:text-slate-400 font-normal leading-relaxed animate-slide-up delay-200">
           Type any topic in math, physics, or computer science. Get an interactive 
           parameter simulator, rigorous first-principles explanations, and practice 
           questions tailored to your level.
         </p>
 
         {/* ── Big input bar ── */}
-        <div className="max-w-2xl mx-auto mb-10">
+        <div className="max-w-2xl mx-auto mb-10 animate-slide-up delay-300">
           <form
             onSubmit={(e) => { e.preventDefault(); handleCreate(); }}
             className="flex items-stretch bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-xl shadow-slate-200/60 dark:shadow-none transition-all duration-200 focus-within:border-cobalt-400 dark:focus-within:border-cobalt-500 focus-within:shadow-[0_0_0_4px_rgba(37,99,235,0.1)] dark:focus-within:shadow-[0_0_0_4px_rgba(37,99,235,0.15)] overflow-hidden"
@@ -85,7 +85,7 @@ export default function HeroSection() {
             />
             <button
               type="submit"
-              className="m-2 px-6 py-3 bg-cobalt-600 hover:bg-cobalt-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-cobalt-600/25 flex items-center gap-2 cursor-pointer flex-shrink-0"
+              className="m-2 px-6 py-3 bg-cobalt-600 hover:bg-cobalt-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-cobalt-600/25 flex items-center gap-2 cursor-pointer flex-shrink-0 btn-lift"
             >
               <Zap className="w-4 h-4" />
               <span>Build Lesson</span>
@@ -103,7 +103,8 @@ export default function HeroSection() {
                   key={i}
                   type="button"
                   onClick={() => handleCreate(topic.prompt)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/40 hover:border-cobalt-300/50 text-slate-700 dark:text-slate-300 text-xs font-medium transition-all cursor-pointer"
+                  style={{ transitionDelay: `${i * 50}ms` }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/40 hover:border-cobalt-300/50 text-slate-700 dark:text-slate-300 text-xs font-medium transition-all cursor-pointer hover:-translate-y-0.5"
                 >
                   <Icon className="w-3.5 h-3.5 text-cobalt-500 dark:text-cobalt-400" />
                   {topic.label}
@@ -116,7 +117,7 @@ export default function HeroSection() {
         {/* Social proof link */}
         <button
           onClick={() => router.push("/lessons")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-cobalt-600 dark:hover:text-white transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-cobalt-600 dark:hover:text-white transition-colors cursor-pointer animate-slide-up delay-400"
         >
           <BookOpen className="w-4 h-4 text-cobalt-500" />
           Browse community lessons — 50+ topics available

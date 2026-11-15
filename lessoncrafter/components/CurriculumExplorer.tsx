@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Compass
 } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 
 interface CurriculumTrack {
   id: string;
@@ -113,48 +114,55 @@ export default function CurriculumExplorer() {
     <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto">
       
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-3">
-          <Compass className="w-3.5 h-3.5 text-cobalt-600 dark:text-cobalt-400" />
-          <span>Featured Topics</span>
+      <ScrollReveal direction="up" threshold={0.1}>
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
+            <Compass className="w-3.5 h-3.5 text-cobalt-500" />
+            <span>Featured Topics</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+            Explore <span className="text-gradient">Interactive Lessons</span>
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+            Preview how LessonCrafter turns complex topics into interactive parameter simulators, structured modules, and practice quizzes.
+          </p>
         </div>
-        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-          Explore Interactive Lessons
-        </h2>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal leading-relaxed">
-          Preview how LessonCrafter turns complex topics into interactive parameter simulators, structured modules, and practice quizzes.
-        </p>
-      </div>
+      </ScrollReveal>
 
       {/* Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
-        {TRACKS.map((t) => {
-          const Icon = t.icon;
-          const isSelected = selectedTrack.id === t.id;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setSelectedTrack(t)}
-              className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                isSelected
-                  ? "bg-cobalt-600 text-white shadow-md shadow-cobalt-600/20"
-                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-cobalt-400/40"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1.5">
-                <Icon className={`w-4 h-4 ${isSelected ? "text-white" : "text-cobalt-600 dark:text-cobalt-400"}`} />
-                <span className={`text-[10px] font-bold uppercase ${isSelected ? "text-cobalt-100" : "text-slate-400"}`}>
-                  {t.category}
-                </span>
-              </div>
-              <div className="font-bold text-xs truncate">{t.title}</div>
-            </button>
-          );
-        })}
-      </div>
+      <ScrollReveal direction="up" delay={100} threshold={0.1}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
+          {TRACKS.map((t) => {
+            const Icon = t.icon;
+            const isSelected = selectedTrack.id === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setSelectedTrack(t)}
+                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer hover:-translate-y-0.5 ${
+                  isSelected
+                    ? "bg-cobalt-600 text-white shadow-md shadow-cobalt-600/20 border-cobalt-500 ring-2 ring-cobalt-400/20"
+                    : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-cobalt-400/40 hover:shadow-sm"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <Icon className={`w-4 h-4 ${isSelected ? "text-white" : "text-cobalt-600 dark:text-cobalt-400"}`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? "text-cobalt-100" : "text-slate-400"}`}>
+                    {t.category}
+                  </span>
+                </div>
+                <div className="font-bold text-xs truncate">{t.title}</div>
+              </button>
+            );
+          })}
+        </div>
+      </ScrollReveal>
 
       {/* Track Detailed Preview Card */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <ScrollReveal direction="up" delay={200} threshold={0.08}>
+        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-8 relative overflow-hidden transition-all duration-300 hover:border-cobalt-400/40">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/40 to-transparent" />
         
         {/* Left Column: Lesson Outline & Sections (7 cols) */}
         <div className="lg:col-span-7 space-y-5">
@@ -226,7 +234,7 @@ export default function CurriculumExplorer() {
           {/* Launch Button */}
           <button
             onClick={() => handleLaunch(selectedTrack.prompt)}
-            className="w-full py-3.5 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-cobalt-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full py-3.5 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-cobalt-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer btn-lift"
           >
             <span>Build This Lesson</span>
             <ArrowRight className="w-4 h-4" />
@@ -234,7 +242,8 @@ export default function CurriculumExplorer() {
 
         </div>
 
-      </div>
+        </div>
+      </ScrollReveal>
     </section>
   );
 }

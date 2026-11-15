@@ -14,9 +14,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser && storedUser !== "undefined") {
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser && storedUser !== "undefined") {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch {
+      // fallback
     }
     setLoading(false);
   }, []);
@@ -25,8 +29,25 @@ export default function Home() {
     <div className="min-h-screen bg-transparent selection:bg-cobalt-500/20 selection:text-cobalt-800 dark:selection:text-cobalt-200 transition-colors duration-200">
       <Navbar />
       
-      {!loading && (
-        user ? <AuthenticatedHero user={user} /> : <HeroSection />
+      {loading ? (
+        <div className="min-h-[85vh] flex flex-col items-center justify-center pt-28 pb-16 px-4">
+          <div className="max-w-4xl w-full mx-auto space-y-6">
+            <div className="w-36 h-8 rounded-full skeleton" />
+            <div className="w-3/4 h-16 rounded-2xl skeleton" />
+            <div className="w-1/2 h-6 rounded-xl skeleton" />
+            <div className="w-full h-16 rounded-2xl skeleton" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+              <div className="h-20 rounded-2xl skeleton" />
+              <div className="h-20 rounded-2xl skeleton" />
+              <div className="h-20 rounded-2xl skeleton" />
+              <div className="h-20 rounded-2xl skeleton" />
+            </div>
+          </div>
+        </div>
+      ) : user ? (
+        <AuthenticatedHero user={user} />
+      ) : (
+        <HeroSection />
       )}
 
       {/* Interactive Simulation Sandbox */}
@@ -42,12 +63,6 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background pointer-events-none" />
         <LowerSection />
       </div>
-      
-      <footer className="py-12 px-6 border-t border-slate-200 dark:border-white/5 text-center">
-        <p className="text-slate-400 dark:text-slate-500 text-xs font-mono font-bold uppercase tracking-[0.2em]">
-          LessonCrafter © {new Date().getFullYear()} — Precision AI Educational Platform
-        </p>
-      </footer>
     </div>
   );
 }

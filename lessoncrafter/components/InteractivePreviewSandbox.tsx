@@ -13,6 +13,7 @@ import {
   Pause, 
   Zap 
 } from "lucide-react";
+import ScrollReveal from "@/components/ScrollReveal";
 
 type SimType = "waves" | "orbit" | "neuron";
 
@@ -95,25 +96,28 @@ export default function InteractivePreviewSandbox() {
     <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto relative">
       
       {/* Section Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
-          <Activity className="w-3.5 h-3.5 text-cobalt-500" />
-          <span>Interactive Simulators</span>
+      <ScrollReveal direction="up" threshold={0.1}>
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
+            <Activity className="w-3.5 h-3.5 text-cobalt-500" />
+            <span>Interactive Simulators</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+            Learn by{" "}
+            <span className="text-gradient">manipulating the variables</span>
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
+            Every lesson comes with a live parameter simulator. Try adjusting the sliders below to see wave interference, orbital mechanics, and neural activations respond in real time.
+          </p>
         </div>
-        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
-          Learn by{" "}
-          <span className="text-gradient">manipulating the variables</span>
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
-          Every lesson comes with a live parameter simulator. Try adjusting the sliders below to see wave interference, orbital mechanics, and neural activations respond in real time.
-        </p>
-      </div>
+      </ScrollReveal>
 
       {/* Simulator Card Container */}
-      <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-5 sm:p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white relative overflow-hidden">
-        {/* Top accent stripe */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/50 to-transparent" />
+      <ScrollReveal direction="up" delay={150} threshold={0.08}>
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-5 sm:p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none bg-white dark:bg-slate-900/90 text-slate-900 dark:text-white relative overflow-hidden transition-all duration-300 hover:border-cobalt-400/40">
+          {/* Top accent stripe */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cobalt-500/50 to-transparent" />
         
         {/* Module Switcher Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8 border-b border-slate-200 dark:border-white/10">
@@ -592,6 +596,7 @@ export default function InteractivePreviewSandbox() {
         </div>
 
       </div>
+      </ScrollReveal>
 
     </section>
   );
