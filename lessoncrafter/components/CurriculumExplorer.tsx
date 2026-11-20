@@ -111,7 +111,7 @@ export default function CurriculumExplorer() {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 max-w-5xl mx-auto">
+    <section className="pt-8 sm:pt-10 pb-16 px-4 sm:px-6 max-w-5xl mx-auto">
       
       {/* Header */}
       <ScrollReveal direction="up" threshold={0.1}>
