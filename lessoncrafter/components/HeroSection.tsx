@@ -55,54 +55,22 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-[94vh] pt-32 sm:pt-36 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
+    <section className="relative flex flex-col items-center justify-center min-h-[90vh] pt-28 sm:pt-32 pb-16 px-4 sm:px-6 lg:px-8 select-none">
       
-      {/* ── 1. The Living Architectural Blueprint Grid (Restored & Elevated) ── */}
+      {/* ── Architectural Grid Accents & Laser Sweep ── */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         
-        {/* Primary Crisp Blueprint Grid */}
+        {/* Animated Horizontal Laser Horizon Beam */}
         <div 
-          className="absolute inset-0 opacity-[0.06] dark:opacity-[0.12]"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #2563eb 1px, transparent 1px),
-              linear-gradient(to bottom, #2563eb 1px, transparent 1px)
-            `,
-            backgroundSize: "44px 44px"
-          }}
-        />
-
-        {/* Fine Secondary Micro-Grid for Technical Depth */}
-        <div 
-          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #06b6d4 1px, transparent 1px),
-              linear-gradient(to bottom, #06b6d4 1px, transparent 1px)
-            `,
-            backgroundSize: "11px 11px"
-          }}
-        />
-
-        {/* Ambient Cobalt Radial Core Glow (Adds luminous warmth without muddy blobs) */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[450px] bg-cobalt-600/[0.12] dark:bg-cobalt-500/[0.18] rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-marine-500/[0.06] dark:bg-marine-500/[0.1] rounded-full blur-[120px] pointer-events-none" />
-
-        {/* Animated Horizontal Laser Horizon Beam (Smooth sweep) */}
-        <div 
-          className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cobalt-400/50 to-transparent blur-[1px]"
+          className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cobalt-400/40 to-transparent blur-[1px]"
           style={{
             top: "38%",
             animation: "pulse 5s ease-in-out infinite"
           }}
         />
 
-        {/* Top & Bottom Vignettes to Blend into Page */}
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-background via-background/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background via-background/60 to-transparent" />
-
-        {/* Architectural Flank Rulers (Solves the empty left/right void with schematic precision) */}
-        <div className="hidden 2xl:flex absolute left-8 top-1/3 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
+        {/* Architectural Flank Rulers */}
+        <div className="hidden 2xl:flex absolute left-8 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
           <span className="tracking-widest uppercase [writing-mode:vertical-lr] rotate-180 text-cobalt-500/80 font-bold">
             AXIS_Y // 0.00 → 1.00
           </span>
@@ -110,7 +78,7 @@ export default function HeroSection() {
           <span>[ψ] 60FPS</span>
         </div>
 
-        <div className="hidden 2xl:flex absolute right-8 top-1/3 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
+        <div className="hidden 2xl:flex absolute right-8 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
           <span className="tracking-widest uppercase [writing-mode:vertical-lr] text-cyan-500/80 font-bold">
             LATENCY // 24ms
           </span>
