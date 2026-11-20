@@ -188,11 +188,11 @@ export default function InteractivePreviewSandbox() {
   };
 
   return (
-    <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto relative select-none">
+    <section className="pt-6 sm:pt-8 pb-12 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto relative select-none">
       
       {/* ── Section Title & Header ── */}
       <ScrollReveal direction="up" threshold={0.1}>
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-white/[0.08] font-mono text-[11px] tracking-wider text-slate-600 dark:text-slate-300 shadow-sm mb-4 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

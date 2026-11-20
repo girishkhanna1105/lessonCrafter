@@ -55,7 +55,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-[90vh] pt-28 sm:pt-32 pb-16 px-4 sm:px-6 lg:px-8 select-none">
+    <section className="relative flex flex-col items-center justify-center pt-16 sm:pt-20 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-8 select-none">
       
       {/* ── Architectural Grid Accents & Laser Sweep ── */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
