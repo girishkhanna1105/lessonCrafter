@@ -1,224 +1,274 @@
 "use client";
 
-import { Sliders, BookOpen, CheckCircle2, FileText, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { 
+  Sliders, 
+  BookOpen, 
+  CheckCircle2, 
+  FileText, 
+  ArrowRight, 
+  Cpu, 
+  Terminal, 
+  Sparkles,
+  Zap,
+  Activity,
+  Atom,
+  BrainCircuit,
+  Sigma,
+  Dna
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ScrollReveal from "@/components/ScrollReveal";
 
-const FEATURES = [
+const PIPELINE_SPECIFICATIONS = [
   {
     icon: Sliders,
-    accent: "cobalt",
-    label: "Interactive Simulations",
-    desc: "Manipulate real-time parameters with live sliders and watch equations respond visually as you change variables.",
-    tag: "Hands-On",
+    step: "01",
+    tag: "SIMULATION RUNTIME",
+    title: "Client-Side Parametric Sandboxes",
+    spec: "60 FPS CLIENT VECTOR ENGINE",
+    desc: "Every lesson compiles self-contained, browser-native simulation engines with zero external CDNs. Parameters update in real time with hardware-accelerated SVG and Canvas vector rendering.",
+    telemetry: "RUNTIME : REACTIVE VIRTUAL DOM · JITTER : <0.2ms"
   },
   {
     icon: BookOpen,
-    accent: "marine",
-    label: "First-Principles Explanations",
-    desc: "Every lesson is written from the ground up, explaining not just what but why — with clear derivations and physical intuition.",
-    tag: "Deep Theory",
+    step: "02",
+    tag: "AXIOMATIC RIGOR",
+    title: "First-Principles Derivations",
+    spec: "LATEX & FORMAL PROOFS",
+    desc: "No superficial summaries or hand-waving shortcuts. Equations are deconstructed from axiomatic foundations, exposing every intermediate mathematical derivation and physical intuition.",
+    telemetry: "MATH ENGINE : KaTeX / MathML · RIGOR : BLOOM LEVEL 5"
   },
   {
     icon: CheckCircle2,
-    accent: "jade",
-    label: "Targeted Practice Questions",
-    desc: "Carefully designed problems that catch common misconceptions and walk you through the correct reasoning step by step.",
-    tag: "Active Recall",
+    step: "03",
+    tag: "COGNITIVE CHALLENGE",
+    title: "Socratic Dialectic Inquiries",
+    spec: "GEDANKENEXPERIMENT PROBES",
+    desc: "A built-in dialectic tutor designed to detect student misconceptions. Rather than spoonfeeding answers, it poses counter-intuitive physical thought experiments to guide self-derived epiphanies.",
+    telemetry: "DIALECTIC LOOP : ACTIVE · SPOONFEEDING : 0%"
   },
   {
     icon: FileText,
-    accent: "solar",
-    label: "Clean Document & PDF Export",
-    desc: "Switch between the interactive lab and a publication-ready document view you can print or save for offline study.",
-    tag: "Export Ready",
+    step: "04",
+    tag: "ACADEMIC EXPORT",
+    title: "Publication Document Export",
+    spec: "DUAL VIEW & VECTOR PDF",
+    desc: "Toggle seamlessly between the interactive parameter laboratory and a publication-grade academic document view. Export high-fidelity PDFs and self-contained HTML for offline study.",
+    telemetry: "OUTPUT : STANDALONE BUNDLE · PACKAGING : ZERO RUNTIME DEPENDENCIES"
   },
 ];
 
-const STAT_ROWS = [
-  { value: "Interactive", label: "Visual Simulations", desc: "Live parameter sliders" },
-  { value: "First Principles", label: "In-Depth Theory", desc: "Step-by-step logic" },
-  { value: "Instant Feedback", label: "Practice Quizzes", desc: "Clear solution steps" },
-  { value: "PDF & HTML", label: "Offline Reading", desc: "Print or download anytime" },
+const BENCHMARK_METRICS = [
+  { value: "60 FPS", label: "Simulation Frame Rate", desc: "Native vector render loop" },
+  { value: "Bloom L5", label: "Pedagogical Depth", desc: "Synthesis & critical evaluation" },
+  { value: "< 24ms", label: "Inference Latency", desc: "Real-time dialectic response" },
+  { value: "0 CDNs", label: "Dependency Footprint", desc: "100% self-contained code" },
 ];
 
-const accentMap: Record<string, {
-  pillBg: string; pillText: string;
-  iconBg: string; iconText: string;
-  border: string; glowShadow: string;
-  barColor: string;
-}> = {
-  cobalt: {
-    pillBg: "bg-cobalt-100 dark:bg-cobalt-900/50",
-    pillText: "text-cobalt-700 dark:text-cobalt-300",
-    iconBg: "bg-cobalt-100 dark:bg-cobalt-900/60",
-    iconText: "text-cobalt-600 dark:text-cobalt-400",
-    border: "hover:border-cobalt-400/50 dark:hover:border-cobalt-500/40",
-    glowShadow: "hover:shadow-cobalt-500/10",
-    barColor: "bg-cobalt-500",
-  },
-  marine: {
-    pillBg: "bg-cyan-100 dark:bg-cyan-900/50",
-    pillText: "text-cyan-700 dark:text-cyan-300",
-    iconBg: "bg-cyan-100 dark:bg-cyan-900/60",
-    iconText: "text-cyan-600 dark:text-cyan-400",
-    border: "hover:border-cyan-400/50 dark:hover:border-cyan-500/40",
-    glowShadow: "hover:shadow-cyan-500/10",
-    barColor: "bg-marine-500",
-  },
-  jade: {
-    pillBg: "bg-emerald-100 dark:bg-emerald-900/50",
-    pillText: "text-emerald-700 dark:text-emerald-300",
-    iconBg: "bg-emerald-100 dark:bg-emerald-900/60",
-    iconText: "text-emerald-600 dark:text-emerald-400",
-    border: "hover:border-emerald-400/50 dark:hover:border-emerald-500/40",
-    glowShadow: "hover:shadow-emerald-500/10",
-    barColor: "bg-jade-500",
-  },
-  solar: {
-    pillBg: "bg-amber-100 dark:bg-amber-900/50",
-    pillText: "text-amber-700 dark:text-amber-300",
-    iconBg: "bg-amber-100 dark:bg-amber-900/60",
-    iconText: "text-amber-600 dark:text-amber-400",
-    border: "hover:border-amber-400/50 dark:hover:border-amber-500/40",
-    glowShadow: "hover:shadow-amber-500/10",
-    barColor: "bg-solar-500",
-  },
-};
+const POPULAR_QUICK_STARTS = [
+  { domain: "QUANTUM", label: "Quantum Tunneling & Wavepacket Dispersion", prompt: "Quantum Computing: Superposition, Entanglement & Bell States with real-time state vector collapse" },
+  { domain: "AI / ML", label: "Transformer Attention & Q/K/V Dot Products", prompt: "Transformers & Deep Learning: Multi-Head Self-Attention Mechanism, Query-Key-Value Dot Products, and Softmax Temperature" },
+  { domain: "CALCULUS", label: "Multivariable Surface Optimization & Hessian", prompt: "Calculus: Multivariable Optimization, Hessian Matrices & Lagrange Multipliers" },
+  { domain: "GENETICS", label: "CRISPR-Cas9 Cleavage & R-Loop Kinetics", prompt: "Cellular Genetics: CRISPR-Cas9 Molecular Mechanism, Guide RNA Targeting, and Non-Homologous End Joining" },
+];
 
 export default function LowerSection() {
+  const router = useRouter();
+
+  const handleLaunchTopic = (promptText: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pending_prompt", promptText);
+    }
+    router.push("/studio");
+  };
+
   return (
-    <section className="relative overflow-hidden">
+    <section className="pt-6 sm:pt-8 pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto relative select-none">
       
-      {/* Subtle bg decoration */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-1/4 w-[600px] h-[300px] bg-cobalt-500/[0.04] dark:bg-cobalt-500/[0.07] rounded-full blur-[100px]" />
-        <div className="absolute bottom-10 right-1/4 w-[400px] h-[200px] bg-marine-500/[0.05] dark:bg-marine-500/[0.06] rounded-full blur-[80px]" />
-      </div>
+      {/* ── Section Header ── */}
+      <ScrollReveal direction="up" threshold={0.1}>
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+          
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-white/[0.08] font-mono text-[11px] tracking-wider text-slate-600 dark:text-slate-300 shadow-sm mb-4 backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
+            <span className="font-semibold text-cobalt-600 dark:text-cobalt-400">ENGINEERING ARCHITECTURE</span>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <span className="text-cyan-500 font-bold">INSTRUMENT SPECIFICATION</span>
+          </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-24 space-y-24">
-
-        {/* ── Stat Strip ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {STAT_ROWS.map((s, i) => (
-            <ScrollReveal key={i} delay={i * 80} direction="up" threshold={0.1}>
-              <div
-                className="relative group p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 hover:border-cobalt-300/60 dark:hover:border-cobalt-700/50 transition-all duration-200 hover:shadow-lg hover:shadow-cobalt-500/10 hover:-translate-y-0.5 text-center overflow-hidden"
-              >
-                {/* Top colour bar */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cobalt-500 to-marine-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mb-1 leading-tight">
-                  {s.value}
-                </div>
-                <div className="text-xs font-bold text-slate-700 dark:text-slate-200">{s.label}</div>
-                <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{s.desc}</div>
-              </div>
-            </ScrollReveal>
-          ))}
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
+            Built as an instrument.{" "}
+            <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-8">
+              Not a content feed.
+            </span>
+          </h2>
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
+            LessonCrafter combines procedural simulation engines, step-by-step mathematical proofs, and dialectic counter-tests 
+            into a unified academic workspace.
+          </p>
         </div>
+      </ScrollReveal>
 
-        {/* ── Feature section ── */}
-        <div className="space-y-12">
-          {/* Heading */}
-          <ScrollReveal direction="up" threshold={0.1}>
-            <div className="text-center max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cobalt-50 dark:bg-cobalt-950/50 border border-cobalt-200/70 dark:border-cobalt-800/60 text-xs font-semibold text-cobalt-700 dark:text-cobalt-300 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
-                What's inside every lesson
+      {/* ── Metric Telemetry Strip ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 mb-10">
+        {BENCHMARK_METRICS.map((metric, i) => (
+          <ScrollReveal key={i} delay={i * 60} direction="up" threshold={0.1}>
+            <div className="p-4 rounded-xl bg-white/80 dark:bg-[#0c111c]/75 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-md shadow-sm text-center transition-all hover:border-cobalt-500/40">
+              <div className="font-mono text-xl sm:text-2xl font-black text-cobalt-600 dark:text-cobalt-400 mb-0.5 tracking-tight">
+                {metric.value}
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
-                Designed for genuine{" "}
-                <span className="text-gradient">understanding</span>
-              </h2>
-              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
-                No shallow summaries. Every lesson combines interactive tools, rigorous explanations, 
-                and guided practice to help you truly master the concept.
-              </p>
+              <div className="text-xs font-bold text-slate-800 dark:text-slate-200">{metric.label}</div>
+              <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{metric.desc}</div>
             </div>
           </ScrollReveal>
+        ))}
+      </div>
 
-          {/* Feature cards — 2×2 grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {FEATURES.map((f, i) => {
-              const a = accentMap[f.accent];
-              const Icon = f.icon;
-              return (
-                <ScrollReveal key={i} delay={i * 100} direction="up" threshold={0.08}>
-                  <div
-                    className={`group relative flex flex-col p-6 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/60 ${a.border} transition-all duration-250 hover:shadow-xl hover:-translate-y-1 ${a.glowShadow} overflow-hidden h-full`}
-                  >
-                    {/* Colour accent top-bar */}
-                    <div className={`absolute top-0 left-6 right-6 h-px ${a.barColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-                    {/* Icon + tag row */}
-                    <div className="flex items-start justify-between mb-5">
-                      <div className={`w-11 h-11 rounded-xl ${a.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
-                        <Icon className={`w-5 h-5 ${a.iconText}`} />
+      {/* ── 4 Architecture Engine Modules (2x2 Precision Deck) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+        {PIPELINE_SPECIFICATIONS.map((spec, i) => {
+          const Icon = spec.icon;
+          return (
+            <ScrollReveal key={i} delay={i * 80} direction="up" threshold={0.08}>
+              <div className="h-full p-5 sm:p-6 rounded-2xl bg-white/80 dark:bg-[#0c111c]/75 border border-slate-200/90 dark:border-white/[0.08] backdrop-blur-xl shadow-xl shadow-slate-200/30 dark:shadow-none flex flex-col justify-between transition-all hover:border-cobalt-400/50 hover:shadow-cobalt-500/5">
+                
+                <div>
+                  <div className="flex items-center justify-between mb-3.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-cobalt-500/10 text-cobalt-600 dark:text-cyan-400 flex items-center justify-center font-bold">
+                        <Icon className="w-4 h-4" />
                       </div>
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${a.pillBg} ${a.pillText}`}>
-                        {f.tag}
+                      <span className="font-mono text-xs font-bold text-slate-400 dark:text-slate-500">
+                        STAGE {spec.step}
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-snug">
-                      {f.label}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed flex-1">
-                      {f.desc}
-                    </p>
+                    <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 font-bold border border-slate-200/80 dark:border-white/[0.06]">
+                      {spec.tag}
+                    </span>
                   </div>
-                </ScrollReveal>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* ── Bottom CTA banner ── */}
-        <ScrollReveal direction="up" duration={700} threshold={0.1}>
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cobalt-600 via-cobalt-700 to-cobalt-800 p-8 sm:p-12 text-center animate-gradient">
-            {/* Background texture */}
-            <div
-              className="absolute inset-0 opacity-10"
-              style={{
-                backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)",
-                backgroundSize: "24px 24px",
-              }}
-            />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-marine-400/20 rounded-full blur-[80px]" />
-            <div className="relative z-10">
-              <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight">
-                Ready to start learning?
-              </h3>
-              <p className="text-cobalt-200 text-sm sm:text-base mb-8 max-w-md mx-auto leading-relaxed">
-                Pick any topic and get a fully interactive lesson built just for you in under 30 seconds.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/studio"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white hover:bg-cobalt-50 text-cobalt-700 font-bold text-sm transition-all shadow-xl shadow-cobalt-900/30 active:scale-95 cursor-pointer btn-lift"
-                >
-                  <span>Build My First Lesson</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/lessons"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-white/20 hover:border-white/40 hover:bg-white/10 text-white font-bold text-sm transition-all backdrop-blur-sm cursor-pointer"
-                >
-                  Browse Lessons
-                </Link>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1.5">
+                    {spec.title}
+                  </h3>
+
+                  <div className="font-mono text-[11px] text-cobalt-600 dark:text-cyan-400 font-semibold mb-2">
+                    {spec.spec}
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                    {spec.desc}
+                  </p>
+                </div>
+
+                <div className="pt-3 mt-4 border-t border-slate-100 dark:border-white/[0.06] font-mono text-[10px] text-slate-400 dark:text-slate-500">
+                  {spec.telemetry}
+                </div>
+
               </div>
+            </ScrollReveal>
+          );
+        })}
+      </div>
+
+      {/* ── Interactive Studio Command Terminal (Master Launch Deck) ── */}
+      <ScrollReveal direction="up" threshold={0.1}>
+        <div className="rounded-2xl border border-slate-200/90 dark:border-white/[0.1] bg-white/90 dark:bg-[#0c111c]/90 backdrop-blur-2xl shadow-2xl p-6 sm:p-10 relative overflow-hidden text-left">
+          
+          {/* Subtle Top Gradient Accent */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cobalt-500 via-cyan-400 to-cobalt-500" />
+
+          {/* Terminal Console Bar */}
+          <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-200/80 dark:border-white/[0.08] font-mono text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-slate-700 dark:text-slate-300 font-bold">COMPILATION STUDIO COMMAND DECK</span>
+            </div>
+            <div className="hidden sm:inline font-mono text-[11px] text-slate-400">
+              STATUS : READY TO ORCHESTRATE
             </div>
           </div>
-        </ScrollReveal>
 
+          <div className="max-w-2xl mb-6">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
+              Compile your first parametric laboratory.
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Enter any theorem, physical law, or algorithm. LessonCrafter compiles a full executable simulation, 
+              first-principles proof, and dialectic challenge in under 30 seconds.
+            </p>
+          </div>
+
+          {/* 1-Click Launch Presets */}
+          <div className="space-y-2 mb-6">
+            <div className="font-mono text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+              Quick Orchestration Presets:
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+              {POPULAR_QUICK_STARTS.map((topic, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleLaunchTopic(topic.prompt)}
+                  className="p-2.5 rounded-lg bg-slate-50 dark:bg-black/30 hover:bg-slate-100 dark:hover:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.06] text-left transition-all cursor-pointer flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-cobalt-600 dark:text-cyan-400 font-bold shrink-0">
+                      [{topic.domain}]
+                    </span>
+                    <span className="text-slate-800 dark:text-slate-200 truncate font-sans text-xs">
+                      {topic.label}
+                    </span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-cobalt-500 group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Master Launch CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => router.push("/studio")}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-cobalt-600 hover:bg-cobalt-500 active:scale-[0.98] text-white font-mono text-xs font-bold uppercase tracking-wider shadow-xl shadow-cobalt-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <Terminal className="w-4 h-4" />
+              <span>Launch Studio Compiler</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/explore")}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white dark:bg-white/[0.04] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200/90 dark:border-white/[0.08] text-slate-800 dark:text-slate-200 font-mono text-xs font-semibold tracking-wider transition-all cursor-pointer"
+            >
+              <span>Explore Verified Labs</span>
+            </button>
+          </div>
+
+        </div>
+      </ScrollReveal>
+
+      {/* ── Technical Footer ── */}
+      <div className="mt-14 pt-6 border-t border-slate-200/80 dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-[11px] text-slate-400 select-none">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-700 dark:text-slate-300">LessonCrafter</span>
+          <span>·</span>
+          <span>Parametric STEM Workbench</span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span>SYS : NOMINAL</span>
+          <span>·</span>
+          <span>RUNTIME : 60 FPS</span>
+          <span>·</span>
+          <span>2026 EDITION</span>
+        </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-slate-200/60 dark:border-slate-800/60 py-8 px-6 text-center">
-        <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
-          LessonCrafter &copy; 2026 &mdash; Interactive Learning Platform
-        </p>
-      </div>
     </section>
   );
 }
