@@ -72,7 +72,7 @@ export default function HeroSection() {
         {/* Architectural Flank Rulers */}
         <div className="hidden 2xl:flex absolute left-8 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
           <span className="tracking-widest uppercase [writing-mode:vertical-lr] rotate-180 text-cobalt-500/80 font-bold">
-            AXIS_Y // 0.00 → 1.00
+            AXIS_Y : 0.00 → 1.00
           </span>
           <div className="w-px h-28 bg-gradient-to-b from-cobalt-500/40 via-slate-700/40 to-transparent" />
           <span>[ψ] 60FPS</span>
@@ -80,7 +80,7 @@ export default function HeroSection() {
 
         <div className="hidden 2xl:flex absolute right-8 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
           <span className="tracking-widest uppercase [writing-mode:vertical-lr] text-cyan-500/80 font-bold">
-            LATENCY // 24ms
+            LATENCY : 24ms
           </span>
           <div className="w-px h-28 bg-gradient-to-b from-cyan-500/40 via-slate-700/40 to-transparent" />
           <span>[TeX] READY</span>

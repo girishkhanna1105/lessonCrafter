@@ -54,7 +54,7 @@ interface CurriculumTrack {
 const TRACKS: CurriculumTrack[] = [
   {
     id: "quantum",
-    domain: "PHYSICS // QUANTUM",
+    domain: "PHYSICS : QUANTUM",
     category: "Quantum Mechanics",
     icon: Atom,
     title: "Quantum Entanglement & Bell State Inequality",
@@ -104,7 +104,7 @@ const TRACKS: CurriculumTrack[] = [
   },
   {
     id: "ml",
-    domain: "AI / ML // ARCHITECTURE",
+    domain: "AI / ML : ARCHITECTURE",
     category: "Neural Architectures",
     icon: Binary,
     title: "Transformer Attention & Scaled Dot-Product Mechanics",
@@ -154,7 +154,7 @@ const TRACKS: CurriculumTrack[] = [
   },
   {
     id: "bio",
-    domain: "BIOLOGY // GENOMICS",
+    domain: "BIOLOGY : GENOMICS",
     category: "Molecular Genetics",
     icon: Dna,
     title: "CRISPR-Cas9 Cleavage & Repair Pathways",
@@ -204,7 +204,7 @@ const TRACKS: CurriculumTrack[] = [
   },
   {
     id: "econ",
-    domain: "ECON // GAME THEORY",
+    domain: "ECONOMICS : GAME THEORY",
     category: "Algorithmic Economics",
     icon: TrendingUp,
     title: "Nash Equilibrium & Iterated Strategic Matrices",
@@ -275,7 +275,7 @@ export default function CurriculumExplorer() {
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-white/[0.08] font-mono text-[11px] tracking-wider text-slate-600 dark:text-slate-300 shadow-sm mb-4 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-cobalt-500 animate-pulse" />
-            <span className="font-semibold text-cobalt-600 dark:text-cobalt-400">PEDAGOGICAL ARCHITECTURE // 03</span>
+            <span className="font-semibold text-cobalt-600 dark:text-cobalt-400">PEDAGOGICAL ARCHITECTURE · STAGE 03</span>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <span className="text-cyan-500 font-bold">DIRECTED ACYCLIC GRAPH</span>
           </div>
@@ -328,7 +328,7 @@ export default function CurriculumExplorer() {
                 </div>
 
                 <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500 font-semibold mb-0.5 uppercase tracking-wider">
-                  [{track.domain.split("//")[0].trim()}]
+                  [{track.domain.split(":")[0].trim()}]
                 </div>
 
                 <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white line-clamp-1">
@@ -492,7 +492,7 @@ export default function CurriculumExplorer() {
                 <div className="p-3.5 rounded-lg bg-cobalt-500/10 dark:bg-cobalt-500/10 border border-cobalt-500/20 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                   <div className="flex items-center gap-1.5 text-cobalt-600 dark:text-cyan-400 font-bold mb-1">
                     <Terminal className="w-3.5 h-3.5" />
-                    <span>ACTIVE INSPECTION // STAGE {selectedTrack.dagNodes[activeNodeIdx].step}</span>
+                    <span>ACTIVE INSPECTION : STAGE {selectedTrack.dagNodes[activeNodeIdx].step}</span>
                   </div>
                   <p className="font-sans text-xs text-slate-600 dark:text-slate-400">
                     {selectedTrack.dagNodes[activeNodeIdx].title}: Verified cognitive anchor with interactive verification gates.
