@@ -53,7 +53,7 @@ export default function Navbar() {
                 Lesson<span className="text-cobalt-600 dark:text-cobalt-400">Crafter</span>
               </span>
               <span className="hidden md:inline font-mono text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">
-                // WORKBENCH
+                WORKBENCH
               </span>
             </div>
           </Link>

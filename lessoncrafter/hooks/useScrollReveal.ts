@@ -12,6 +12,7 @@ export function useScrollReveal({
   threshold = 0.12, 
 
 
+  
 
   
   rootMargin = "-40px",

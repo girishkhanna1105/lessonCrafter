@@ -918,7 +918,7 @@ export default function InteractivePreviewSandbox() {
                 </div>
 
                 <div className="text-slate-500 text-right">
-                  SIMULATION PROTOCOL // v2.4 KINETIC
+                  SIMULATION PROTOCOL · v2.4 KINETIC
                 </div>
               </div>
 
