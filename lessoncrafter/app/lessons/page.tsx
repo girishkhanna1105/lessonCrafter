@@ -59,10 +59,43 @@ export default function LessonsPage() {
 
       const { data, error } = await query.order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching lessons:", error);
-      } else if (data) {
+      if (!error && data && data.length > 0) {
         setLessons(data);
+      } else {
+        if (error) {
+          console.warn("[Lessons] Supabase query notice:", error);
+        }
+        // Graceful fallback: retrieve locally generated lessons from localStorage
+        const localLessons: any[] = [];
+        if (typeof window !== "undefined") {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith("lesson_")) {
+              const val = localStorage.getItem(key);
+              if (val) {
+                try {
+                  const parsed = JSON.parse(val);
+                  localLessons.push({
+                    id: parsed.id,
+                    title: parsed.title || parsed.outline || "Interactive Lesson",
+                    topic: parsed.outline,
+                    outline: parsed.outline,
+                    status: "generated",
+                    created_at: new Date().toISOString(),
+                    is_public: true
+                  });
+                } catch {
+                  // ignore non-json
+                }
+              }
+            }
+          }
+        }
+        if (localLessons.length > 0) {
+          setLessons(localLessons);
+        } else if (data) {
+          setLessons(data);
+        }
       }
     } catch (err) {
       console.error("Fetch lessons failed:", err);
