@@ -48,6 +48,10 @@ export default function LessonRunner({ code, onRuntimeError }: LessonRunnerProps
     isDark,
     isDarkMode: isDark,
     themeMode: isDark ? "dark" : "light",
+    ReactDOM: {
+      render: () => {},
+      createRoot: () => ({ render: () => {} }),
+    },
     setTheme,
     toggleTheme: () => setTheme(isDark ? "light" : "dark"),
     onThemeChange: (newDark: boolean) => setTheme(newDark ? "dark" : "light"),
@@ -101,10 +105,36 @@ export default function LessonRunner({ code, onRuntimeError }: LessonRunnerProps
     },
   });
 
+  // Pre-clean code before passing to react-live
+  const cleanedCode = React.useMemo(() => {
+    let c = (code || "").trim();
+    // Strip markdown code fences if any remain
+    c = c.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
+    // Normalize any ReactDOM.render variations into react-live's native render()
+    c = c.replace(/ReactDOM\.render\s*\(\s*<LessonComponent\s*\/?>[^)]*\);?/gi, "render(<LessonComponent />);");
+    c = c.replace(/ReactDOM\.createRoot\([^)]+\)\.render\s*\(\s*<LessonComponent\s*\/?>\s*\);?/gi, "render(<LessonComponent />);");
+    
+    // Safety check for truncated trailing lines (e.g. unfinished tag before render)
+    if (!c.includes("render(")) {
+      const lines = c.split("\n");
+      while (lines.length > 0 && !lines[lines.length - 1].trim().endsWith(">") && !lines[lines.length - 1].trim().endsWith("}") && !lines[lines.length - 1].trim().endsWith(";")) {
+        lines.pop();
+      }
+      let sanitized = lines.join("\n");
+      if (!sanitized.includes("</div>\n  );")) {
+        sanitized += "\n    </div>\n  );\n}";
+      } else if (!sanitized.trim().endsWith("}")) {
+        sanitized += "\n}";
+      }
+      c = sanitized + "\nrender(<LessonComponent />);";
+    }
+    return c;
+  }, [code]);
+
   return (
     <div className="w-full transition-colors duration-200">
       <LiveProvider
-        code={code}
+        code={cleanedCode}
         scope={safeScope}
         noInline={true}
       >

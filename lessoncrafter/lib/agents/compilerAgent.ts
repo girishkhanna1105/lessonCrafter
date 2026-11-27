@@ -174,6 +174,11 @@ OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } an
   // Strip import/export
   code = code.replace(/^import\s+.*$/gm, "").replace(/^export\s+default\s+/gm, "").replace(/^export\s+/gm, "").trim();
 
+  // Normalize ReactDOM.render or createRoot calls to react-live render
+  code = code.replace(/ReactDOM\.render\s*\([^;]+?\);?/gi, "render(<LessonComponent />);");
+  code = code.replace(/ReactDOM\.createRoot\([^)]+?\)\.render\([^)]+?\);?/gi, "render(<LessonComponent />);");
+  code = code.replace(/```\s*$/g, "").trim();
+
   if (!code.includes("render(")) {
     // If code ends abruptly with an unclosed tag like '<div style', strip incomplete trailing lines
     const lines = code.split("\n");
