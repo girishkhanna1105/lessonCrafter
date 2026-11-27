@@ -32,9 +32,9 @@ export async function callResilientLlm(options: LlmOptions): Promise<string> {
 
   const errors: string[] = [];
 
-  // 1. Try Groq ultra-fast inference
+  // 1. Try Groq ultra-fast inference (high-throughput models first)
   if (groq) {
-    const groqModels = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
+    const groqModels = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b"];
     for (const model of groqModels) {
       try {
         const completion = await groq.chat.completions.create({
