@@ -1,4 +1,3 @@
-// app/lessons/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,9 +9,21 @@ import GeneratingTelemetryVisualizer from "@/components/GeneratingTelemetryVisua
 import LessonDocumentView from "@/components/LessonDocumentView";
 import { extractLessonDocument } from "@/lib/extractLessonDocument";
 import { 
-  ChevronLeft, RotateCcw, ShieldAlert, 
-  Code2, Loader2, Wrench, BookOpen, 
-  Download, Printer, FileText, Sparkles 
+  ChevronLeft, 
+  RotateCcw, 
+  ShieldAlert, 
+  Code2, 
+  Loader2, 
+  Wrench, 
+  BookOpen, 
+  Download, 
+  Printer, 
+  FileText, 
+  Sparkles,
+  Terminal,
+  Sliders,
+  CheckCircle2,
+  Atom
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -40,6 +51,7 @@ export default function LessonViewer() {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [repairAttempts, setRepairAttempts] = useState(0);
   const [lastRepairAttempt, setLastRepairAttempt] = useState<string | null>(null);
+  const isBusy = isRepairing || isRegenerating;
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -170,70 +182,63 @@ export default function LessonViewer() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${cleanTitle} - LessonCrafter Courseware</title>
+  <title>${cleanTitle} - LessonCrafter Laboratory</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 2.5rem; max-width: 900px; margin: auto; line-height: 1.7; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #f8fafc; padding: 2.5rem; max-width: 900px; margin: auto; line-height: 1.7; }
     h1 { color: #38bdf8; border-bottom: 2px solid #1e293b; padding-bottom: 0.75rem; margin-top: 1rem; font-size: 2.2rem; }
     .badge { display: inline-block; padding: 0.35rem 0.85rem; background: #2563eb; color: white; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; margin-right: 0.5rem; }
     .badge-alt { display: inline-block; padding: 0.35rem 0.85rem; background: #1e293b; color: #94a3b8; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
     .card { background: #111827; border: 1px solid #1f2937; border-radius: 1rem; padding: 1.5rem; margin: 1.5rem 0; }
     .anchor { background: #1e293b; border-left: 4px solid #38bdf8; padding: 1.25rem; border-radius: 0.75rem; margin: 1.5rem 0; font-style: italic; color: #e2e8f0; }
-    .alert { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.75rem; padding: 1rem; margin-top: 1rem; color: #fef3c7; }
-    .quiz-card { background: #0b1120; border: 1px solid #1e293b; border-radius: 1rem; padding: 1.25rem; margin: 1.25rem 0; }
-    .opt { background: #1e293b; padding: 0.65rem 1rem; border-radius: 0.5rem; margin: 0.4rem 0; font-size: 0.9rem; }
-    .correct { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; font-weight: bold; }
-    ul { padding-left: 1.25rem; }
-    li { margin-bottom: 0.5rem; }
-    footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e293b; font-size: 0.8rem; color: #64748b; text-align: center; }
+    footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e293b; font-size: 0.8rem; color: #64748b; font-family: monospace; }
   </style>
 </head>
 <body>
-  <div>
+  <div style="margin-bottom: 1rem;">
     <span class="badge">${doc.subject}</span>
     <span class="badge-alt">${doc.level}</span>
   </div>
   <h1>${cleanTitle}</h1>
-  <p style="font-size: 1.1rem; color: #cbd5e1;">${doc.introduction}</p>
+  <p style="font-size: 1.15rem; color: #cbd5e1; margin-bottom: 2rem;">${doc.introduction}</p>
 
-  ${doc.intuitiveAnchor ? `<div class="anchor"><strong>Intuitive Anchor:</strong> &ldquo;${doc.intuitiveAnchor}&rdquo;</div>` : ""}
+  ${doc.intuitiveAnchor ? `<div class="anchor"><strong>Intuitive Anchor:</strong> "${doc.intuitiveAnchor}"</div>` : ""}
 
   <div class="card">
-    <h3 style="margin-top:0; color:#38bdf8; font-size:0.9rem; text-transform:uppercase;">Core Competencies & Learning Objectives</h3>
-    <ul>
+    <h3 style="margin-top:0; color:#38bdf8; font-size:1.1rem; text-transform:uppercase; letter-spacing:0.05em;">Core Objectives</h3>
+    <ul style="padding-left:1.25rem; margin-bottom:0;">
       ${doc.objectives.map(o => `<li>${o}</li>`).join("")}
     </ul>
   </div>
 
-  ${doc.sections.map((s, idx) => `
+  ${doc.sections.map((s, i) => `
     <div class="card">
-      <h2 style="color: #f8fafc; font-size: 1.4rem;">${s.title}</h2>
+      <h2 style="color:#60a5fa; margin-top:0; font-size:1.35rem;">Module ${i + 1}: ${s.title}</h2>
       <p>${s.explanation}</p>
-      ${s.keyPoints?.length ? `
-        <h4 style="color:#94a3b8; margin-bottom:0.5rem;">Key Takeaways:</h4>
-        <ul>${s.keyPoints.map(k => `<li>${k}</li>`).join("")}</ul>
-      ` : ""}
-      ${s.misconception ? `
-        <div class="alert">
-          <strong>⚠️ Misconception Trap:</strong> ${s.misconception}
-        </div>
-      ` : ""}
+      ${s.example ? `<div style="background:#0f172a; border-left:3px solid #10b981; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Physical Realization:</strong> ${s.example}</div>` : ""}
+      ${s.misconception ? `<div style="background:#0f172a; border-left:3px solid #f59e0b; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Misconception Alert:</strong> ${s.misconception}</div>` : ""}
     </div>
   `).join("")}
 
-  <h2 style="margin-top: 2.5rem; color:#38bdf8;">Practice Questions & Solutions</h2>
-  ${doc.quiz.map((q, i) => `
-    <div class="quiz-card">
-      <div style="font-weight:bold; margin-bottom:0.75rem;">Q${i + 1}: ${q.question}</div>
-      ${q.options.map((opt, oIdx) => `
-        <div class="opt ${oIdx === q.correctIndex ? "correct" : ""}">
-          [${String.fromCharCode(65 + oIdx)}] ${opt} ${oIdx === q.correctIndex ? "✓ (Correct)" : ""}
+  ${doc.quiz.length === 0 ? "" : `
+    <div class="card">
+      <h2 style="color:#34d399; margin-top:0;">Formative Assessment</h2>
+      ${doc.quiz.map((q, qIdx) => `
+        <div style="margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid #1e293b;">
+          <p><strong>${qIdx + 1}. ${q.question}</strong></p>
+          <div style="margin-left:0.5rem;">
+            ${q.options.map((opt, oIdx) => `
+              <div style="padding:0.4rem 0.8rem; margin:0.35rem 0; background:${oIdx === q.correctIndex ? '#064e3b' : '#1e293b'}; border-radius:0.5rem; font-size:0.9rem;">
+                ${String.fromCharCode(65 + oIdx)}) ${opt} ${oIdx === q.correctIndex ? "✓" : ""}
+              </div>
+            `).join("")}
+          </div>
+          <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.75rem;"><strong>Analysis:</strong> ${q.explanation}</div>
         </div>
       `).join("")}
-      <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.75rem;"><strong>Explanation:</strong> ${q.explanation}</div>
     </div>
-  `).join("")}
+  `}
 
-  <footer>Published with LessonCrafter</footer>
+  <footer>LessonCrafter Parametric Laboratory Platform</footer>
 </body>
 </html>`;
 
@@ -246,246 +251,336 @@ export default function LessonViewer() {
     URL.revokeObjectURL(url);
   };
 
-  if (loading)
-    return (
-      <main className="flex justify-center items-center min-h-screen bg-background">
-        <div className="text-center">
-          <Loader2 className="animate-spin w-12 h-12 text-cobalt-600 mx-auto mb-4" />
-          <p className="text-slate-500 font-mono text-sm">Loading your lesson...</p>
-        </div>
-      </main>
-    );
-
-  if (!lesson)
-    return (
-      <main className="flex flex-col justify-center items-center min-h-screen bg-background px-6">
-        <div className="glass-card p-12 text-center max-w-lg">
-          <ShieldAlert className="w-16 h-16 text-red-500 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">Lesson Not Found</h2>
-          <p className="text-slate-500 mb-8 text-sm">The lesson you&apos;re looking for might have been deleted or moved.</p>
-          <button
-            onClick={() => router.push("/studio")}
-            className="w-full py-4 bg-cobalt-600 text-white rounded-xl font-bold hover:bg-cobalt-500 transition-all active:scale-95 shadow-lg shadow-cobalt-600/20"
-          >
-            Return to Lesson Builder
-          </button>
-        </div>
-      </main>
-    );
-
-  const { title, ts_code, compile_error, status, outline } = lesson;
-  const isBusy = isRepairing || isRegenerating;
-
   return (
-    <main className="min-h-screen bg-background text-foreground relative pb-20 transition-colors duration-200">
-      <Navbar />
+    <div className="min-h-screen bg-background relative selection:bg-cobalt-500/20 selection:text-cobalt-800 dark:selection:text-cobalt-200 transition-colors duration-200 overflow-x-hidden">
       
-      {/* Busy Overlay */}
-      {isBusy && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex flex-col justify-center items-center px-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cobalt-500/20 blur-3xl rounded-full" />
-            <Loader2 className="animate-spin w-16 h-16 text-cobalt-500 mb-8 relative z-10" />
-          </div>
-          <h2 className="text-3xl font-black text-white mb-2 text-center">
-            {isRepairing ? "Updating Lesson..." : "Rebuilding Lesson..."}
-          </h2>
-          <p className="text-slate-400 font-mono text-sm text-center">
-            {isRepairing ? "Diagnosing component and applying fix..." : "Regenerating interactive modules..."}
-          </p>
+      {/* ── Global Technical Blueprint Grid (Unified Atmosphere) ── */}
+      <div className="fixed inset-0 pointer-events-none select-none z-0 overflow-hidden">
+        
+        {/* Primary 44px Blueprint Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.09] dark:opacity-[0.16]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #2563eb 1px, transparent 1px),
+              linear-gradient(to bottom, #2563eb 1px, transparent 1px)
+            `,
+            backgroundSize: "44px 44px"
+          }}
+        />
+
+        {/* Fine 11px Micro-Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.045] dark:opacity-[0.08]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #06b6d4 1px, transparent 1px),
+              linear-gradient(to bottom, #06b6d4 1px, transparent 1px)
+            `,
+            backgroundSize: "11px 11px"
+          }}
+        />
+
+        {/* Animated Laser Horizon Beam */}
+        <div 
+          className="absolute inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-cobalt-400/40 to-transparent blur-[0.5px] top-[14%] animate-pulse pointer-events-none"
+        />
+
+        {/* Ambient Top Cobalt Core Luster */}
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-cobalt-600/[0.12] dark:bg-cobalt-500/[0.18] rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute top-[35%] left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-cyan-500/[0.08] dark:bg-cyan-500/[0.12] rounded-full blur-[160px] pointer-events-none" />
+
+        {/* Architectural Flank Rulers */}
+        <div className="hidden 2xl:flex absolute left-6 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
+          <span className="tracking-widest uppercase [writing-mode:vertical-lr] rotate-180 text-cobalt-500/80 font-bold">
+            AXIS_Y : 0.00 → 1.00
+          </span>
+          <div className="w-px h-24 bg-gradient-to-b from-cobalt-500/40 via-slate-700/40 to-transparent" />
+          <span>[ψ] RUNNING</span>
         </div>
-      )}
 
-      {/* Top action bar — back button + action buttons */}
-      <div className="pt-24 pb-4 px-4 sm:px-6 max-w-[940px] mx-auto">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/studio")}
-              className="group flex items-center gap-1.5 text-xs font-mono font-bold text-slate-500 hover:text-cobalt-600 dark:hover:text-white transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              BUILDER
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">/</span>
-            <button
-              onClick={() => router.push("/lessons")}
-              className="text-xs font-mono font-bold text-slate-500 hover:text-cobalt-600 dark:hover:text-white transition-colors flex items-center gap-1"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              EXPLORE
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Mode Switcher: Interactive Lab vs Reading View */}
-            <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <button
-                type="button"
-                onClick={() => setViewMode("interactive")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  viewMode === "interactive"
-                    ? "bg-cobalt-600 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Interactive Lab</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("document")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  viewMode === "document"
-                    ? "bg-cobalt-600 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Reading View</span>
-              </button>
-            </div>
-
-            <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-mono font-bold uppercase tracking-wider ${
-              status === "generated"
-                ? "text-jade-500 border-jade-500/20 bg-jade-500/10"
-                : "text-solar-500 border-solar-500/20 bg-solar-500/10"
-            }`}>
-              {status === "generated" ? "● Ready" : <Loader2 className="w-3 h-3 animate-spin" />}
-              {status}
-            </div>
-
-            <button
-              onClick={handleExportHtml}
-              title="Download standalone HTML file"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-cobalt-500/40 text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all active:scale-95 cursor-pointer"
-            >
-              <Download className="w-3 h-3 text-cobalt-600 dark:text-cobalt-400" />
-              Export
-            </button>
-
-            <button
-              onClick={() => window.print()}
-              title="Print or Save as PDF"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-cobalt-500/40 text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all active:scale-95 cursor-pointer"
-            >
-              <Printer className="w-3 h-3 text-marine-500" />
-              PDF
-            </button>
-
-            <button
-              onClick={handleRegenerateLesson}
-              disabled={isBusy}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-cobalt-500/40 text-xs font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3 text-cobalt-500" />
-              Rebuild
-            </button>
-          </div>
+        <div className="hidden 2xl:flex absolute right-6 top-1/2 -translate-y-1/2 flex-col items-center gap-6 font-mono text-[10px] text-slate-400 dark:text-slate-600 select-none">
+          <span className="tracking-widest uppercase [writing-mode:vertical-lr] text-cyan-500/80 font-bold">
+            RUNTIME : 60FPS
+          </span>
+          <div className="w-px h-24 bg-gradient-to-b from-cyan-500/40 via-slate-700/40 to-transparent" />
+          <span>[TeX] COMPILED</span>
         </div>
       </div>
 
-      {/* Lesson Surface — Constrained cleanly to max-w-[940px] to prevent width mismatch */}
-      <div className="w-full max-w-[940px] mx-auto px-4 sm:px-6">
-        {status === "generating" ? (
-          <div className="py-12">
-            <GeneratingTelemetryVisualizer pipeline={null} topicTitle={outline || title} />
-          </div>
-        ) : (compile_error || !ts_code) ? (
-          <div className="glass-card p-12 border-red-500/20 bg-red-500/5 my-8">
-            <div className="flex items-center gap-3 text-red-500 mb-6 font-black text-xl">
-              <ShieldAlert className="w-6 h-6" />
-              Lesson Generation Notice
+      <div className="relative z-10">
+        <Navbar />
+
+        {/* Busy Overlay */}
+        {isBusy && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[100] flex flex-col justify-center items-center px-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-cobalt-500/20 blur-3xl rounded-full" />
+              <Loader2 className="animate-spin w-14 h-14 text-cobalt-500 mb-6 relative z-10" />
             </div>
-            <p className="text-slate-700 dark:text-slate-300 mb-6 leading-relaxed">
-              We encountered an issue preparing <strong>&ldquo;{outline}&rdquo;</strong>.
+            <h2 className="text-2xl font-black text-white mb-2 text-center">
+              {isRepairing ? "Diagnosing & Auto-Repairing Component..." : "Rebuilding Laboratory Runtime..."}
+            </h2>
+            <p className="text-slate-400 font-mono text-xs text-center">
+              {isRepairing ? "Inspecting AST syntax and repairing runtime handler..." : "Re-orchestrating multi-agent synthesis pipeline..."}
             </p>
-            <div className="bg-slate-900 rounded-xl p-6 mb-8 border border-red-500/20 font-mono text-sm text-red-400 overflow-x-auto shadow-inner">
-              {compile_error || "ts_code is missing."}
-            </div>
-            <button 
-              onClick={handleRegenerateLesson} 
-              disabled={isBusy}
-              className="px-8 py-3.5 bg-cobalt-600 text-white rounded-xl font-bold hover:bg-cobalt-500 transition-all shadow-xl shadow-cobalt-600/20 flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-50 cursor-pointer"
-            >
-              <RotateCcw className="w-4 h-4" /> Rebuild Lesson
-            </button>
           </div>
-        ) : viewMode === "document" ? (
-          <LessonDocumentView
-            document={extractLessonDocument(title, outline, ts_code)}
-            rawTsCode={ts_code}
-          />
-        ) : (
-          <>
-            {/* Live React Component Execution */}
-            <div className="w-full">
-              <LessonRunner
-                key={ts_code}
-                code={ts_code}
-                onRuntimeError={(error) => {
-                  if (error.message !== runtimeError && error.message !== lastRepairAttempt) {
-                    setRuntimeError(error.message);
-                  }
-                }}
-              />
+        )}
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[70vh]">
+            <div className="text-center p-8 rounded-xl bg-white/70 dark:bg-[#0c111c]/75 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-xl shadow-xs">
+              <Loader2 className="animate-spin w-10 h-10 text-cobalt-600 dark:text-cobalt-400 mx-auto mb-3" />
+              <p className="text-slate-700 dark:text-slate-300 font-mono text-xs font-bold uppercase tracking-wider">
+                Loading Laboratory Runtime...
+              </p>
+              <p className="text-slate-400 font-sans text-[11px] mt-1">
+                Compiling vector graph and mathematical proofs
+              </p>
             </div>
-
-            {/* Repair & Source Code Inspector Section */}
-            <div className="w-full pb-16">
-              {runtimeError && (
-                <div className="mt-8 glass-card p-6 sm:p-8 border-solar-500/30 bg-solar-500/5 animate-in slide-in-from-bottom-4 duration-300">
-                  <div className="flex items-center gap-2.5 text-solar-500 mb-3 font-black text-sm">
-                    <Wrench className="w-4 h-4" /> Simulation Preview Notice
-                  </div>
-                  <pre className="bg-slate-900 p-4 rounded-xl text-solar-300 font-mono text-xs mb-5 overflow-x-auto whitespace-pre-wrap border border-solar-500/20">{runtimeError}</pre>
-                  
-                  {repairAttempts < 2 ? (
-                    <button 
-                      onClick={handleRepairLesson} 
-                      disabled={isBusy}
-                      className="px-6 py-2.5 bg-solar-500 text-slate-950 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-solar-400 transition-all shadow-md shadow-solar-500/20 active:scale-95 disabled:opacity-50 cursor-pointer"
-                    >
-                      <Wrench className="w-4 h-4" /> Auto-Fix Issue ({2 - repairAttempts} attempts left)
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={handleRegenerateLesson} 
-                      disabled={isBusy}
-                      className="px-6 py-2.5 bg-cobalt-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-cobalt-500 transition-all active:scale-95 cursor-pointer"
-                    >
-                      <RotateCcw className="w-4 h-4" /> Rebuild Lesson
-                    </button>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-10 text-center">
-                <button 
-                  onClick={() => setShowRawCode(!showRawCode)}
-                  className="inline-flex items-center gap-2 text-xs font-mono font-bold text-slate-400 hover:text-cobalt-600 dark:hover:text-white transition-all uppercase tracking-widest cursor-pointer"
+          </div>
+        ) : !lesson ? (
+          <div className="flex flex-col justify-center items-center min-h-[70vh] px-6">
+            <div className="p-8 sm:p-10 rounded-xl bg-white/75 dark:bg-[#0c111c]/75 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-xl shadow-xs text-center max-w-md">
+              <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+              <h2 className="text-xl font-bold mb-1.5 text-slate-900 dark:text-white">Laboratory Not Found</h2>
+              <p className="text-slate-500 text-xs mb-6 leading-relaxed">
+                The laboratory module you are looking for may have expired or was removed.
+              </p>
+              <button
+                onClick={() => router.push("/studio")}
+                className="w-full py-2.5 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/20 active:scale-95 cursor-pointer"
+              >
+                Synthesize New Lab in Studio
+              </button>
+            </div>
+          </div>
+        ) : (
+          <main className="pt-4 sm:pt-6 pb-16 px-4 sm:px-6 max-w-[960px] mx-auto">
+            
+            {/* ── Top Command Bar ── */}
+            <div className="mb-3.5 p-2 sm:p-2.5 rounded-xl bg-white/75 dark:bg-[#0c111c]/75 border border-slate-200/80 dark:border-white/[0.08] backdrop-blur-xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+              
+              {/* Breadcrumb Navigation */}
+              <div className="flex items-center gap-2 text-xs font-mono">
+                <button
+                  onClick={() => router.push("/studio")}
+                  className="group flex items-center gap-1 font-bold text-slate-500 hover:text-cobalt-600 dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  <Code2 className="w-3.5 h-3.5" />
-                  {showRawCode ? "Hide Code" : "View Lesson Code"}
+                  <ChevronLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                  <span>STUDIO</span>
                 </button>
-                {showRawCode && (
-                  <div className="mt-5 text-left glass-card p-6 font-mono text-xs leading-relaxed text-slate-700 dark:text-slate-300 bg-slate-900/90 dark:bg-slate-950 overflow-x-auto border border-slate-200 dark:border-slate-800 shadow-inner rounded-xl">
-                    <pre className="whitespace-pre-wrap break-words">{ts_code}</pre>
-                  </div>
-                )}
+                <span className="text-slate-300 dark:text-slate-700">·</span>
+                <button
+                  onClick={() => router.push("/lessons")}
+                  className="font-bold text-slate-500 hover:text-cobalt-600 dark:hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>EXPLORE</span>
+                </button>
+                <span className="text-slate-300 dark:text-slate-700">·</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[180px] sm:max-w-[260px]">
+                  {lesson.title || lesson.outline}
+                </span>
+              </div>
+
+              {/* Mode Switcher & Actions */}
+              <div className="flex items-center gap-1.5 self-start md:self-auto flex-wrap">
+                
+                {/* Mode Switcher: Interactive Lab vs Reading View */}
+                <div className="inline-flex p-0.5 rounded-lg bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/[0.08] text-[11px] font-mono font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("interactive")}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                      viewMode === "interactive"
+                        ? "bg-cobalt-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <Atom className="w-3 h-3 text-cyan-400" />
+                    <span>Interactive Lab</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("document")}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                      viewMode === "document"
+                        ? "bg-cobalt-600 text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <FileText className="w-3 h-3" />
+                    <span>Reading View</span>
+                  </button>
+                </div>
+
+                <div className={`flex items-center gap-1 px-2.5 py-1 rounded-md border text-[10px] font-mono font-bold uppercase tracking-wider ${
+                  lesson.status === "generated"
+                    ? "text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                    : "text-solar-500 border-solar-500/20 bg-solar-500/10"
+                }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Ready</span>
+                </div>
+
+                <button
+                  onClick={handleExportHtml}
+                  title="Download standalone HTML file"
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-white/[0.08] hover:border-cobalt-500/40 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all cursor-pointer shadow-xs"
+                >
+                  <Download className="w-3 h-3 text-cobalt-500" />
+                  <span>Export</span>
+                </button>
+
+                <button
+                  onClick={() => window.print()}
+                  title="Print or Save as PDF"
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-white/[0.08] hover:border-cobalt-500/40 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all cursor-pointer shadow-xs"
+                >
+                  <Printer className="w-3 h-3 text-cyan-500" />
+                  <span>PDF</span>
+                </button>
+
+                <button
+                  onClick={handleRegenerateLesson}
+                  disabled={isBusy}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-slate-200/80 dark:border-white/[0.08] hover:border-cobalt-500/40 text-[11px] font-mono font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 transition-all disabled:opacity-50 cursor-pointer shadow-xs"
+                >
+                  <RotateCcw className="w-3 h-3 text-cobalt-500" />
+                  <span>Rebuild</span>
+                </button>
+
               </div>
             </div>
-          </>
+
+            {/* ── Lesson Surface Frame ── */}
+            <div className="w-full">
+              {lesson.status === "generating" ? (
+                <div className="py-8">
+                  <GeneratingTelemetryVisualizer pipeline={null} topicTitle={lesson.outline || lesson.title} />
+                </div>
+              ) : (lesson.compile_error || !lesson.ts_code) ? (
+                <div className="p-6 sm:p-8 rounded-xl bg-white/75 dark:bg-[#0c111c]/75 border border-rose-500/30 backdrop-blur-xl shadow-sm my-4">
+                  <div className="flex items-center gap-2 text-rose-500 mb-3 font-mono font-bold text-sm">
+                    <ShieldAlert className="w-4 h-4" />
+                    <span>SYNTAX COMPILE NOTICE</span>
+                  </div>
+                  <p className="text-slate-700 dark:text-slate-300 text-xs mb-4 leading-relaxed font-sans">
+                    Encountered a compile-time syntax conflict while generating <strong>&ldquo;{lesson.outline}&rdquo;</strong>.
+                  </p>
+                  <div className="bg-black/60 rounded-lg p-3 mb-5 border border-rose-500/20 font-mono text-xs text-rose-400 overflow-x-auto shadow-inner">
+                    {lesson.compile_error || "ts_code is empty."}
+                  </div>
+                  <button 
+                    onClick={handleRegenerateLesson} 
+                    disabled={isBusy}
+                    className="px-4 py-2 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/25 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Rebuild Laboratory</span>
+                  </button>
+                </div>
+              ) : viewMode === "document" ? (
+                <LessonDocumentView
+                  document={extractLessonDocument(lesson.title, lesson.outline, lesson.ts_code)}
+                  rawTsCode={lesson.ts_code}
+                />
+              ) : (
+                <>
+                  {/* Live React Component Execution */}
+                  <div className="w-full rounded-2xl border border-slate-200/80 dark:border-white/[0.08] bg-white/75 dark:bg-[#0c111c]/80 backdrop-blur-xl shadow-lg p-4 sm:p-6 transition-all">
+                    
+                    {/* Laboratory Instrument Sub-Header */}
+                    <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200/70 dark:border-white/[0.06] text-[10px] font-mono text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                        <span className="font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                          VECTOR SIMULATION STAGE : 60 FPS
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-cobalt-600 dark:text-cyan-400 font-bold">FIRST-PRINCIPLES MATH</span>
+                        <span className="text-slate-300 dark:text-slate-700">|</span>
+                        <span>SOCRATIC INTERACTIVE</span>
+                      </div>
+                    </div>
+
+                    <LessonRunner
+                      key={lesson.ts_code}
+                      code={lesson.ts_code}
+                      onRuntimeError={(error) => {
+                        if (error.message !== runtimeError && error.message !== lastRepairAttempt) {
+                          setRuntimeError(error.message);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Repair & Source Code Inspector Section */}
+                  <div className="w-full pt-6">
+                    {runtimeError && (
+                      <div className="p-4 sm:p-5 rounded-xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-md mb-6 animate-scale-in">
+                        <div className="flex items-center gap-2 text-amber-500 mb-2 font-mono font-bold text-xs">
+                          <Wrench className="w-3.5 h-3.5" />
+                          <span>SIMULATION RUNTIME DIAGNOSTIC</span>
+                        </div>
+                        <pre className="bg-black/60 p-3 rounded-lg text-amber-300 font-mono text-[11px] mb-3 overflow-x-auto whitespace-pre-wrap border border-amber-500/20">{runtimeError}</pre>
+                        
+                        {repairAttempts < 2 ? (
+                          <button 
+                            onClick={handleRepairLesson} 
+                            disabled={isBusy}
+                            className="px-3.5 py-1.5 bg-amber-500 text-slate-950 rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-amber-400 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                          >
+                            <Wrench className="w-3.5 h-3.5" />
+                            <span>Auto-Fix Runtime Issue ({2 - repairAttempts} attempts left)</span>
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={handleRegenerateLesson} 
+                            disabled={isBusy}
+                            className="px-3.5 py-1.5 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-cobalt-500 transition-all cursor-pointer"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Rebuild Laboratory</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="text-center pt-2">
+                      <button 
+                        onClick={() => setShowRawCode(!showRawCode)}
+                        className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-slate-400 hover:text-cobalt-600 dark:hover:text-white transition-all uppercase tracking-wider cursor-pointer"
+                      >
+                        <Code2 className="w-3.5 h-3.5" />
+                        <span>{showRawCode ? "Hide Laboratory AST Source" : "Inspect Compiled Source Code"}</span>
+                      </button>
+                      
+                      {showRawCode && (
+                        <div className="mt-3 text-left p-4 font-mono text-xs leading-relaxed text-slate-300 bg-black/70 overflow-x-auto border border-slate-200/80 dark:border-white/[0.08] shadow-inner rounded-xl backdrop-blur-md">
+                          <pre className="whitespace-pre-wrap break-words">{lesson.ts_code}</pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <footer className="mt-10 pt-6 border-t border-slate-200/70 dark:border-white/[0.08] flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+              <div>LessonCrafter · Parametric STEM Platform</div>
+              <div>Hardware Accelerated Interactive Synthesis</div>
+            </footer>
+
+            {/* Study Assistant Sidecar Drawer */}
+            <SocraticTutorDrawer lessonTitle={lesson.title || lesson.outline} lessonOutline={lesson.outline} />
+          </main>
         )}
       </div>
 
-      <footer className="max-w-[940px] mx-auto px-4 sm:px-6 pt-12 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
-        <div>LessonCrafter · Interactive Learning Platform</div>
-        <div>Explore concepts through hands-on simulations</div>
-      </footer>
-
-      {/* Study Assistant Sidecar Drawer */}
-      <SocraticTutorDrawer lessonTitle={title || outline} lessonOutline={outline} />
-    </main>
+    </div>
   );
 }

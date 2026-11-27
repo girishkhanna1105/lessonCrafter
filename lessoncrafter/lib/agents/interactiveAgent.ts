@@ -46,14 +46,15 @@ DESIGN & ARCHITECTURE REQUIREMENTS:
 
 2. INSTRUMENT-GRADE VISUAL DESIGN:
    - Palette: Cobalt (#2563eb), Marine Cyan (#06b6d4), Emerald (#10b981), Solar Amber (#f59e0b). NEVER purple or violet.
-   - Clean dark-slate instrument frame with subtle border and status header:
-     - Header bar with title, model status pill ("Active Simulation", "60 FPS"), and preset buttons.
-     - Centerpiece SVG visualizer with coordinate axes, soft gridlines, glowing dynamic paths (using linearGradient or drop-shadow), and animated or parameterized markers.
+   - Punctuation: NEVER use "//" in any label, badge, or title (use clean ":" or "·").
+   - Clean instrument frame with subtle hairline border and precision header:
+     - Header bar with title, model status pill ("● VECTOR RUNTIME : 60 FPS"), and hypothesis scenario presets.
+     - Centerpiece SVG visualizer with coordinate axes, dark blueprint coordinate grid background (using an SVG pattern with blue/cyan gridlines), glowing laser vector trajectories (linearGradient / subtle filter glow), and reticle coordinate telemetry.
    - Dedicated Control Dock beneath the canvas:
-     - 2 to 3 labeled parameter sliders (e.g. Frequency, Damping, Amplitude, or Phase) with real-time numeric readouts.
-     - 2 to 3 Quick Preset buttons (e.g. "Baseline State", "Critical Resonance", "Damped Equilibrium").
+     - 2 to 3 tactile parameter sliders with monospace numeric value tags and physical units (e.g. "65 meV", "1.25 rad/s").
+     - 2 to 3 Quick Scenario presets (e.g. "Tunneling", "Pass Over", "Critical Bound").
    - Live Telemetry Readout Grid:
-     - 3 to 4 computed metric pills (e.g. "Total Energy", "Q-Factor", "System Entropy", "Phase Shift") calculated dynamically from the current slider states.
+     - 3 to 4 computed metric pills (e.g. "Transmitted: 1.0%", "Energy: 4.2 eV", "Entropy: 0.18 S") calculated dynamically from current slider states.
 
 3. REACT FORMAT:
    - Valid self-contained React functional component snippet:

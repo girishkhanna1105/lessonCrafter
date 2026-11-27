@@ -71,14 +71,14 @@ Explanation: "${q.explanation}"
 `).join("\n")}
 
 DESIGN & ARCHITECTURE DIRECTIVES:
-1. DUAL-MODE PALETTE:
+1. DUAL-MODE KINETIC PALETTE:
    At top of LessonComponent:
    const dark = typeof isDark !== 'undefined' ? isDark : true;
    const C = {
      bg: dark ? '#0a0f18' : '#f8fafc',
-     card: dark ? '#111827' : '#ffffff',
-     cardAlt: dark ? '#161f30' : '#f1f5f9',
-     border: dark ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
+     card: dark ? 'rgba(12, 17, 28, 0.78)' : 'rgba(255, 255, 255, 0.82)',
+     cardAlt: dark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(241, 245, 249, 0.7)',
+     border: dark ? 'rgba(255,255,255,0.08)' : 'rgba(226,232,240,0.85)',
      borderHover: dark ? 'rgba(37,99,235,0.4)' : 'rgba(37,99,235,0.3)',
      text: dark ? '#f8fafc' : '#0f172a',
      textMuted: dark ? '#94a3b8' : '#64748b',
@@ -90,58 +90,61 @@ DESIGN & ARCHITECTURE DIRECTIVES:
      danger: '#ef4444'
    };
 
-2. STRICT UNIFIED WIDTH & CARD ARCHITECTURE:
-   CRITICAL CONSISTENT WIDTH RULE:
+2. STRICT UNIFIED WIDTH & INSTRUMENT CARD ARCHITECTURE:
+   CRITICAL CONSISTENT WIDTH & SPACING RULE:
    - The master outer container and EVERY SINGLE card in the lesson MUST share the EXACT SAME WIDTH: maxWidth 920px!
-   - NO card is allowed to be wider or narrower than any other card. Every card (Hero Banner, Interactive Lab, Section Cards 1..6, Worked Example, Quiz) must align perfectly to the exact same left and right edges.
+   - NO card is allowed to be wider or narrower than any other card. Every card must align perfectly to the exact same left and right edges.
+   - Punctuation: NEVER use "//" in any user-facing badge, subtitle, or title. Always use ":" or "·" (e.g. "ENGINE: ACTIVE · 60 FPS VECTOR").
    
-   Define a unified card style at the top of LessonComponent:
+   Define unified instrument card style at the top of LessonComponent:
    const cardStyle = {
      width: '100%',
      maxWidth: '920px',
      margin: '0 auto',
      background: C.card,
+     backdropFilter: 'blur(16px)',
+     WebkitBackdropFilter: 'blur(16px)',
      border: '1px solid ' + C.border,
-     borderRadius: '20px',
-     padding: '28px 24px',
+     borderRadius: '14px',
+     padding: '20px 22px',
      boxSizing: 'border-box',
-     boxShadow: '0 4px 20px -2px rgba(0,0,0,0.1)'
+     boxShadow: dark ? '0 4px 20px -2px rgba(0,0,0,0.4)' : '0 4px 20px -2px rgba(0,0,0,0.05)'
    };
 
    Master Container:
-   style={{ width: '100%', maxWidth: '920px', margin: '0 auto', padding: '16px 0', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '28px' }}
+   style={{ width: '100%', maxWidth: '920px', margin: '0 auto', padding: '12px 0', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: '20px' }}
 
    A. HERO HEADER BANNER:
       - Container: style={cardStyle}
-      - Subject badge ("${content.subject}") & Level pill ("${content.level}") with font-mono text.
-      - Lesson title with font-size 2.2rem, font-weight 900, line-height 1.25, color C.text.
-      - Collapsible or prominent Learning Objectives drawer with CheckCircle2 icons.
+      - Top Precision Status Strip: font-mono text-[10px], letter-spacing 0.05em, status dot (● ACTIVE), Subject badge ("${content.subject}") & Level pill ("${content.level}").
+      - Lesson title with font-size 1.85rem sm:2.2rem, font-weight 900, line-height 1.25, color C.text.
+      - Collapsible or prominent Learning Objectives drawer with CheckCircle2 icons and monospace numbered tags.
 
-   B. CENTERPIECE INTERACTIVE SIMULATION LAB:
+   B. CENTERPIECE INTERACTIVE SIMULATION LAB (VECTOR SCOPE):
       - Container: style={cardStyle} (Single card container — DO NOT double-wrap or nest inside an extra card!).
-      - Header with "Interactive Simulation Lab", live status pill ("Active Model", "Interactive Simulation"), and preset buttons.
-      - Dynamic SVG visualizer with viewBox="0 0 860 340", width: '100%', height: 'auto', glowing paths, and coordinate axes.
-      - Parameter control dock with responsive grid (minmax 220px, 1fr) for sliders and live value displays.
+      - Header bar with "INTERACTIVE SIMULATION LAB : 60 FPS VECTOR", live indicator dot, and 1-click hypothesis scenario presets.
+      - Dynamic SVG visualizer with viewBox="0 0 860 340", width: '100%', height: 'auto', subtle coordinate blueprint grid pattern, glowing laser vector paths, and auto-centering reticle coordinate readouts.
+      - Parameter control dock with responsive grid for tactile sliders with monospace value chips and physical units.
       - Telemetry readout pills displaying dynamic metrics derived from slider states.
 
    C. COMPREHENSIVE CURRICULUM MODULES (SECTIONS 1 THROUGH 6):
       - EVERY SECTION MUST BE A DEDICATED CARD USING style={cardStyle}!
-      - Numbered badge ("01", "02", "03", etc.).
+      - Monospace numbered stage badge ("01 · Parametric Modeling", "02 · Analytical Derivation", etc.).
       - Section title and overview paragraphs.
-      - Structured subsections (e.g. 1.1, 1.2) with distinct subheadings and deep multi-paragraph explanations.
+      - Structured subsections with distinct subheadings and deep multi-paragraph explanations.
       - Key Takeaways bulleted list with CheckCircle2 icons.
-      - Misconception Alert card with 1px amber border, light amber background, and AlertTriangle icon.
-      - Real-World Case Study / Analogy card with 4px cobalt left-border and Lightbulb icon.
-      - Monospace mathematical formulations or code snippet blocks with dark slate background.
+      - Socratic Misconception Alert card with 1px amber border, subtle amber glow, and AlertTriangle icon.
+      - Real-World Case Study / Physical Analogy card with 3px cobalt left-border and Lightbulb icon.
+      - Monospace mathematical formulations or code snippet blocks with dark background (#080c14).
 
    ${content.worked_example ? `
-   D. WORKED EXAMPLE:
+   D. WORKED EXAMPLE (COGNITIVE DAG PROGRESSION):
       - Container: style={cardStyle}
       - Title, challenge problem scenario, and step-by-step breakdown boxes with numbered badges.
       - Core insight callout with Target icon.
    ` : ""}
 
-   E. PRACTICE QUESTIONS & SOLUTIONS:
+   E. PRACTICE QUESTIONS & SOKRATIC SOLUTIONS:
       - Container: style={cardStyle}
       - Question counter badge, progress bar, 4 tactile option cards with circular "A", "B", "C", "D" badges.
       - Instant feedback (Emerald for correct, Amber for incorrect distractor).
