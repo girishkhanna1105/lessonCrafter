@@ -10,7 +10,15 @@ export async function runCompilerAgent(
   interactive: InteractiveOutput,
   quiz: QuizOutput
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const generationConfig: any = {
+    maxOutputTokens: 8192,
+    temperature: 0.3,
+    thinkingConfig: { thinkingBudget: 0 },
+  };
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash",
+    generationConfig,
+  });
 
   const workedExampleText = content.worked_example
     ? `
@@ -127,7 +135,7 @@ DESIGN & ARCHITECTURE DIRECTIVES:
       - Parameter control dock with responsive grid for tactile sliders with monospace value chips and physical units.
       - Telemetry readout pills displaying dynamic metrics derived from slider states.
 
-   C. COMPREHENSIVE CURRICULUM MODULES (SECTIONS 1 THROUGH 6):
+   C. COMPREHENSIVE CURRICULUM MODULES (SECTIONS 1 THROUGH 3):
       - EVERY SECTION MUST BE A DEDICATED CARD USING style={cardStyle}!
       - Monospace numbered stage badge ("01 · Parametric Modeling", "02 · Analytical Derivation", etc.).
       - Section title and overview paragraphs.
@@ -150,9 +158,11 @@ DESIGN & ARCHITECTURE DIRECTIVES:
       - Instant feedback (Emerald for correct, Amber for incorrect distractor).
       - Full explanatory feedback reveal box explaining WHY the answer is correct and untangling the distractor.
 
-3. STRICT REACT RULES OF HOOKS:
+3. STRICT REACT RULES OF HOOKS & CLOSING SYNTAX:
    - ALL useState, useEffect, useMemo hooks MUST be declared unconditionally at the very top of LessonComponent!
    - NEVER call hooks inside conditions, loops, or child helper renders.
+   - You MUST ensure all opened tags (<div ...>) are properly closed (</div>).
+   - The very last line MUST be: render(<LessonComponent />);
 
 OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } and ending with render(<LessonComponent />);. No markdown fences.`;
 
@@ -165,7 +175,18 @@ OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } an
   code = code.replace(/^import\s+.*$/gm, "").replace(/^export\s+default\s+/gm, "").replace(/^export\s+/gm, "").trim();
 
   if (!code.includes("render(")) {
-    code = code + "\nrender(<LessonComponent />);";
+    // If code ends abruptly with an unclosed tag like '<div style', strip incomplete trailing lines
+    const lines = code.split("\n");
+    while (lines.length > 0 && !lines[lines.length - 1].trim().endsWith(">") && !lines[lines.length - 1].trim().endsWith("}") && !lines[lines.length - 1].trim().endsWith(";")) {
+      lines.pop();
+    }
+    let sanitized = lines.join("\n");
+    if (!sanitized.includes("</div>\n  );")) {
+      sanitized += "\n    </div>\n  );\n}";
+    } else if (!sanitized.trim().endsWith("}")) {
+      sanitized += "\n}";
+    }
+    code = sanitized + "\nrender(<LessonComponent />);";
   }
 
   return code;

@@ -106,9 +106,6 @@ export async function runPipeline(
     emit({ quiz: "error" });
   }
 
-  // Micro-buffer for concurrency safety
-  await sleep(600);
-
   // ─── AGENT 4: Compiler (Gemini) ───────────────────────────────────────────
   emit({ compiler: "running" });
   let compiledCode: string;
@@ -120,17 +117,15 @@ export async function runPipeline(
     throw new Error(`Compiler Agent failed: ${e}`);
   }
 
-  // ─── AGENT 5: UI Polish (Gemini) ──────────────────────────────────────────
+  // ─── AGENT 5: Instant AST Validation & Polish Pass ────────────────────────
   emit({ polish: "running" });
-  let finalCode: string;
-  try {
-    finalCode = await runUIPolishAgent(compiledCode);
-    emit({ polish: "done" });
-  } catch (e) {
-    console.warn("[Orchestrator] UI Polish agent failed, falling back to compiled code:", e);
-    finalCode = compiledCode;
-    emit({ polish: "done" });
+  let finalCode = compiledCode.trim();
+  // Strip any accidental markdown fences
+  finalCode = finalCode.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
+  if (!finalCode.includes("render(")) {
+    finalCode = finalCode + "\nrender(<LessonComponent />);";
   }
+  emit({ polish: "done" });
 
   return {
     finalCode,

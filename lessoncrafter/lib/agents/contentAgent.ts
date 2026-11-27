@@ -49,12 +49,15 @@ export async function runContentAgent(
   pedagogyBrief?: PedagogyBrief,
   intakeAnswers?: Record<string, string>
 ): Promise<LessonContent> {
+  const generationConfig: any = {
+    maxOutputTokens: 8192,
+    temperature: 0.3,
+    responseMimeType: "application/json",
+    thinkingConfig: { thinkingBudget: 0 },
+  };
   const model = genAI.getGenerativeModel({ 
     model: "gemini-2.5-flash",
-    generationConfig: {
-      maxOutputTokens: 8192,
-      temperature: 0.35,
-    }
+    generationConfig,
   });
 
   const roleContext = userProfile?.role === "teacher"
@@ -86,10 +89,13 @@ ${pedagogyBrief.cognitiveMilestones.map((m, i) => `  ${i + 1}. ${m}`).join("\n")
   const prompt = `You are the Lead Pedagogical Content Architect.
 Your task is to write an exhaustive, textbook-grade academic masterclass on: "${topic}".
 
-CRITICAL LENGTH & DEPTH MANDATE:
-- Target Volume: Comprehensive 6 to 8 full printed pages (approximately 3,200 to 4,800 words total).
-- DO NOT summarize or write brief outlines. Every concept must be explored deeply from first principles.
-- Use the hierarchical "subsections" structure to unpack specific mathematical proofs, mechanical foundations, and real-world architectures with academic precision.
+CRITICAL VOLUME & RIGOR MANDATE:
+- Generate exactly 3 authoritative, high-density curriculum modules:
+  * Module 01: First-Principles Mechanics & Core Governing Constraints
+  * Module 02: Analytical Formulations, Dynamics & State Transitions
+  * Module 03: Practical Synthesis, Real-World Systems & Edge Case Failure Modes
+- Focus on technical rigor, mathematical equations, and actionable mental models.
+- Keep total output concise and dense (approx. 1,200 to 1,600 words total) so it parses cleanly in JSON without truncation.
 
 USER CONTEXT:
 ${roleContext}
@@ -247,7 +253,7 @@ Generate an exhaustive masterclass document matching this schema (Return ONLY va
   "summary": "An executive synthesis consolidating the core laws, trade-offs, and mental models into a definitive mental checklist."
 }
 
-Generate exactly 6 comprehensive modules with detailed subsections. Every subsection must have rich, substantive paragraphs with technical depth.`;
+Generate exactly 3 authoritative modules with structured subsections and dense technical depth. Output strictly valid JSON.`;
 
   const fallbackContent: LessonContent = {
     title: topic,

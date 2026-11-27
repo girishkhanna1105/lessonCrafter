@@ -20,7 +20,15 @@ export async function runInteractiveAgent(
   content: LessonContent,
   pedagogyBrief?: PedagogyBrief
 ): Promise<InteractiveOutput> {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const generationConfig: any = {
+    maxOutputTokens: 4096,
+    temperature: 0.25,
+    thinkingConfig: { thinkingBudget: 0 },
+  };
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash",
+    generationConfig,
+  });
 
   const sectionsOverview = content.sections
     .map((s, i) => `Section ${i + 1}: "${s.title}" — Key: ${s.key_points.slice(0, 2).join(", ")}`)
