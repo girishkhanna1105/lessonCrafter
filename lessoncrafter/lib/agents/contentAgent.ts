@@ -1,8 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { safeJsonParse } from "./safeJson";
 import { PedagogyBrief } from "./pedagogyAgent";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { callResilientLlm } from "../llmClient";
 
 export interface ContentSubsection {
   title: string;
@@ -49,17 +47,6 @@ export async function runContentAgent(
   pedagogyBrief?: PedagogyBrief,
   intakeAnswers?: Record<string, string>
 ): Promise<LessonContent> {
-  const generationConfig: any = {
-    maxOutputTokens: 8192,
-    temperature: 0.3,
-    responseMimeType: "application/json",
-    thinkingConfig: { thinkingBudget: 0 },
-  };
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig,
-  });
-
   const roleContext = userProfile?.role === "teacher"
     ? `Target Audience: TEACHER classroom delivery. Provide rigorous curriculum alignment, in-depth theoretical explanations, and instructional clarity.
        Teaching style: ${userProfile?.teaching_style || "conceptual derivation"}
@@ -182,60 +169,6 @@ Generate an exhaustive masterclass document matching this schema (Return ONLY va
       "real_world_example": "...",
       "misconception_callout": "...",
       "code_snippet": "..."
-    },
-    {
-      "title": "04. Real-World Architecture & Engineering Implementation",
-      "explanation": "Overview of practical real-world implementations.",
-      "subsections": [
-        {
-          "title": "4.1 System Topology & Practical Pipeline",
-          "content": "Detailed real-world deployment (2-3 paragraphs, 250+ words) covering implementation details and best practices."
-        },
-        {
-          "title": "4.2 Critical Trade-Off Analysis: Performance vs Complexity",
-          "content": "Detailed real-world deployment (2-3 paragraphs, 250+ words) exploring architectural choices and tradeoffs."
-        }
-      ],
-      "key_points": [ ... ],
-      "real_world_example": "...",
-      "misconception_callout": "...",
-      "code_snippet": "..."
-    },
-    {
-      "title": "05. Edge Cases, Failure Modes & Boundary Conditions",
-      "explanation": "Overview of unusual edge cases, failure modes, and boundary states.",
-      "subsections": [
-        {
-          "title": "5.1 Threshold Behavior & Asymptotic Limits",
-          "content": "Rigorous investigation (2-3 paragraphs, 250+ words) of behavior as variables approach boundary conditions."
-        },
-        {
-          "title": "5.2 Error Handling & Recovery Strategies",
-          "content": "Rigorous investigation (2-3 paragraphs, 250+ words) on fail-safe mechanisms and mitigation strategies."
-        }
-      ],
-      "key_points": [ ... ],
-      "real_world_example": "...",
-      "misconception_callout": "...",
-      "code_snippet": "..."
-    },
-    {
-      "title": "06. Practical Applications & Modern Frontiers",
-      "explanation": "Overview of modern industry applications and cutting-edge directions.",
-      "subsections": [
-        {
-          "title": "6.1 Comparative Paradigm Analysis",
-          "content": "In-depth comparison (2-3 paragraphs, 250+ words) contrasting competing schools of thought and alternative representations."
-        },
-        {
-          "title": "6.2 Open Problems & Next-Generation Horizons",
-          "content": "In-depth exploration (2-3 paragraphs, 250+ words) of unresolved questions and emergent methodologies."
-        }
-      ],
-      "key_points": [ ... ],
-      "real_world_example": "...",
-      "misconception_callout": "...",
-      "code_snippet": "..."
     }
   ],
   "worked_example": {
@@ -323,12 +256,17 @@ Generate exactly 3 authoritative modules with structured subsections and dense t
   };
 
   try {
-    const result = await model.generateContent(prompt);
-    const rawText = result.response.text().trim();
+    const rawText = await callResilientLlm({
+      prompt,
+      systemPrompt: "You are the Lead Pedagogical Content Architect. Return strictly valid JSON matching the requested schema.",
+      jsonMode: true,
+      maxTokens: 5000,
+      temperature: 0.25,
+    });
     const parsed = safeJsonParse<LessonContent>(rawText, fallbackContent);
     return parsed.sections && parsed.sections.length >= 2 ? parsed : fallbackContent;
   } catch (err: any) {
-    console.error("[ContentAgent] Gemini failed, using fallback:", err.message);
+    console.error("[ContentAgent] Resilient LLM failed, using fallback:", err.message);
     return fallbackContent;
   }
 }

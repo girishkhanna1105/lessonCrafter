@@ -1,9 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { LessonContent } from "./contentAgent";
 import { safeJsonParse } from "./safeJson";
 import { PedagogyBrief } from "./pedagogyAgent";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { callResilientLlm } from "../llmClient";
 
 export interface InteractiveElement {
   type: "code_demo" | "visualization" | "diagram" | "animation";
@@ -20,16 +18,6 @@ export async function runInteractiveAgent(
   content: LessonContent,
   pedagogyBrief?: PedagogyBrief
 ): Promise<InteractiveOutput> {
-  const generationConfig: any = {
-    maxOutputTokens: 4096,
-    temperature: 0.25,
-    thinkingConfig: { thinkingBudget: 0 },
-  };
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig,
-  });
-
   const sectionsOverview = content.sections
     .map((s, i) => `Section ${i + 1}: "${s.title}" — Key: ${s.key_points.slice(0, 2).join(", ")}`)
     .join("\n");
@@ -224,11 +212,16 @@ Return ONLY valid JSON.`;
   };
 
   try {
-    const result = await model.generateContent(prompt);
-    const rawText = result.response.text().trim();
+    const rawText = await callResilientLlm({
+      prompt,
+      systemPrompt: "You are the Lead Interactive Simulation Engineer. Return strictly valid JSON with no markdown fences.",
+      jsonMode: true,
+      maxTokens: 3500,
+      temperature: 0.25,
+    });
     return safeJsonParse<InteractiveOutput>(rawText, fallback);
   } catch (e: any) {
-    console.error("[InteractiveAgent] Gemini error, using fallback:", e.message);
+    console.error("[InteractiveAgent] Resilient LLM error, using fallback:", e.message);
     return fallback;
   }
 }

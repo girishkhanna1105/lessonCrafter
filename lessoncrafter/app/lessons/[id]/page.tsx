@@ -92,13 +92,10 @@ export default function LessonViewer() {
     fetchLesson();
   }, [id, supabase]);
 
-  const handleRepairLesson = async () => {
+  const handleRepairLesson = async (specificError?: string) => {
     if (!lesson || !lesson.ts_code || isRepairing || isRegenerating) return;
-    const errToFix = runtimeError || "SyntaxError: Unexpected token in laboratory component";
-    if (errToFix === lastRepairAttempt && repairAttempts >= 2) {
-      alert("Maximum auto-repair attempts reached for this session. Please try rebuilding the lesson.");
-      return;
-    }
+    const errToFix = specificError || runtimeError || "SyntaxError: Unexpected token in laboratory component";
+    if (repairAttempts >= 2) return;
     
     setIsRepairing(true);
     setLastRepairAttempt(errToFix);
@@ -519,48 +516,15 @@ export default function LessonViewer() {
                     <LessonRunner
                       key={lesson.ts_code}
                       code={lesson.ts_code}
-                      onRuntimeError={(error) => {
-                        if (error.message !== runtimeError && error.message !== lastRepairAttempt) {
-                          setRuntimeError(error.message);
-                        }
-                      }}
-                      onAutoFix={handleRepairLesson}
+                      onAutonomousRepair={(error) => handleRepairLesson(error.message)}
                       onRebuild={handleRegenerateLesson}
-                      isBusy={isBusy}
+                      isRepairing={isRepairing}
+                      repairAttempts={repairAttempts}
                     />
                   </div>
 
-                  {/* Repair & Source Code Inspector Section */}
-                  <div className="w-full pt-6">
-                    {runtimeError && (
-                      <div className="p-4 sm:p-5 rounded-xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-md mb-6 animate-scale-in">
-                        <div className="flex items-center gap-2 text-amber-500 mb-2 font-mono font-bold text-xs">
-                          <Wrench className="w-3.5 h-3.5" />
-                          <span>SIMULATION RUNTIME DIAGNOSTIC</span>
-                        </div>
-                        <pre className="bg-black/60 p-3 rounded-lg text-amber-300 font-mono text-[11px] mb-3 overflow-x-auto whitespace-pre-wrap border border-amber-500/20">{runtimeError}</pre>
-                        
-                        {repairAttempts < 2 ? (
-                          <button 
-                            onClick={handleRepairLesson} 
-                            disabled={isBusy}
-                            className="px-3.5 py-1.5 bg-amber-500 text-slate-950 rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-amber-400 transition-all shadow-sm cursor-pointer disabled:opacity-50"
-                          >
-                            <Wrench className="w-3.5 h-3.5" />
-                            <span>Auto-Fix Runtime Issue ({2 - repairAttempts} attempts left)</span>
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={handleRegenerateLesson} 
-                            disabled={isBusy}
-                            className="px-3.5 py-1.5 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-cobalt-500 transition-all cursor-pointer"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Rebuild Laboratory</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
+                  {/* Source Code Inspector Section */}
+                  <div className="w-full pt-4">
 
                     <div className="text-center pt-2">
                       <button 

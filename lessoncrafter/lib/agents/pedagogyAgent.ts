@@ -60,7 +60,7 @@ Return ONLY valid JSON.`;
 
   // 1. Groq high-speed inference (with verified active models)
   if (groq) {
-    const candidateModels = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
+    const candidateModels = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
     for (const modelId of candidateModels) {
       try {
         const completion = await groq.chat.completions.create({

@@ -6,86 +6,80 @@ import * as LucideIcons from "lucide-react";
 
 interface LessonRunnerProps {
   code: string;
-  onRuntimeError?: (error: Error) => void;
-  onAutoFix?: () => void;
+  onAutonomousRepair?: (error: Error) => void;
   onRebuild?: () => void;
-  isBusy?: boolean;
+  isRepairing?: boolean;
+  repairAttempts?: number;
 }
 
 function LiveErrorMonitor({
-  onError,
-  onAutoFix,
+  onAutonomousRepair,
   onRebuild,
-  isBusy,
+  isRepairing,
+  repairAttempts = 0,
 }: {
-  onError?: (error: Error) => void;
-  onAutoFix?: () => void;
+  onAutonomousRepair?: (error: Error) => void;
   onRebuild?: () => void;
-  isBusy?: boolean;
+  isRepairing?: boolean;
+  repairAttempts?: number;
 }) {
   const { error } = React.useContext(LiveContext);
 
   React.useEffect(() => {
-    if (error && onError) {
-      onError(new Error(error));
+    if (error && !isRepairing && repairAttempts < 2 && onAutonomousRepair) {
+      onAutonomousRepair(new Error(error));
     }
-  }, [error, onError]);
+  }, [error, isRepairing, repairAttempts, onAutonomousRepair]);
 
   if (!error) return null;
 
+  // While autonomous repair is running or within 2 attempts: show calm, elegant calibration state
+  if (isRepairing || repairAttempts < 2) {
+    return (
+      <div className="my-8 p-8 rounded-2xl border border-cobalt-500/20 bg-cobalt-500/5 backdrop-blur-xl text-center max-w-lg mx-auto shadow-sm">
+        <LucideIcons.Loader2 className="w-8 h-8 text-cobalt-500 animate-spin mx-auto mb-3" />
+        <h4 className="text-xs font-mono font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">
+          Calibrating Laboratory Runtime...
+        </h4>
+        <p className="text-[11px] text-slate-500 font-sans">
+          Autonomously optimizing component AST parameters (Attempt {Math.min(repairAttempts + 1, 2)}/2)
+        </p>
+      </div>
+    );
+  }
+
+  // After 2 failed attempts: Clean, friendly user notification with Rebuild action
   return (
-    <div className="mb-6 rounded-xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-md p-4 sm:p-5 text-left shadow-lg">
-      <div className="flex items-center justify-between pb-3 mb-3 border-b border-rose-500/20">
-        <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs uppercase tracking-wider">
-          <LucideIcons.AlertTriangle className="w-4 h-4 text-rose-500" />
-          <span>Simulation Syntax / Transform Notice</span>
-        </div>
-        <span className="text-[10px] font-mono text-slate-400">AST COMPILER</span>
+    <div className="my-8 p-8 sm:p-10 rounded-2xl border border-slate-200/80 dark:border-white/[0.08] bg-white/80 dark:bg-[#0c111c]/80 backdrop-blur-xl text-center max-w-md mx-auto shadow-xl">
+      <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
+        <LucideIcons.AlertTriangle className="w-6 h-6 text-amber-500" />
       </div>
-
-      <p className="text-slate-300 text-xs mb-3 font-sans">
-        A syntax discrepancy or incomplete code fragment was detected in this laboratory:
+      <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
+        Something went wrong with the system
+      </h3>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed font-sans">
+        We failed to compile your lesson. Please rebuild now so we can synthesize a fresh laboratory.
       </p>
-
-      <pre className="text-rose-400 bg-black/60 rounded-lg p-3 text-xs whitespace-pre-wrap font-mono mb-4 border border-rose-500/25 overflow-x-auto shadow-inner">
-        {error}
-      </pre>
-
-      <div className="flex items-center gap-2.5 flex-wrap">
-        {onAutoFix && (
-          <button
-            type="button"
-            onClick={onAutoFix}
-            disabled={isBusy}
-            className="px-3.5 py-2 bg-amber-500 text-slate-950 rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-amber-400 transition-all shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50"
-          >
-            <LucideIcons.Wrench className="w-3.5 h-3.5" />
-            <span>Auto-Fix Issue with AI</span>
-          </button>
-        )}
-
-        {onRebuild && (
-          <button
-            type="button"
-            onClick={onRebuild}
-            disabled={isBusy}
-            className="px-3.5 py-2 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/25 cursor-pointer disabled:opacity-50"
-          >
-            <LucideIcons.RotateCcw className="w-3.5 h-3.5" />
-            <span>Rebuild Laboratory</span>
-          </button>
-        )}
-      </div>
+      {onRebuild && (
+        <button
+          type="button"
+          onClick={onRebuild}
+          className="w-full py-2.5 bg-cobalt-600 hover:bg-cobalt-500 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 transition-all shadow-md shadow-cobalt-600/25 cursor-pointer active:scale-95"
+        >
+          <LucideIcons.RotateCcw className="w-3.5 h-3.5" />
+          <span>Rebuild Laboratory</span>
+        </button>
+      )}
     </div>
   );
 }
 
 export default function LessonRunner({
   code,
-  onRuntimeError,
-  onAutoFix,
+  onAutonomousRepair,
   onRebuild,
-  isBusy,
+  isRepairing = false,
+  repairAttempts = 0,
 }: LessonRunnerProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme !== "light"; // default to dark if undefined or dark
@@ -215,16 +209,16 @@ export default function LessonRunner({
         scope={safeScope}
         noInline={true}
       >
-        {/* Compile/Syntax errors with instant Auto-Fix and Rebuild actions */}
+        {/* Compile/Syntax errors with autonomous background auto-repair */}
         <LiveErrorMonitor
-          onError={onRuntimeError}
-          onAutoFix={onAutoFix}
+          onAutonomousRepair={onAutonomousRepair}
           onRebuild={onRebuild}
-          isBusy={isBusy}
+          isRepairing={isRepairing}
+          repairAttempts={repairAttempts}
         />
         
-        {/* RUNTIME errors */}
-        <LessonErrorBoundary onRuntimeError={onRuntimeError || (() => {})}>
+        {/* Runtime errors: automatically routed to autonomous repair */}
+        <LessonErrorBoundary onRuntimeError={onAutonomousRepair || (() => {})}>
           <LivePreview />
         </LessonErrorBoundary>
       </LiveProvider>

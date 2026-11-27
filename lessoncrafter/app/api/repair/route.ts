@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { callResilientLlm } from "@/lib/llmClient";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -18,45 +16,36 @@ export async function POST(req: Request) {
   try {
     console.log(`🔧 [Repair] Fixing runtime error for Lesson ${lessonId}: ${errorMessage}`);
 
-    const generationConfig: any = {
-      temperature: 0.2,
-      maxOutputTokens: 8192,
-      thinkingConfig: { thinkingBudget: 0 },
-    };
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
-      generationConfig,
-    });
-
-    const prompt = `You are a React code repair agent. Fix the following react-live component that has a runtime error.
+    const prompt = `You are a specialized React code repair agent. Fix the following react-live component that has a runtime or syntax error.
 
 CRITICAL FORMAT RULES (react-live noInline mode):
 1. NO import statements
 2. NO export statements
 3. Component MUST be named "LessonComponent" as: function LessonComponent() { ... }
 4. LAST LINE must be: render(<LessonComponent />)
-5. Only inline styles — no Tailwind/CSS classes
+5. Only inline styles with style={{ ... }} — no Tailwind/CSS classes
+6. Ensure all opened JSX tags are properly closed with matching closing tags!
 
 LESSON TOPIC: "${outline}"
 
 ERROR TO FIX: ${errorMessage}
 
 REPAIR DIRECTIVES:
-- IF THE ERROR IS A HOOK VIOLATION ("Rendered more hooks than during previous render" or hook count mismatch):
-  1. Remove any activeTab state and conditional rendering of hooks!
-  2. Put ALL useState and useEffect calls unconditionally at the very top of LessonComponent.
-  3. Never put hooks in array functions or object methods (e.g. "code: () => { useState() }").
-  4. Display the layout as a unified 2-column workstation (Left: Theory/Curriculum, Right: Simulation Lab + Quiz).
-- IF THE QUIZ IS DUPLICATED: Ensure exactly ONE single Quiz card renders in the right column.
-- FIX HEADER MISALIGNMENT: Give the lesson title its own full-width row with proper line-height so it never collides with buttons or badges.
+- Ensure all brackets, braces, and tags are 100% balanced and syntactically valid.
+- If hooks were declared conditionally or inside loops, move ALL useState/useEffect hooks to the top of LessonComponent.
+- Complete any truncated JSX blocks cleanly.
 
 BROKEN CODE:
 ${originalCode}
 
-Return ONLY the fixed code. No markdown. No backticks. Start with the first code line and end with render(<LessonComponent />)`;
+Return ONLY the fixed code. No markdown code fences. Start with function LessonComponent() and end with render(<LessonComponent />);`;
 
-    const result = await model.generateContent(prompt);
-    let repairedCode = result.response.text().trim();
+    let repairedCode = await callResilientLlm({
+      prompt,
+      systemPrompt: "You are a master React compiler and code repair specialist. Return ONLY raw valid React code with NO markdown fences.",
+      maxTokens: 8192,
+      temperature: 0.1,
+    });
 
     // Strip code fences
     repairedCode = repairedCode.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();

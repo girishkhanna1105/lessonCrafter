@@ -1,25 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { LessonContent } from "./contentAgent";
 import { InteractiveOutput } from "./interactiveAgent";
 import { QuizOutput } from "./quizAgent";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { callResilientLlm } from "../llmClient";
+import { transform } from "sucrase";
 
 export async function runCompilerAgent(
   content: LessonContent,
   interactive: InteractiveOutput,
   quiz: QuizOutput
 ): Promise<string> {
-  const generationConfig: any = {
-    maxOutputTokens: 8192,
-    temperature: 0.3,
-    thinkingConfig: { thinkingBudget: 0 },
-  };
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig,
-  });
-
   const workedExampleText = content.worked_example
     ? `
 WORKED EXAMPLE:
@@ -166,8 +155,12 @@ DESIGN & ARCHITECTURE DIRECTIVES:
 
 OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } and ending with render(<LessonComponent />);. No markdown fences.`;
 
-  const result = await model.generateContent(prompt);
-  let code = result.response.text().trim();
+  let code = await callResilientLlm({
+    prompt,
+    systemPrompt: "You are the Lead Educational Compiler Agent. Output raw executable React code with NO markdown code fences. End with render(<LessonComponent />);",
+    maxTokens: 8192,
+    temperature: 0.25,
+  });
 
   // Strip code fences
   code = code.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
@@ -180,18 +173,43 @@ OUTPUT: Return ONLY raw code starting with function LessonComponent() { ... } an
   code = code.replace(/```\s*$/g, "").trim();
 
   if (!code.includes("render(")) {
-    // If code ends abruptly with an unclosed tag like '<div style', strip incomplete trailing lines
-    const lines = code.split("\n");
-    while (lines.length > 0 && !lines[lines.length - 1].trim().endsWith(">") && !lines[lines.length - 1].trim().endsWith("}") && !lines[lines.length - 1].trim().endsWith(";")) {
-      lines.pop();
+    code = code + "\nrender(<LessonComponent />);";
+  }
+
+  // Pre-flight AST validation with sucrase
+  try {
+    transform(code, { transforms: ["jsx"] });
+  } catch (parseErr: any) {
+    console.warn("[CompilerAgent] Pre-flight AST check detected issue, applying instant repair pass:", parseErr.message);
+    try {
+      const repairPrompt = `Fix the syntax error in this React code component so it compiles cleanly.
+ERROR: ${parseErr.message}
+
+CODE:
+${code}
+
+Return ONLY raw repaired code starting with function LessonComponent() and ending with render(<LessonComponent />);. No markdown.`;
+
+      const repaired = await callResilientLlm({
+        prompt: repairPrompt,
+        systemPrompt: "You are a specialized code repair agent. Return ONLY raw valid React code with no markdown fences.",
+        maxTokens: 8192,
+        temperature: 0.1,
+      });
+
+      let cleanedRepair = repaired.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
+      cleanedRepair = cleanedRepair.replace(/^import\s+.*$/gm, "").replace(/^export\s+default\s+/gm, "").replace(/^export\s+/gm, "").trim();
+      if (!cleanedRepair.includes("render(")) {
+        cleanedRepair = cleanedRepair + "\nrender(<LessonComponent />);";
+      }
+
+      // Verify repaired code
+      transform(cleanedRepair, { transforms: ["jsx"] });
+      code = cleanedRepair;
+      console.log("[CompilerAgent] Pre-flight repair succeeded.");
+    } catch (repairErr: any) {
+      console.error("[CompilerAgent] Pre-flight repair could not fully resolve AST:", repairErr.message);
     }
-    let sanitized = lines.join("\n");
-    if (!sanitized.includes("</div>\n  );")) {
-      sanitized += "\n    </div>\n  );\n}";
-    } else if (!sanitized.trim().endsWith("}")) {
-      sanitized += "\n}";
-    }
-    code = sanitized + "\nrender(<LessonComponent />);";
   }
 
   return code;
