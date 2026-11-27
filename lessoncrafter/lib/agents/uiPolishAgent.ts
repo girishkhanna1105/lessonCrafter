@@ -23,9 +23,10 @@ YOUR TASKS (improve visually only, keep all functionality):
 3. STRICT REACT RULES OF HOOKS: Keep all useState and useEffect calls at the very top of LessonComponent. Never move hooks into conditionals or arrays.
 4. Header Alignment: Ensure lesson title has its own full-width row with line-height 1.3 so it never collides with or squeezes metadata badges.
 5. Quiz Polish: Ensure exactly ONE single instance of the Quiz renders. Add question progress bar, circular option letter badges (A, B, C, D), and Emerald/Red feedback badges.
-6. Polish cards with subtle hairline borders, smooth border radius (14px to 18px), and generous internal padding (24px to 32px).
+6. Kinetic Card Polish: Use subtle hairline borders (1px solid rgba(255,255,255,0.08) in dark, rgba(226,232,240,0.85) in light), precision border radius (12px to 14px), frosted translucent card backgrounds (rgba(12,17,28,0.78) in dark, rgba(255,255,255,0.82) in light with backdrop-filter: blur(16px)), and compact internal padding (18px to 22px).
 7. Ensure technical code blocks use monospace font with dark background blocks (#080c14).
 8. Strictly NO purple or violet colors.
+9. ZERO "//": Never allow "//" in any user-facing label, badge, or title. Replace with ":" or "·".
 
 OUTPUT: Return ONLY the raw code. No markdown. No \`\`\`. Start with the first code line.`;
 

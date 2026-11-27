@@ -58,9 +58,9 @@ Analyze how learners think about this topic. Output strictly valid JSON with thi
 
 Return ONLY valid JSON.`;
 
-  // 1. Groq high-speed inference
+  // 1. Groq high-speed inference (with verified active models)
   if (groq) {
-    const candidateModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+    const candidateModels = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
     for (const modelId of candidateModels) {
       try {
         const completion = await groq.chat.completions.create({
@@ -83,7 +83,7 @@ Return ONLY valid JSON.`;
           return parsed;
         }
       } catch (err: any) {
-        console.warn(`[PedagogyAgent] Groq ${modelId} failed:`, err.message);
+        // Continue to Gemini fallback immediately
       }
     }
   }
@@ -91,12 +91,14 @@ Return ONLY valid JSON.`;
   // 2. Gemini fallback
   if (genAI) {
     try {
+      const generationConfig: any = {
+        temperature: 0.2,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 0 },
+      };
       const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash-lite",
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-        },
+        generationConfig,
       });
       const res = await model.generateContent(prompt);
       const raw = res.response.text();

@@ -105,7 +105,7 @@ Return ONLY valid JSON.`;
 
   // 1. Try Groq fast inference first (<600ms)
   if (groq) {
-    const candidateModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+    const candidateModels = ["openai/gpt-oss-20b", "qwen/qwen3.8-27b"];
     for (const modelId of candidateModels) {
       try {
         const completion = await groq.chat.completions.create({
@@ -128,7 +128,7 @@ Return ONLY valid JSON.`;
           return parsed;
         }
       } catch (err: any) {
-        console.warn(`[IntakeAgent] Groq ${modelId} failed:`, err.message);
+        // Fallback to Gemini
       }
     }
   }
@@ -136,12 +136,14 @@ Return ONLY valid JSON.`;
   // 2. Fallback to Gemini 2.5 Flash Lite
   if (genAI) {
     try {
+      const generationConfig: any = {
+        temperature: 0.3,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 0 },
+      };
       const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash-lite",
-        generationConfig: {
-          temperature: 0.3,
-          responseMimeType: "application/json",
-        },
+        generationConfig,
       });
       const result = await model.generateContent(prompt);
       const raw = result.response.text();

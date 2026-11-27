@@ -94,8 +94,9 @@ Return ONLY valid JSON:
   // 1. Try Groq fast inference first
   if (groq) {
     const candidateModels = [
-      "llama-3.3-70b-versatile",
-      "llama-3.1-8b-instant",
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.8-27b",
     ];
 
     for (const modelId of candidateModels) {
@@ -123,7 +124,7 @@ Return ONLY valid JSON:
           return parsed;
         }
       } catch (err: any) {
-        console.warn(`[QuizAgent] Groq model ${modelId} failed: ${err.message}.`);
+        // Fallback to Gemini
       }
     }
   }
@@ -131,12 +132,14 @@ Return ONLY valid JSON:
   // 2. Gemini fallback
   if (genAI) {
     try {
+      const generationConfig: any = {
+        temperature: 0.2,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingBudget: 0 },
+      };
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-        },
+        model: "gemini-2.5-flash-lite",
+        generationConfig,
       });
       const res = await model.generateContent(prompt);
       const text = res.response.text();

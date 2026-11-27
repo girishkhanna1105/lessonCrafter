@@ -28,24 +28,16 @@ export async function POST(req: Request) {
     // ─── Agent 1: Re-generate content ─────────────────────────────────────
     console.log("🧠 [Regenerate] Agent 1: Content Architect running...");
     const content = await runContentAgent(outline, null);
-    await sleep(4000); // Free tier rate limit buffer
 
-    // ─── Agent 4: Compile directly (skip Interactive + Quiz for speed) ────
+    // ─── Agent 4: Compile directly ─────────────────────────────────────────
     console.log("⚙️ [Regenerate] Agent 4: Compiler running...");
-    const compiledCode = await runCompilerAgent(
+    let finalCode = await runCompilerAgent(
       content,
-      { elements: [] },   // No interactive elements — faster
-      { questions: [] }   // No quiz — faster
+      { elements: [] },
+      { questions: [] }
     );
-    await sleep(4000);
-
-    // ─── Agent 5: UI Polish ────────────────────────────────────────────────
-    console.log("🎨 [Regenerate] Agent 5: UI Polish running...");
-    let finalCode: string;
-    try {
-      finalCode = await runUIPolishAgent(compiledCode);
-    } catch {
-      finalCode = compiledCode; // Graceful fallback
+    if (!finalCode.includes("render(")) {
+      finalCode = finalCode + "\nrender(<LessonComponent />);";
     }
 
     // Save to DB
