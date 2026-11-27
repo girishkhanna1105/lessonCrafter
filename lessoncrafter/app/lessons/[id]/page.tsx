@@ -93,15 +93,15 @@ export default function LessonViewer() {
   }, [id, supabase]);
 
   const handleRepairLesson = async () => {
-    if (!runtimeError || !lesson || !lesson.ts_code || isRepairing) return;
-    if (runtimeError === lastRepairAttempt) return;
-    if (repairAttempts >= 2) {
-      alert("Maximum auto-repair attempts reached for this session. Please try a full regeneration.");
+    if (!lesson || !lesson.ts_code || isRepairing || isRegenerating) return;
+    const errToFix = runtimeError || "SyntaxError: Unexpected token in laboratory component";
+    if (errToFix === lastRepairAttempt && repairAttempts >= 2) {
+      alert("Maximum auto-repair attempts reached for this session. Please try rebuilding the lesson.");
       return;
     }
     
     setIsRepairing(true);
-    setLastRepairAttempt(runtimeError);
+    setLastRepairAttempt(errToFix);
     setRepairAttempts(prev => prev + 1);
 
     try {
@@ -112,20 +112,24 @@ export default function LessonViewer() {
           lessonId: lesson.id,
           outline: lesson.outline,
           originalCode: lesson.ts_code,
-          errorMessage: runtimeError,
+          errorMessage: errToFix,
         }),
       });
 
       const result = await response.json();
 
       if (result.success && result.repairedCode) {
-        setLesson({ 
+        const updatedLesson = { 
           ...lesson, 
           ts_code: result.repairedCode, 
           compile_error: null,
           status: 'generated' 
-        });
+        };
+        setLesson(updatedLesson);
         setRuntimeError(null);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`lesson_${lesson.id}`, JSON.stringify(updatedLesson));
+        }
       } else {
         setRuntimeError(`Repair attempt failed: ${result.error || 'Unknown error'}`);
       }
@@ -157,12 +161,17 @@ export default function LessonViewer() {
       const result = await response.json();
 
       if (result.success && result.generatedCode) {
-        setLesson({ 
+        const updatedLesson = { 
           ...lesson, 
           ts_code: result.generatedCode, 
           compile_error: null,
           status: 'generated' 
-        });
+        };
+        setLesson(updatedLesson);
+        setRuntimeError(null);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`lesson_${lesson.id}`, JSON.stringify(updatedLesson));
+        }
       } else {
         setRuntimeError(`Regeneration failed: ${result.error || 'Unknown error'}`);
       }
@@ -515,6 +524,9 @@ export default function LessonViewer() {
                           setRuntimeError(error.message);
                         }
                       }}
+                      onAutoFix={handleRepairLesson}
+                      onRebuild={handleRegenerateLesson}
+                      isBusy={isBusy}
                     />
                   </div>
 

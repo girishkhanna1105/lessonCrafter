@@ -1,15 +1,92 @@
 import React from "react";
-import { LiveProvider, LiveError, LivePreview } from "react-live";
+import { LiveProvider, LivePreview, LiveContext } from "react-live";
 import { useTheme } from "next-themes";
 import LessonErrorBoundary from "./LessonErrorBoundary";
 import * as LucideIcons from "lucide-react";
 
 interface LessonRunnerProps {
   code: string;
-  onRuntimeError: (error: Error) => void;
+  onRuntimeError?: (error: Error) => void;
+  onAutoFix?: () => void;
+  onRebuild?: () => void;
+  isBusy?: boolean;
 }
 
-export default function LessonRunner({ code, onRuntimeError }: LessonRunnerProps) {
+function LiveErrorMonitor({
+  onError,
+  onAutoFix,
+  onRebuild,
+  isBusy,
+}: {
+  onError?: (error: Error) => void;
+  onAutoFix?: () => void;
+  onRebuild?: () => void;
+  isBusy?: boolean;
+}) {
+  const { error } = React.useContext(LiveContext);
+
+  React.useEffect(() => {
+    if (error && onError) {
+      onError(new Error(error));
+    }
+  }, [error, onError]);
+
+  if (!error) return null;
+
+  return (
+    <div className="mb-6 rounded-xl border border-rose-500/30 bg-rose-950/20 backdrop-blur-md p-4 sm:p-5 text-left shadow-lg">
+      <div className="flex items-center justify-between pb-3 mb-3 border-b border-rose-500/20">
+        <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs uppercase tracking-wider">
+          <LucideIcons.AlertTriangle className="w-4 h-4 text-rose-500" />
+          <span>Simulation Syntax / Transform Notice</span>
+        </div>
+        <span className="text-[10px] font-mono text-slate-400">AST COMPILER</span>
+      </div>
+
+      <p className="text-slate-300 text-xs mb-3 font-sans">
+        A syntax discrepancy or incomplete code fragment was detected in this laboratory:
+      </p>
+
+      <pre className="text-rose-400 bg-black/60 rounded-lg p-3 text-xs whitespace-pre-wrap font-mono mb-4 border border-rose-500/25 overflow-x-auto shadow-inner">
+        {error}
+      </pre>
+
+      <div className="flex items-center gap-2.5 flex-wrap">
+        {onAutoFix && (
+          <button
+            type="button"
+            onClick={onAutoFix}
+            disabled={isBusy}
+            className="px-3.5 py-2 bg-amber-500 text-slate-950 rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-amber-400 transition-all shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50"
+          >
+            <LucideIcons.Wrench className="w-3.5 h-3.5" />
+            <span>Auto-Fix Issue with AI</span>
+          </button>
+        )}
+
+        {onRebuild && (
+          <button
+            type="button"
+            onClick={onRebuild}
+            disabled={isBusy}
+            className="px-3.5 py-2 bg-cobalt-600 text-white rounded-lg font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-cobalt-500 transition-all shadow-md shadow-cobalt-600/25 cursor-pointer disabled:opacity-50"
+          >
+            <LucideIcons.RotateCcw className="w-3.5 h-3.5" />
+            <span>Rebuild Laboratory</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function LessonRunner({
+  code,
+  onRuntimeError,
+  onAutoFix,
+  onRebuild,
+  isBusy,
+}: LessonRunnerProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme !== "light"; // default to dark if undefined or dark
 
@@ -138,11 +215,16 @@ export default function LessonRunner({ code, onRuntimeError }: LessonRunnerProps
         scope={safeScope}
         noInline={true}
       >
-        {/* COMPILE errors */}
-        <LiveError className="text-red-400 bg-red-950/30 rounded-md p-3 text-sm whitespace-pre-wrap font-mono mb-4 border border-red-500/20" />
+        {/* Compile/Syntax errors with instant Auto-Fix and Rebuild actions */}
+        <LiveErrorMonitor
+          onError={onRuntimeError}
+          onAutoFix={onAutoFix}
+          onRebuild={onRebuild}
+          isBusy={isBusy}
+        />
         
         {/* RUNTIME errors */}
-        <LessonErrorBoundary onRuntimeError={onRuntimeError}>
+        <LessonErrorBoundary onRuntimeError={onRuntimeError || (() => {})}>
           <LivePreview />
         </LessonErrorBoundary>
       </LiveProvider>

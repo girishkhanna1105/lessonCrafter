@@ -18,7 +18,15 @@ export async function POST(req: Request) {
   try {
     console.log(`🔧 [Repair] Fixing runtime error for Lesson ${lessonId}: ${errorMessage}`);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const generationConfig: any = {
+      temperature: 0.2,
+      maxOutputTokens: 8192,
+      thinkingConfig: { thinkingBudget: 0 },
+    };
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig,
+    });
 
     const prompt = `You are a React code repair agent. Fix the following react-live component that has a runtime error.
 
