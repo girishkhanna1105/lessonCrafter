@@ -5,16 +5,11 @@ import { useRouter } from "next/navigation";
 import { 
   ArrowRight, 
   CheckCircle2, 
-  HelpCircle,
-  MessageSquare,
-  Sparkles,
   GitBranch,
   ShieldAlert,
   BrainCircuit,
   Lightbulb,
   CornerDownRight,
-  RefreshCw,
-  Terminal
 } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -150,7 +145,7 @@ export default function InteractiveSocraticDemo() {
             </span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
-            Passive AI gives away answers and destroys learning. LessonCrafter's Socratic engine identifies 
+            Passive AI gives away answers and destroys learning. LessonCrafter&apos;s Socratic engine identifies 
             cognitive misconceptions, tests boundary conditions, and guides you to derive truth from first principles.
           </p>
         </div>

@@ -24,7 +24,7 @@ export interface LlmOptions {
 export async function callResilientLlm(options: LlmOptions): Promise<string> {
   const {
     prompt,
-    systemPrompt = "You are an expert STEM curriculum and interactive simulation engineer.",
+    systemPrompt = "You are an expert curriculum and interactive simulation engineer.",
     jsonMode = false,
     maxTokens = 4096,
     temperature = 0.25,

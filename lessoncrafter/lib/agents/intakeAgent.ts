@@ -127,7 +127,7 @@ Return ONLY valid JSON.`;
         if (parsed.questions && parsed.questions.length >= 2) {
           return parsed;
         }
-      } catch (err: any) {
+      } catch {
         // Fallback to Gemini
       }
     }

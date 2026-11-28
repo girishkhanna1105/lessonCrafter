@@ -2,7 +2,6 @@ import { runContentAgent, LessonContent } from "./contentAgent";
 import { runInteractiveAgent, InteractiveOutput } from "./interactiveAgent";
 import { runQuizAgent, QuizOutput } from "./quizAgent";
 import { runCompilerAgent } from "./compilerAgent";
-import { runUIPolishAgent } from "./uiPolishAgent";
 import { runPedagogyAgent, PedagogyBrief } from "./pedagogyAgent";
 
 export type AgentStatus = "waiting" | "running" | "done" | "error";
@@ -26,8 +25,6 @@ export interface PipelineResult {
   quizData: QuizOutput;
   pedagogyBrief?: PedagogyBrief;
 }
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Runs the upgraded multi-agent pipeline with Adaptive Cognitive Profiling and parallelized generation.

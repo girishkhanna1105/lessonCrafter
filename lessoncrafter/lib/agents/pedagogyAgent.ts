@@ -82,7 +82,7 @@ Return ONLY valid JSON.`;
         if (parsed && parsed.intuitiveAnchor && parsed.targetMisconceptions?.length) {
           return parsed;
         }
-      } catch (err: any) {
+      } catch {
         // Continue to Gemini fallback immediately
       }
     }

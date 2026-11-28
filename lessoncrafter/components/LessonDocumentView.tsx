@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { 
-  BookOpen, 
   CheckCircle2, 
   Lightbulb, 
   AlertTriangle, 
@@ -10,7 +9,6 @@ import {
   Compass, 
   Printer, 
   Download, 
-  ChevronRight,
   FileText,
   Target
 } from "lucide-react";
@@ -23,7 +21,6 @@ interface LessonDocumentViewProps {
 
 export default function LessonDocumentView({
   document,
-  rawTsCode,
 }: LessonDocumentViewProps) {
   const [revealedAnswers, setRevealedAnswers] = useState<Record<number, boolean>>({});
 

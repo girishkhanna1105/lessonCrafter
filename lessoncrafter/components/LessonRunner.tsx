@@ -84,6 +84,32 @@ export default function LessonRunner({
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme !== "light"; // default to dark if undefined or dark
 
+  // Pre-clean code before passing to react-live (must run unconditionally before any early return)
+  const cleanedCode = React.useMemo(() => {
+    let c = (code || "").trim();
+    // Strip markdown code fences if any remain
+    c = c.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
+    // Normalize any ReactDOM.render variations into react-live's native render()
+    c = c.replace(/ReactDOM\.render\s*\(\s*<LessonComponent\s*\/?>[^)]*\);?/gi, "render(<LessonComponent />);");
+    c = c.replace(/ReactDOM\.createRoot\([^)]+\)\.render\s*\(\s*<LessonComponent\s*\/?>\s*\);?/gi, "render(<LessonComponent />);");
+    
+    // Safety check for truncated trailing lines (e.g. unfinished tag before render)
+    if (!c.includes("render(")) {
+      const lines = c.split("\n");
+      while (lines.length > 0 && !lines[lines.length - 1].trim().endsWith(">") && !lines[lines.length - 1].trim().endsWith("}") && !lines[lines.length - 1].trim().endsWith(";")) {
+        lines.pop();
+      }
+      let sanitized = lines.join("\n");
+      if (!sanitized.includes("</div>\n  );")) {
+        sanitized += "\n    </div>\n  );\n}";
+      } else if (!sanitized.trim().endsWith("}")) {
+        sanitized += "\n}";
+      }
+      c = sanitized + "\nrender(<LessonComponent />);";
+    }
+    return c;
+  }, [code]);
+
   // Safety check for require()
   if (code.includes("require(")) {
     return (
@@ -175,32 +201,6 @@ export default function LessonRunner({
       return undefined;
     },
   });
-
-  // Pre-clean code before passing to react-live
-  const cleanedCode = React.useMemo(() => {
-    let c = (code || "").trim();
-    // Strip markdown code fences if any remain
-    c = c.replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/i, "").trim();
-    // Normalize any ReactDOM.render variations into react-live's native render()
-    c = c.replace(/ReactDOM\.render\s*\(\s*<LessonComponent\s*\/?>[^)]*\);?/gi, "render(<LessonComponent />);");
-    c = c.replace(/ReactDOM\.createRoot\([^)]+\)\.render\s*\(\s*<LessonComponent\s*\/?>\s*\);?/gi, "render(<LessonComponent />);");
-    
-    // Safety check for truncated trailing lines (e.g. unfinished tag before render)
-    if (!c.includes("render(")) {
-      const lines = c.split("\n");
-      while (lines.length > 0 && !lines[lines.length - 1].trim().endsWith(">") && !lines[lines.length - 1].trim().endsWith("}") && !lines[lines.length - 1].trim().endsWith(";")) {
-        lines.pop();
-      }
-      let sanitized = lines.join("\n");
-      if (!sanitized.includes("</div>\n  );")) {
-        sanitized += "\n    </div>\n  );\n}";
-      } else if (!sanitized.trim().endsWith("}")) {
-        sanitized += "\n}";
-      }
-      c = sanitized + "\nrender(<LessonComponent />);";
-    }
-    return c;
-  }, [code]);
 
   return (
     <div className="w-full transition-colors duration-200">

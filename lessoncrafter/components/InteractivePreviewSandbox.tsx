@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Atom, 
@@ -8,15 +8,9 @@ import {
   BrainCircuit, 
   Play, 
   Pause, 
-  RotateCcw, 
   ArrowRight, 
-  Zap, 
-  Sliders, 
-  Activity, 
-  Layers,
   Sparkles,
-  CheckCircle2,
-  Maximize2
+  CheckCircle2
 } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -37,7 +31,7 @@ export default function InteractivePreviewSandbox() {
   const [barrierV0, setBarrierV0] = useState(65); // meV
   const [particleEnergy, setParticleEnergy] = useState(55); // meV
   const [barrierWidth, setBarrierWidth] = useState(2.8); // nm
-  const [packetSpread, setPacketSpread] = useState(1.4);
+  const [packetSpread] = useState(1.4);
 
   // ── Channel 02: Keplerian Orbit Parameters ──
   const [starMass, setStarMass] = useState(140); // Solar mass units
@@ -208,7 +202,7 @@ export default function InteractivePreviewSandbox() {
             </span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
-            LessonCrafter doesn't just display static text. Every lesson compiles a live parametric simulator. 
+            LessonCrafter doesn&apos;t just display static text. Every lesson compiles a live interactive simulator. 
             Adjust the physical parameters below to see how the mathematics responds in real time.
           </p>
         </div>
@@ -534,7 +528,7 @@ export default function InteractivePreviewSandbox() {
                   {/* Keplerian Dynamics Card */}
                   <div className="p-3.5 rounded-lg bg-slate-100/70 dark:bg-black/40 border border-slate-200/80 dark:border-white/[0.07] font-mono text-[11px] space-y-1.5">
                     <div className="flex justify-between text-slate-400 text-[10px] tracking-wider uppercase mb-1">
-                      <span>KEPLER'S 3RD LAW & VIS-VIVA EQUATION</span>
+                      <span>KEPLER&apos;S 3RD LAW & VIS-VIVA EQUATION</span>
                       <span className="text-amber-400 font-bold">2-BODY GRAVITATION</span>
                     </div>
                     <div className="text-slate-800 dark:text-slate-200 font-semibold text-xs">
@@ -549,7 +543,7 @@ export default function InteractivePreviewSandbox() {
                       <span className="text-cyan-400 font-bold tabular-nums">{(Math.sqrt(Math.pow(semiMajorAxis, 3) / (starMass * 10))).toFixed(1)} yr</span>
                     </div>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans leading-relaxed pt-1">
-                      Swept orbital radius conforms to Kepler's second law: equal areas in equal intervals. Velocity peaks at perihelion and reaches minimum at aphelion.
+                      Swept orbital radius conforms to Kepler&apos;s second law: equal areas in equal intervals. Velocity peaks at perihelion and reaches minimum at aphelion.
                     </p>
                   </div>
                 </div>
@@ -918,7 +912,7 @@ export default function InteractivePreviewSandbox() {
                 </div>
 
                 <div className="text-slate-500 text-right">
-                  SIMULATION PROTOCOL · v2.4 KINETIC
+                  SIMULATION ENGINE · v2.4
                 </div>
               </div>
 

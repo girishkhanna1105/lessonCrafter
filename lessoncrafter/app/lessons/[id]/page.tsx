@@ -14,15 +14,10 @@ import {
   ShieldAlert, 
   Code2, 
   Loader2, 
-  Wrench, 
   BookOpen, 
   Download, 
   Printer, 
   FileText, 
-  Sparkles,
-  Terminal,
-  Sliders,
-  CheckCircle2,
   Atom
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -50,7 +45,6 @@ export default function LessonViewer() {
   const [isRepairing, setIsRepairing] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [repairAttempts, setRepairAttempts] = useState(0);
-  const [lastRepairAttempt, setLastRepairAttempt] = useState<string | null>(null);
   const isBusy = isRepairing || isRegenerating;
 
   useEffect(() => {
@@ -70,7 +64,7 @@ export default function LessonViewer() {
         } else if (error) {
           console.warn("[LessonViewer] DB query notice:", error.message);
         }
-      } catch (err) {
+      } catch {
         console.warn("[LessonViewer] Remote database unreachable, checking local cache...");
       }
 
@@ -98,7 +92,6 @@ export default function LessonViewer() {
     if (repairAttempts >= 2) return;
     
     setIsRepairing(true);
-    setLastRepairAttempt(errToFix);
     setRepairAttempts(prev => prev + 1);
 
     try {
@@ -142,7 +135,6 @@ export default function LessonViewer() {
 
     setIsRegenerating(true);
     setRuntimeError(null);
-    setLastRepairAttempt(null);
     setRepairAttempts(0);
 
     try {
@@ -179,6 +171,14 @@ export default function LessonViewer() {
     }
   };
 
+  const escapeHtml = (unsafe: string) =>
+    String(unsafe || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
   const handleExportHtml = () => {
     if (!lesson) return;
     const doc = extractLessonDocument(lesson.title, lesson.outline, lesson.ts_code);
@@ -188,7 +188,7 @@ export default function LessonViewer() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${cleanTitle} - LessonCrafter Laboratory</title>
+  <title>${escapeHtml(cleanTitle)} - LessonCrafter Laboratory</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0a0f18; color: #f8fafc; padding: 2.5rem; max-width: 900px; margin: auto; line-height: 1.7; }
     h1 { color: #38bdf8; border-bottom: 2px solid #1e293b; padding-bottom: 0.75rem; margin-top: 1rem; font-size: 2.2rem; }
@@ -201,27 +201,27 @@ export default function LessonViewer() {
 </head>
 <body>
   <div style="margin-bottom: 1rem;">
-    <span class="badge">${doc.subject}</span>
-    <span class="badge-alt">${doc.level}</span>
+    <span class="badge">${escapeHtml(doc.subject)}</span>
+    <span class="badge-alt">${escapeHtml(doc.level)}</span>
   </div>
-  <h1>${cleanTitle}</h1>
-  <p style="font-size: 1.15rem; color: #cbd5e1; margin-bottom: 2rem;">${doc.introduction}</p>
+  <h1>${escapeHtml(cleanTitle)}</h1>
+  <p style="font-size: 1.15rem; color: #cbd5e1; margin-bottom: 2rem;">${escapeHtml(doc.introduction)}</p>
 
-  ${doc.intuitiveAnchor ? `<div class="anchor"><strong>Intuitive Anchor:</strong> "${doc.intuitiveAnchor}"</div>` : ""}
+  ${doc.intuitiveAnchor ? `<div class="anchor"><strong>Intuitive Anchor:</strong> "${escapeHtml(doc.intuitiveAnchor)}"</div>` : ""}
 
   <div class="card">
     <h3 style="margin-top:0; color:#38bdf8; font-size:1.1rem; text-transform:uppercase; letter-spacing:0.05em;">Core Objectives</h3>
     <ul style="padding-left:1.25rem; margin-bottom:0;">
-      ${doc.objectives.map(o => `<li>${o}</li>`).join("")}
+      ${doc.objectives.map(o => `<li>${escapeHtml(o)}</li>`).join("")}
     </ul>
   </div>
 
   ${doc.sections.map((s, i) => `
     <div class="card">
-      <h2 style="color:#60a5fa; margin-top:0; font-size:1.35rem;">Module ${i + 1}: ${s.title}</h2>
-      <p>${s.explanation}</p>
-      ${s.example ? `<div style="background:#0f172a; border-left:3px solid #10b981; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Physical Realization:</strong> ${s.example}</div>` : ""}
-      ${s.misconception ? `<div style="background:#0f172a; border-left:3px solid #f59e0b; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Misconception Alert:</strong> ${s.misconception}</div>` : ""}
+      <h2 style="color:#60a5fa; margin-top:0; font-size:1.35rem;">Module ${i + 1}: ${escapeHtml(s.title)}</h2>
+      <p>${escapeHtml(s.explanation)}</p>
+      ${s.example ? `<div style="background:#0f172a; border-left:3px solid #10b981; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Physical Realization:</strong> ${escapeHtml(s.example)}</div>` : ""}
+      ${s.misconception ? `<div style="background:#0f172a; border-left:3px solid #f59e0b; padding:0.75rem 1rem; margin:1rem 0; font-size:0.9rem;"><strong>Misconception Alert:</strong> ${escapeHtml(s.misconception)}</div>` : ""}
     </div>
   `).join("")}
 
@@ -230,21 +230,21 @@ export default function LessonViewer() {
       <h2 style="color:#34d399; margin-top:0;">Formative Assessment</h2>
       ${doc.quiz.map((q, qIdx) => `
         <div style="margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:1px solid #1e293b;">
-          <p><strong>${qIdx + 1}. ${q.question}</strong></p>
+          <p><strong>${qIdx + 1}. ${escapeHtml(q.question)}</strong></p>
           <div style="margin-left:0.5rem;">
             ${q.options.map((opt, oIdx) => `
               <div style="padding:0.4rem 0.8rem; margin:0.35rem 0; background:${oIdx === q.correctIndex ? '#064e3b' : '#1e293b'}; border-radius:0.5rem; font-size:0.9rem;">
-                ${String.fromCharCode(65 + oIdx)}) ${opt} ${oIdx === q.correctIndex ? "✓" : ""}
+                ${String.fromCharCode(65 + oIdx)}) ${escapeHtml(opt)} ${oIdx === q.correctIndex ? "✓" : ""}
               </div>
             `).join("")}
           </div>
-          <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.75rem;"><strong>Analysis:</strong> ${q.explanation}</div>
+          <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.75rem;"><strong>Analysis:</strong> ${escapeHtml(q.explanation)}</div>
         </div>
       `).join("")}
     </div>
   `}
 
-  <footer>LessonCrafter Parametric Laboratory Platform</footer>
+  <footer>LessonCrafter Interactive Learning Platform</footer>
 </body>
 </html>`;
 
@@ -547,7 +547,7 @@ export default function LessonViewer() {
             </div>
 
             <footer className="mt-10 pt-6 border-t border-slate-200/70 dark:border-white/[0.08] flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
-              <div>LessonCrafter · Parametric STEM Platform</div>
+              <div>LessonCrafter · Interactive Learning Platform</div>
               <div>Hardware Accelerated Interactive Synthesis</div>
             </footer>
 

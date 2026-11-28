@@ -123,7 +123,7 @@ Return ONLY valid JSON:
         if (parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
           return parsed;
         }
-      } catch (err: any) {
+      } catch {
         // Fallback to Gemini
       }
     }

@@ -9,7 +9,7 @@ export function safeJsonParse<T>(rawText: string, fallback: T): T {
   }
 
   // 1. Clean markdown code fences and whitespace
-  let cleaned = rawText
+  const cleaned = rawText
     .replace(/^```(?:json)?\s*/im, "")
     .replace(/```\s*$/m, "")
     .trim();

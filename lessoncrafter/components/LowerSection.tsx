@@ -1,23 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { 
   Sliders, 
   BookOpen, 
   CheckCircle2, 
   FileText, 
-  ArrowRight, 
-  Cpu, 
-  Terminal, 
-  Sparkles,
-  Zap,
-  Activity,
-  Atom,
-  BrainCircuit,
-  Sigma,
-  Dna
+  ArrowRight,
+  Terminal
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -26,7 +16,7 @@ const PIPELINE_SPECIFICATIONS = [
     icon: Sliders,
     step: "01",
     tag: "SIMULATION RUNTIME",
-    title: "Client-Side Parametric Sandboxes",
+    title: "Client-Side Interactive Sandboxes",
     spec: "60 FPS CLIENT VECTOR ENGINE",
     desc: "Every lesson compiles self-contained, browser-native simulation engines with zero external CDNs. Parameters update in real time with hardware-accelerated SVG and Canvas vector rendering.",
     telemetry: "RUNTIME : REACTIVE VIRTUAL DOM · JITTER : <0.2ms"
@@ -193,7 +183,7 @@ export default function LowerSection() {
 
           <div className="max-w-2xl mb-6">
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
-              Compile your first parametric laboratory.
+              Build your first interactive lesson.
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               Enter any theorem, physical law, or algorithm. LessonCrafter compiles a full executable simulation, 
@@ -257,7 +247,7 @@ export default function LowerSection() {
         <div className="flex items-center gap-2">
           <span className="font-bold text-slate-700 dark:text-slate-300">LessonCrafter</span>
           <span>·</span>
-          <span>Parametric STEM Workbench</span>
+          <span>Interactive Learning Studio</span>
         </div>
 
         <div className="flex items-center gap-4">

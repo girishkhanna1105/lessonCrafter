@@ -4,12 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { 
   Send, 
   X, 
-  User, 
   Loader2, 
   RotateCcw, 
   MessageSquare,
-  HelpCircle,
-  Sparkles
+  HelpCircle
 } from "lucide-react";
 
 interface Message {
@@ -102,7 +100,7 @@ export default function SocraticTutorDrawer({
         };
         setMessages((prev) => [...prev, errorMessage]);
       }
-    } catch (err: any) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
