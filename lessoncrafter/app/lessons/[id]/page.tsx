@@ -244,7 +244,7 @@ export default function LessonViewer() {
     </div>
   `}
 
-  <footer>LessonCrafter Parametric Laboratory Platform</footer>
+  <footer>LessonCrafter Interactive Learning Platform</footer>
 </body>
 </html>`;
 
@@ -547,7 +547,7 @@ export default function LessonViewer() {
             </div>
 
             <footer className="mt-10 pt-6 border-t border-slate-200/70 dark:border-white/[0.08] flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
-              <div>LessonCrafter · Parametric STEM Platform</div>
+              <div>LessonCrafter · Interactive Learning Platform</div>
               <div>Hardware Accelerated Interactive Synthesis</div>
             </footer>
 

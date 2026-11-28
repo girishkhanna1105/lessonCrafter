@@ -229,10 +229,10 @@ export default function LessonsPage() {
               </div>
 
               <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-                Parametric Lab <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-4">Repository.</span>
+                Interactive Lesson <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-4">Library.</span>
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 max-w-xl leading-relaxed">
-                Browse peer-reviewed STEM laboratories featuring real-time 60 FPS visualizers, step-by-step mathematical proofs, and Socratic challenges.
+                Browse interactive lessons featuring real-time visualizers, step-by-step explanations, and guided quizzes.
               </p>
             </div>
 
@@ -350,7 +350,7 @@ export default function LessonsPage() {
                       <div className="flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-cobalt-500/10 text-cobalt-600 dark:text-cyan-400">
-                          PARAMETRIC LAB
+                          INTERACTIVE LESSON
                         </span>
                       </div>
                       

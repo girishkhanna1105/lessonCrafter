@@ -50,7 +50,7 @@ export async function runContentAgent(
   const roleContext = userProfile?.role === "teacher"
     ? `Target Audience: TEACHER classroom delivery. Provide rigorous curriculum alignment, in-depth theoretical explanations, and instructional clarity.
        Teaching style: ${userProfile?.teaching_style || "conceptual derivation"}
-       Level: ${userProfile?.grade_levels?.[0] || userProfile?.learner_level || "College STEM"}`
+       Level: ${userProfile?.grade_levels?.[0] || userProfile?.learner_level || "College"}`
     : `Target Audience: STUDENT self-study masterclass. Provide deep, intuitive, first-principles explanations that build mastery step-by-step.
        Grade/Year: ${userProfile?.grade_or_year || userProfile?.learner_level || "Undergraduate / Advanced"}
        Learning Goal: ${userProfile?.learning_goal || intakeAnswers?.goal || "deep_intuition"}`;

@@ -92,7 +92,7 @@ export default function AuthenticatedHero({ user }: AuthenticatedHeroProps) {
             WORKSPACE : {firstName}
           </span>
           <span className="text-slate-300 dark:text-slate-700">|</span>
-          <span className="text-cyan-500 font-bold hidden sm:inline">v2.4 KINETIC</span>
+          <span className="text-cyan-500 font-bold hidden sm:inline">v2.4</span>
         </div>
 
         {/* Headline */}
@@ -187,7 +187,7 @@ export default function AuthenticatedHero({ user }: AuthenticatedHeroProps) {
         <div className="w-full max-w-2xl pt-6 border-t border-slate-200/80 dark:border-white/[0.08] grid grid-cols-1 sm:grid-cols-3 gap-3 text-left font-mono text-[11px] text-slate-500 dark:text-slate-400 animate-slide-up delay-400">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-            <span>01 · Parametric Simulation</span>
+            <span>01 · Interactive Simulation</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

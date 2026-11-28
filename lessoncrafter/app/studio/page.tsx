@@ -36,9 +36,9 @@ const LEARNER_LEVELS = [
   },
   { 
     id: "college", 
-    label: "College STEM", 
+    label: "College", 
     tag: "BLOOM L5 · EVALUATION", 
-    desc: "Rigorous mathematical proofs & state equations" 
+    desc: "Rigorous proofs, models & deeper concepts" 
   },
   { 
     id: "professional", 
@@ -421,7 +421,7 @@ export default function StudioPage() {
               </div>
 
               <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-                Parametric Lesson <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-4">Studio.</span>
+                Interactive Lesson <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-4">Studio.</span>
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5 max-w-xl leading-relaxed">
                 Configure theorem parameters to compile an interactive simulation, step-by-step mathematical proof, and Socratic challenge in real time.
@@ -826,7 +826,7 @@ export default function StudioPage() {
                   <span className="uppercase tracking-wider font-semibold text-slate-600 dark:text-slate-300 text-[11px]">
                     Quick-Start Studio Blueprints
                   </span>
-                  <span className="text-[10px] text-cyan-500 font-bold">VERIFIED STEM LABS</span>
+                  <span className="text-[10px] text-cyan-500 font-bold">FEATURED TOPICS</span>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -876,7 +876,7 @@ export default function StudioPage() {
                       <Sliders className="w-3 h-3" />
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-slate-800 dark:text-slate-200">01 · Parametric Simulator</div>
+                      <div className="font-bold text-xs text-slate-800 dark:text-slate-200">01 · Interactive Simulator</div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug font-sans">
                         Hardware-accelerated 60 FPS vector canvas with interactive physical dials.
                       </p>

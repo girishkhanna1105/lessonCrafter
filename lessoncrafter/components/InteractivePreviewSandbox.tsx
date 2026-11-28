@@ -202,7 +202,7 @@ export default function InteractivePreviewSandbox() {
             </span>
           </h2>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
-            LessonCrafter doesn&apos;t just display static text. Every lesson compiles a live parametric simulator. 
+            LessonCrafter doesn&apos;t just display static text. Every lesson compiles a live interactive simulator. 
             Adjust the physical parameters below to see how the mathematics responds in real time.
           </p>
         </div>
@@ -912,7 +912,7 @@ export default function InteractivePreviewSandbox() {
                 </div>
 
                 <div className="text-slate-500 text-right">
-                  SIMULATION PROTOCOL · v2.4 KINETIC
+                  SIMULATION ENGINE · v2.4
                 </div>
               </div>
 

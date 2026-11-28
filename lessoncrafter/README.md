@@ -2,7 +2,7 @@
 
 # LessonCrafter
 
-**An AI-native parametric STEM workbench that synthesizes live, interactive React learning laboratories on demand.**
+**An AI-native learning studio that turns any topic into a live, interactive React lesson on demand.**
 
 [![Next.js](https://img.shields.io/badge/Next.js-App%20Router-000000?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19-2563eb?style=flat-square&logo=react)](https://react.dev/)
@@ -16,10 +16,10 @@
 
 ## Overview
 
-**LessonCrafter** transforms any STEM concept, theorem, or algorithm into a self-contained, executable educational micro-app. Instead of returning static walls of text, LessonCrafter runs a **multi-agent AI pipeline** streamed over Server-Sent Events (SSE) and compiles three synchronized pillars into a live browser sandbox:
+**LessonCrafter** transforms any concept, theorem, or topic into a self-contained, executable educational micro-app. Instead of returning static walls of text, LessonCrafter runs a **multi-agent AI pipeline** streamed over Server-Sent Events (SSE) and compiles three synchronized pillars into a live browser sandbox:
 
-1. **Conceptual Theory & Worked Examples** — Structured explanations, intuitive anchors, and misconception callouts tailored to learner level (`Introductory`, `Foundational`, `College STEM`, `Advanced & R&D`) and delivery mode (`Student` vs. `Teacher`).
-2. **Interactive Parametric Simulator** — Real-time, state-driven visualizers and SVG simulations executed directly in the browser via `react-live` and `@babel/standalone`.
+1. **Conceptual Theory & Worked Examples** — Structured explanations, intuitive anchors, and misconception callouts tailored to learner level (`Introductory`, `Foundational`, `College`, `Advanced & R&D`) and delivery mode (`Student` vs. `Teacher`).
+2. **Interactive Simulator** — Real-time, state-driven visualizers and SVG simulations executed directly in the browser via `react-live` and `@babel/standalone`.
 3. **Formative Assessment & Socratic Tutor** — Interactive MCQs with instant analysis, paired with a dockable **Socratic AI Tutor** that guides learners with probing questions rather than spoiling answers.
 
 ---

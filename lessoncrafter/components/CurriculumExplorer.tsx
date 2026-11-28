@@ -89,7 +89,7 @@ const TRACKS: CurriculumTrack[] = [
     ],
     simulationSpec: {
       engine: "Interactive 3D Bloch Sphere",
-      description: "Parametric polar and azimuthal angle dials with real-time projective measurement probability Born distribution.",
+      description: "Interactive polar and azimuthal angle dials with real-time projective measurement probability Born distribution.",
       telemetry: "STATE: ENTANGLED | CHSH BOUND: S = 2.828 | RUNTIME: WEBGPU"
     },
     socraticProbe: {

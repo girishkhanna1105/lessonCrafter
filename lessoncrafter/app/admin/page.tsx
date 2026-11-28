@@ -115,7 +115,7 @@ export default function AdminDashboardPage() {
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <p className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-cobalt-600 dark:text-cobalt-400">
-                Mission Control • Operations Center
+                Operations & Telemetry Center
               </p>
             </div>
             <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
