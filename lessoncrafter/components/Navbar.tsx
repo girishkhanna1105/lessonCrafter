@@ -2,13 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { User, LogOut, Loader2, Compass, Plus, Terminal, ArrowRight, ShieldCheck } from "lucide-react";
+import { User, LogOut, Loader2, Compass, Plus, Terminal, ArrowRight } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => { 
     const checkUser = () => {
@@ -26,7 +25,6 @@ export default function Navbar() {
       setLoading(false);
     };
     checkUser();
-    setMounted(true);
     window.addEventListener("storage", checkUser);
     return () => window.removeEventListener("storage", checkUser);
   }, []);

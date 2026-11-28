@@ -9,8 +9,7 @@ import {
   Dna, 
   CornerDownLeft,
   CheckCircle2,
-  Terminal,
-  UserCheck
+  Terminal
 } from "lucide-react";
 
 interface AuthenticatedHeroProps {

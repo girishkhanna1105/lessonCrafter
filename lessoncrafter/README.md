@@ -1,109 +1,168 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+<div align="center">
+
+# LessonCrafter
+
+**An AI-native parametric STEM workbench that synthesizes live, interactive React learning laboratories on demand.**
+
+[![Next.js](https://img.shields.io/badge/Next.js-App%20Router-000000?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-2563eb?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%26%20SSR-10b981?style=flat-square&logo=supabase)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-06b6d4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+
+</div>
+
+---
+
+## Overview
+
+**LessonCrafter** transforms any STEM concept, theorem, or algorithm into a self-contained, executable educational micro-app. Instead of returning static walls of text, LessonCrafter runs a **multi-agent AI pipeline** streamed over Server-Sent Events (SSE) and compiles three synchronized pillars into a live browser sandbox:
+
+1. **Conceptual Theory & Worked Examples** — Structured explanations, intuitive anchors, and misconception callouts tailored to learner level (`Introductory`, `Foundational`, `College STEM`, `Advanced & R&D`) and delivery mode (`Student` vs. `Teacher`).
+2. **Interactive Parametric Simulator** — Real-time, state-driven visualizers and SVG simulations executed directly in the browser via `react-live` and `@babel/standalone`.
+3. **Formative Assessment & Socratic Tutor** — Interactive MCQs with instant analysis, paired with a dockable **Socratic AI Tutor** that guides learners with probing questions rather than spoiling answers.
+
+---
+
+## Architecture & Pipeline
+
+```mermaid
+flowchart LR
+    User["/studio (Prompt + Diagnostic Intake)"] -->|SSE Stream| API["POST /api/generate-v2"]
+    API --> A0["Agent 0: Pedagogy Specialist"]
+    A0 --> A1["Agent 1: Content Architect"]
+    A1 --> A2["Agent 2: Interactive Builder"]
+    A1 --> A3["Agent 3: Quiz Designer"]
+    A2 & A3 --> A4["Agent 4: Deterministic Compiler (Sucrase)"]
+    A4 --> DB[("Supabase / Local Fallback")]
+    A4 --> Runner["/lessons/[id] (react-live Sandbox)"]
+    Runner -->|Runtime Error (max 2x)| Repair["POST /api/repair"]
+    Runner --> Tutor["POST /api/tutor (Socratic Sidecar)"]
+```
+
+### Key Engineering Highlights
+
+- **Multi-Agent Orchestration (`lib/agents/orchestrator.ts`)**:
+  - **Intake Agent (`/api/intake`)**: Generates diagnostic follow-up questions before synthesis to calibrate depth and focus areas.
+  - **Pedagogy & Content Agents**: Build intuitive anchors, target misconceptions, structured sections, and step-by-step worked examples.
+  - **Parallel Execution**: Runs the Interactive Simulation Builder and Quiz Designer concurrently via `Promise.allSettled()` to cut generation latency.
+  - **Deterministic Compiler (`lib/agents/compilerAgent.ts`)**: Validates generated JSX snippets with `sucrase` and deterministically assembles the final `LessonComponent`—eliminating LLM truncation and syntax failures at compile time.
+- **Poly-Model Resilient Failover (`lib/llmClient.ts`)**:
+  - Prioritizes ultra-fast **Groq** inference (`qwen/qwen3.8-27b`, `openai/gpt-oss-20b`, `openai/gpt-oss-120b`) and automatically fails over to **Google Gemini** (`gemini-2.5-flash-lite`, `gemini-2.5-flash`) on rate limits or provider saturation.
+  - Socratic Tutor (`/api/tutor`) uses Groq (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`) with Gemini (`gemini-2.5-flash`) fallback.
+- **Self-Healing Browser Sandbox (`components/LessonRunner.tsx`)**:
+  - Executes generated components in `react-live` (`noInline` mode) with a `Proxy`-guarded `safeScope` (injecting React hooks, dual-mode theme tokens, and `lucide-react` icons).
+  - Blocks `require()` calls, catches compile/runtime errors via `LessonErrorBoundary`, and triggers autonomous repair (`/api/repair`) up to a hard ceiling of 2 attempts, with a 3-agent fast-path rebuild (`/api/regenerate`).
+- **Resilient Local Fallback**:
+  - If Supabase is paused or unreachable, `/api/generate-v2` and `/lessons/[id]` seamlessly fall back to `local-*` session IDs and `localStorage` caching so lessons still generate, render, repair, and export.
+- **Dual-Mode & Export Suite**:
+  - **Cobalt Architect** dark/light theme (`next-themes`) with a technical blueprint grid UI.
+  - Switch between **Interactive Laboratory**, **Structured Document View**, and **Raw TSX Source**; export lessons as escaped standalone `.html` files or print/PDF.
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| **Framework** | Next.js (App Router, Turbopack), React 19, TypeScript 5.9 |
+| **Styling & UI** | Tailwind CSS, Radix UI / shadcn-style primitives, Lucide Icons, `next-themes` |
+| **AI & Observability** | Groq SDK, Google Generative AI (`@google/generative-ai`), Langfuse (optional tracing) |
+| **In-Browser Execution** | `react-live`, `@babel/standalone`, `sucrase` (server-side JSX validation) |
+| **Database & Auth** | Supabase (`@supabase/ssr`, `@supabase/supabase-js`), `bcryptjs`, `jsonwebtoken` |
+
+---
+
+## Project Structure
+
+```text
+lessoncrafter/
+├── app/
+│   ├── api/
+│   │   ├── admin/metrics/      # Operations telemetry & stuck-task reset
+│   │   ├── auth/               # Login, register, and JWT session verification
+│   │   ├── generate-v2/        # Primary SSE multi-agent streaming pipeline
+│   │   ├── intake/             # Diagnostic follow-up question generator
+│   │   ├── profile/            # Student/Teacher persona persistence
+│   │   ├── regenerate/         # 3-agent fast-path lesson rebuild
+│   │   ├── repair/             # Autonomous AST/runtime code healer
+│   │   └── tutor/              # Socratic AI tutor sidecar endpoint
+│   ├── admin/                  # Mission Control telemetry dashboard
+│   ├── auth/                   # Sign-in & registration
+│   ├── lessons/                # Explore Labs & [id] interactive viewer
+│   ├── onboarding/             # Role-based persona questionnaire
+│   ├── profile/                # Account & pedagogy preferences
+│   └── studio/                 # Primary creation workbench (/page2 redirects here)
+├── components/                 # Sandbox runner, Socratic drawer, landing demos, UI primitives
+├── lib/
+│   ├── agents/                 # Pedagogy, Content, Interactive, Quiz, Compiler, Orchestrator
+│   ├── supabase/               # Browser & SSR Supabase clients
+│   ├── jwt.ts                  # JWT sign/verify helpers
+│   └── llmClient.ts            # Multi-provider Groq -> Gemini failover client
+└── middleware.ts               # Bearer token verification for /api/auth/me
+```
+
+---
+
+## Getting Started
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/<your-username>/lessoncrafter.git
+cd lessoncrafter
+npm install
+```
+
+### 2. Configure Environment Variables
+
+Copy `.env.example` to `.env.local` (or `.env`) and fill in your credentials:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-or-anon-key
+
+# AI Providers
+GEMINI_API_KEY=your-gemini-api-key
+GROQ_API_KEY=your-groq-api-key
+
+# Auth
+JWT_SECRET=your-random-jwt-secret-string
+
+# Observability (Optional)
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
+```
+
+### 3. Run Locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Verify Lint, Types & Build
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+---
+
+## Security & Reliability Notes
+
+- **Password & Token Security**: Passwords are hashed with `bcryptjs` (cost 10) and sessions use signed `jsonwebtoken` tokens (`7d` expiry). Self-registration restricts roles to `student` or `teacher`.
+- **Sandbox Guardrails**: `LessonRunner` rejects `require()` statements, isolates execution in `react-live`, and caps autonomous LLM repair loops at 2 attempts.
+- **Export & HTTP Hardening**: HTML exports escape all dynamic lesson content to prevent script injection, and `next.config.ts` sets `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and `Permissions-Policy` headers.
+- **Environment Hygiene**: `.env` and `.env*.local` are gitignored; keep API keys out of version control.
+
+---
 
 <p align="center">
- The fastest way to build apps with Next.js and Supabase
+  Built with curiosity and first-principles engineering.
 </p>
-
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
-
-## Features
-
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
-
-## Demo
-
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
-
-## Deploy to Vercel
-
-Vercel deployment will guide you through creating a Supabase account and project.
-
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
-
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
-
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
-
-## Clone and run locally
-
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
-
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
-
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
-
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
-
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd with-supabase-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
-
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
-
-5. You can now run the Next.js local development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
-
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
-
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
-
-## Feedback and issues
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)

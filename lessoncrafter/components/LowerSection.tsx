@@ -1,23 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { 
   Sliders, 
   BookOpen, 
   CheckCircle2, 
   FileText, 
-  ArrowRight, 
-  Cpu, 
-  Terminal, 
-  Sparkles,
-  Zap,
-  Activity,
-  Atom,
-  BrainCircuit,
-  Sigma,
-  Dna
+  ArrowRight,
+  Terminal
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ScrollReveal from "@/components/ScrollReveal";
 

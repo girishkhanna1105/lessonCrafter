@@ -9,10 +9,7 @@ import {
   Sigma, 
   Dna, 
   CornerDownLeft,
-  CheckCircle2,
-  Sparkles,
-  Sliders,
-  Play
+  CheckCircle2
 } from "lucide-react";
 
 const POPULAR_TOPICS = [
@@ -104,7 +101,7 @@ export default function HeroSection() {
 
         {/* Master Headline */}
         <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.08] mb-6 max-w-3xl animate-slide-up delay-100">
-          Don't just read about complex systems.{" "}
+          Don&apos;t just read about complex systems.{" "}
           <span className="text-cobalt-600 dark:text-cobalt-400 underline decoration-cobalt-500/30 decoration-2 underline-offset-8">
             Experiment with them.
           </span>

@@ -15,8 +15,7 @@ import {
   Terminal,
   ShieldCheck,
   FileText,
-  RefreshCw,
-  Sparkles
+  RefreshCw
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import GeneratingTelemetryVisualizer, { PipelineProgress } from "@/components/GeneratingTelemetryVisualizer";
@@ -651,7 +650,7 @@ export default function StudioPage() {
                         Refine Pedagogical Focus Areas
                       </h3>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                        Topic: <span className="font-semibold text-slate-800 dark:text-slate-200">"{outline}"</span>
+                        Topic: <span className="font-semibold text-slate-800 dark:text-slate-200">&ldquo;{outline}&rdquo;</span>
                       </p>
                     </div>
 
@@ -681,7 +680,7 @@ export default function StudioPage() {
                     <div className="py-7 text-center space-y-2 font-mono text-xs">
                       <Loader2 className="w-5 h-5 animate-spin text-cobalt-600 mx-auto" />
                       <p className="font-medium text-slate-500 dark:text-slate-400">
-                        Analyzing "{outline}" with pedagogical intake agent...
+                        Analyzing &ldquo;{outline}&rdquo; with pedagogical intake agent...
                       </p>
                     </div>
                   )}

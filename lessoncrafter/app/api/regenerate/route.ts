@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { runContentAgent } from "@/lib/agents/contentAgent";
 import { runCompilerAgent } from "@/lib/agents/compilerAgent";
-import { runUIPolishAgent } from "@/lib/agents/uiPolishAgent";
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function POST(req: Request) {
   const supabase = await createClient();

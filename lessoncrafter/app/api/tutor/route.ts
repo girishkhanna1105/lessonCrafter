@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 
 interface Message {
@@ -34,9 +34,15 @@ SOCRATIC PEDAGOGY PRINCIPLES:
 5. Conciseness & Formatting: Keep your responses concise (2-3 concise paragraphs maximum), clear, and formatted in clean GitHub-flavored markdown with bolding for key terms.
 6. Tone: Warm, intellectually curious, encouraging, and razor-sharp. Strictly avoid violet or purple aesthetic references.`;
 
+    const safeHistory: Message[] = Array.isArray(history)
+      ? history
+          .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+          .slice(-6)
+      : [];
+
     const groqMessages = [
       { role: "system" as const, content: systemPrompt },
-      ...history.slice(-6).map((m: Message) => ({
+      ...safeHistory.map((m: Message) => ({
         role: m.role as "user" | "assistant",
         content: m.content,
       })),
@@ -49,25 +55,27 @@ SOCRATIC PEDAGOGY PRINCIPLES:
       "llama-3.1-8b-instant",
     ];
 
-    for (const modelId of candidateModels) {
-      try {
-        const response = await groq.chat.completions.create({
-          model: modelId,
-          messages: groqMessages,
-          temperature: 0.7,
-          max_tokens: 600,
-        });
-
-        const reply = response.choices[0]?.message?.content;
-        if (reply && reply.trim()) {
-          return NextResponse.json({
-            success: true,
-            answer: reply.trim(),
-            modelUsed: modelId,
+    if (groq) {
+      for (const modelId of candidateModels) {
+        try {
+          const response = await groq.chat.completions.create({
+            model: modelId,
+            messages: groqMessages,
+            temperature: 0.7,
+            max_tokens: 600,
           });
+
+          const reply = response.choices[0]?.message?.content;
+          if (reply && reply.trim()) {
+            return NextResponse.json({
+              success: true,
+              answer: reply.trim(),
+              modelUsed: modelId,
+            });
+          }
+        } catch (err: any) {
+          console.warn(`[Tutor] Groq model ${modelId} failed: ${err.message}. Trying next fallback...`);
         }
-      } catch (err: any) {
-        console.warn(`[Tutor] Groq model ${modelId} failed: ${err.message}. Trying next fallback...`);
       }
     }
 
@@ -75,7 +83,7 @@ SOCRATIC PEDAGOGY PRINCIPLES:
     if (genAI) {
       try {
         const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        const chatHistoryPrompt = history
+        const chatHistoryPrompt = safeHistory
           .slice(-4)
           .map((m: Message) => `${m.role === "user" ? "Student" : "Tutor"}: ${m.content}`)
           .join("\n");
@@ -88,7 +96,7 @@ SOCRATIC PEDAGOGY PRINCIPLES:
           return NextResponse.json({
             success: true,
             answer: reply.trim(),
-            modelUsed: "gemini-1.5-flash",
+            modelUsed: "gemini-2.5-flash",
           });
         }
       } catch (geminiErr: any) {

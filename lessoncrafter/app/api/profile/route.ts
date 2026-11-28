@@ -9,23 +9,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
   }
 
-  const tableName = role === 'teacher' ? 'teacher_profiles' : 'student_profiles';
+  const safeRole = role === "teacher" ? "teacher" : "student";
+  const tableName = safeRole === "teacher" ? "teacher_profiles" : "student_profiles";
 
   // 🔄 Sync the role in the users table first
   const { error: roleError } = await supabase
     .from("users")
-    .update({ role })
+    .update({ role: safeRole })
     .eq("user_id", userId);
 
   if (roleError) {
     console.error("Role sync error:", roleError);
   }
 
+  // Strip protected keys so caller cannot overwrite primary/foreign keys
+  const sanitizedProfileData = { ...(profileData || {}) };
+  delete sanitizedProfileData.id;
+  delete sanitizedProfileData.user_id;
+
   const { data, error } = await supabase
     .from(tableName)
     .upsert({
       user_id: userId,
-      ...profileData,
+      ...sanitizedProfileData,
       updated_at: new Date().toISOString()
     })
     .select()

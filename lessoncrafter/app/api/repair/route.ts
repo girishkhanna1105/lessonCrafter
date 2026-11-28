@@ -56,18 +56,20 @@ Return ONLY the fixed code. No markdown code fences. Start with function LessonC
       repairedCode = repairedCode + "\nrender(<LessonComponent />);";
     }
 
-    // Save to DB
-    const { error: updateError } = await supabase
-      .from("lessons")
-      .update({
-        ts_code: repairedCode,
-        status: "generated",
-        compile_status: "success",
-        compile_error: null,
-      })
-      .eq("id", lessonId);
+    // Save to DB (skip for local-only fallback lessons)
+    if (typeof lessonId === "string" && !lessonId.startsWith("local-")) {
+      const { error: updateError } = await supabase
+        .from("lessons")
+        .update({
+          ts_code: repairedCode,
+          status: "generated",
+          compile_status: "success",
+          compile_error: null,
+        })
+        .eq("id", lessonId);
 
-    if (updateError) throw new Error("Supabase update failed: " + updateError.message);
+      if (updateError) throw new Error("Supabase update failed: " + updateError.message);
+    }
 
     console.log(`✅ [Repair] Lesson ${lessonId} repaired and saved.`);
     return NextResponse.json({ success: true, repairedCode });

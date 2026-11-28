@@ -8,16 +8,11 @@ import {
   Dna, 
   TrendingUp, 
   ArrowRight, 
-  BookOpen, 
   Sliders, 
   HelpCircle,
-  Compass,
   GitCommit,
   CheckCircle2,
-  Terminal,
-  Activity,
-  ChevronRight,
-  Sparkles
+  Terminal
 } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -519,7 +514,7 @@ export default function CurriculumExplorer() {
           <div className="px-5 py-3 bg-slate-50/60 dark:bg-slate-900/40 border-t border-slate-200/80 dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-slate-500">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Pedagogical scaffolding verified against revised Bloom's taxonomy (Level 4–6)</span>
+              <span>Pedagogical scaffolding verified against revised Bloom&apos;s taxonomy (Level 4–6)</span>
             </div>
             <div className="flex items-center gap-3 text-[11px]">
               <span className="text-slate-400">TOTAL NODES: <strong className="text-slate-700 dark:text-slate-300">4 STAGES</strong></span>
